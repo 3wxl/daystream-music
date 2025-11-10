@@ -7,8 +7,10 @@ import Pages from 'vite-plugin-pages'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [
+    tailwindcss(),
     // 2. 配置自动路由插件（放在 vue() 之前）
     Pages({
       dirs: [

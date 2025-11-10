@@ -74,57 +74,6 @@ service.interceptors.response.use(
     return Promise.reject(error)
   },
 )
-// 自定义axios请求函数
-// const request = <T = any>(
-//   url: string,
-//   method: Method = 'get',
-//   submitData?: object,
-//   config?: RequestConfig<T>,
-// ) => {
-//   let loading: LoadingInstance | undefined
-//   if (config?.showLoading) {
-//     loading = ElLoading.service({
-//       lock: true,
-//       text: '请求中...',
-//       background: 'rgba(0, 0, 0, 0.5)',
-//     })
-//   }
-
-//   // 构建请求配置对象
-//   let axiosConfig: AxiosRequestConfig = {
-//     url,
-//     method,
-//     [method.toLowerCase() === 'get' ? 'params' : 'data']: submitData,
-//     ...config,
-//   }
-
-//   if (config?.interceptors?.requestInterceptor) {
-//     axiosConfig = config.interceptors.requestInterceptor(axiosConfig)
-//   }
-
-//   return service
-//     .request<Data<T>>(axiosConfig)
-//     .then((response) => {
-//       let res = response.data
-
-//       if (config?.interceptors?.responseInterceptor) {
-//         res = config.interceptors.responseInterceptor(res)
-//       }
-
-//       loading?.close()
-//       return res
-//     })
-//     .catch((err) => {
-//       loading?.close()
-//       if (config?.interceptors?.responseInterceptorCatch) {
-//         return config.interceptors.responseInterceptorCatch(err)
-//       }
-//       return Promise.reject(err)
-//     })
-// }
-
-// export default request
-
 const request = <T = any>(
   url: string,
   method: Method = 'get',
