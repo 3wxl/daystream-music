@@ -5,8 +5,12 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 // 1. 引入 vite-plugin-pages 插件
 import Pages from 'vite-plugin-pages'
 import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [
+    tailwindcss(),
     // 2. 配置自动路由插件（放在 vue() 之前）
     Pages({
       dirs: [
@@ -21,6 +25,7 @@ export default defineConfig({
         }
         return route
       },
+      routeBlockLang:'yaml'
     }),
     vue(),
     vueDevTools(),
@@ -37,7 +42,14 @@ export default defineConfig({
         globalsPropValue: true, // 将声明的变量标记为全局变量
         filepath: './.eslintrc-auto-import.json', // 生成的 ESLint 配置文件路径
       },
+      resolvers: [ElementPlusResolver()],
     }),
+    // 自动导入 Element Plus 组件
+    Components({
+      resolvers: [ElementPlusResolver()],
+      // 生成组件类型声明文件（可选，建议开启）
+      dts: 'src/components.d.ts'
+    })
   ],
   resolve: {
     alias: {
