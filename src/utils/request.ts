@@ -1,13 +1,14 @@
 import axios from 'axios'
 import type {
   AxiosRequestConfig,
-  AxiosInstance,
   Method,
   AxiosResponse,
   InternalAxiosRequestConfig,
+  AxiosError,
 } from 'axios'
 import { ElLoading, ElMessage } from 'element-plus'
 import type { LoadingInstance } from 'element-plus'
+
 const TOKEN_KEY = 'auth_token'
 
 const setToken = (token: string) => {
@@ -22,19 +23,20 @@ const removeToken = () => {
   localStorage.removeItem(TOKEN_KEY)
 }
 
-type Data<T = any> = {
+// 响应数据通用类型
+type Data<T = unknown> = {
   code: string
   message: string
   data: T
 }
 
 // Axios 请求配置接口
-interface RequestConfig<T = any> extends AxiosRequestConfig {
+interface RequestConfig<T = unknown> extends AxiosRequestConfig {
   interceptors?: {
     requestInterceptor?: (config: AxiosRequestConfig) => AxiosRequestConfig
-    requestInterceptorCatch?: (error: any) => any
+    requestInterceptorCatch?: (error: AxiosError) => Promise<AxiosError>
     responseInterceptor?: (res: AxiosResponse<Data<T>>) => AxiosResponse<Data<T>>
-    responseInterceptorCatch?: (error: any) => any
+    responseInterceptorCatch?: (error: AxiosError) => Promise<AxiosError>
   }
   showLoading?: boolean
 }
@@ -44,7 +46,7 @@ const service = axios.create({
   timeout: 5000,
 })
 
-// 添加响应拦截器
+// 请求拦截器
 service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = getToken()
@@ -54,81 +56,34 @@ service.interceptors.request.use(
     }
     return config
   },
-  (error) => {
+  (error: AxiosError) => {
     console.error('请求发送失败：', error)
     return Promise.reject(error)
   },
 )
+
+// 响应拦截器
 service.interceptors.response.use(
-  (response: AxiosResponse) => response.data,
-  (error) => {
+  (response: AxiosResponse<Data<unknown>>) => {
+    return response // 返回完整响应对象
+  },
+  (error: AxiosError) => {
     console.error('响应错误：', error)
 
-    // 处理Token过期（401状态码，根据后端实际情况调整）
     if (error.response?.status === 401) {
-      removeToken() // 清除无效Token
-      ElMessage.error('登录已过期，请重新登录') // 提示用户
-      window.location.href = '/login' // 跳转到登录页
+      removeToken()
+      ElMessage.error('登录已过期，请重新登录')
+      window.location.href = '/login'
     }
 
     return Promise.reject(error)
   },
 )
-// 自定义axios请求函数
-// const request = <T = any>(
-//   url: string,
-//   method: Method = 'get',
-//   submitData?: object,
-//   config?: RequestConfig<T>,
-// ) => {
-//   let loading: LoadingInstance | undefined
-//   if (config?.showLoading) {
-//     loading = ElLoading.service({
-//       lock: true,
-//       text: '请求中...',
-//       background: 'rgba(0, 0, 0, 0.5)',
-//     })
-//   }
-
-//   // 构建请求配置对象
-//   let axiosConfig: AxiosRequestConfig = {
-//     url,
-//     method,
-//     [method.toLowerCase() === 'get' ? 'params' : 'data']: submitData,
-//     ...config,
-//   }
-
-//   if (config?.interceptors?.requestInterceptor) {
-//     axiosConfig = config.interceptors.requestInterceptor(axiosConfig)
-//   }
-
-//   return service
-//     .request<Data<T>>(axiosConfig)
-//     .then((response) => {
-//       let res = response.data
-
-//       if (config?.interceptors?.responseInterceptor) {
-//         res = config.interceptors.responseInterceptor(res)
-//       }
-
-//       loading?.close()
-//       return res
-//     })
-//     .catch((err) => {
-//       loading?.close()
-//       if (config?.interceptors?.responseInterceptorCatch) {
-//         return config.interceptors.responseInterceptorCatch(err)
-//       }
-//       return Promise.reject(err)
-//     })
-// }
-
-// export default request
-
-const request = <T = any>(
+// 请求函数
+const request = <T = unknown>(
   url: string,
   method: Method = 'get',
-  submitData?: object,
+  submitData?: Record<string, unknown> | undefined,
   config?: RequestConfig<T>,
 ) => {
   let loading: LoadingInstance | undefined
@@ -156,20 +111,18 @@ const request = <T = any>(
   return service
     .request<Data<T>>(axiosConfig)
     .then((response) => {
-      let res = response // 将整个 response 传入
+      let res: AxiosResponse<Data<T>> = response
 
       if (config?.interceptors?.responseInterceptor) {
-        res = config.interceptors.responseInterceptor(res) // 此时 res 是 AxiosResponse 类型
+        res = config.interceptors.responseInterceptor(res)
       }
 
       loading?.close()
-      return res // 最终返回 data 即可
+      return res.data
     })
-    .catch((err) => {
-      // 错误时关闭加载动画
+    .catch((err: AxiosError) => {
       loading?.close()
 
-      // 执行单个请求的错误拦截器
       if (config?.interceptors?.responseInterceptorCatch) {
         return config.interceptors.responseInterceptorCatch(err)
       }
@@ -178,6 +131,5 @@ const request = <T = any>(
     })
 }
 
-// 导出请求函数和Token操作工具（供登录/退出组件使用）
 export default request
 export { setToken, getToken, removeToken }
