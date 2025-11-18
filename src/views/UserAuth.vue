@@ -59,7 +59,7 @@
           <!-- 邮箱/手机号 -->
           <div>
             <label for="login-email" class="block text-sm font-medium text-neutral-300 mb-2">
-              邮箱或手机号
+              邮箱
             </label>
             <input
               type="text"

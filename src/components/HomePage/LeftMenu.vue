@@ -1,90 +1,84 @@
 <template>
-  <div class="flex flex-col">
-    <span class="mt-2 mb-2">Daystream</span>
-    <div class="avatar">
-      <el-avatar :size="50" :src="circleUrl" @click="changeCollapse()"/>
-  </div>
-  <el-menu
-    default-active="1"
-    class="el-menu-vertical-demo"
-    :collapse="isCollapse"
-    :router ="router"
-    @open="handleOpen"
-    @close="handleClose"
+  <div
+    class="flex flex-col h-screen bg-gradient-to-b from-[#151a2d] via-[#101425] to-[#0b0f1b] border-r border-white/5 shadow-xl transition-all duration-300 text-gray-100"
+    :class="isCollapse ? 'w-20' : 'w-56'"
   >
-    <el-menu-item index="/">
-      <el-icon><House /></el-icon>
-      <template #title>首页</template>
-    </el-menu-item>
-    <el-menu-item index="/artist">
-      <el-icon><View /></el-icon>
-      <template #title>歌手</template>
-    </el-menu-item>
-    <el-menu-item index="album">
-      <el-icon><Tickets /></el-icon>
-      <template #title>专辑</template>
-    </el-menu-item>
-    <el-menu-item index="/user">
-      <el-icon><User /></el-icon>
-      <template #title>个人</template>
-    </el-menu-item>
-     <el-menu-item index="/UserAuth">
-      <el-icon><setting /></el-icon>
-      <template #title>登录</template>
-    </el-menu-item>
-  </el-menu>
+    <!-- Logo 区域 -->
+    <div class="flex flex-col items-center justify-center gap-2 px-4 py-6 border-b border-white/5">
+      <img :src="circleUrl" alt="Logo" class="w-12 h-12 rounded-2xl cursor-pointer shadow-lg ring-2 ring-white/10" @click="changeCollapse()" />
+      <span v-if="!isCollapse" class="text-lg font-semibold tracking-wide text-white">Daystream</span>
+    </div>
+
+    <!-- 导航菜单 -->
+    <nav class="flex-1 py-6" :class="isCollapse ? 'px-2' : 'px-4'">
+      <router-link
+        v-for="item in menuItems"
+        :key="item.path"
+        :to="item.path"
+        class="flex items-center gap-3 mb-2 rounded-2xl py-3 text-sm font-medium transition-all duration-200"
+        :class="[
+          $route.path === item.path
+            ? 'bg-pink-500/20 text-pink-200 shadow-lg shadow-pink-500/30 border border-pink-400/60'
+            : 'text-gray-300 hover:bg-white/5 hover:text-white border border-transparent',
+          isCollapse ? 'justify-center px-0' : 'px-4'
+        ]"
+      >
+        <component :is="item.icon" class="w-5 h-5 flex-shrink-0" />
+        <span v-if="!isCollapse" class="whitespace-nowrap">{{ item.title }}</span>
+      </router-link>
+    </nav>
+
+    <!-- 底部设置 -->
+    <div class="px-4 py-6 border-t border-white/5">
+      <router-link
+        to="/UserAuth"
+        class="flex items-center gap-3 rounded-2xl py-3 text-sm font-medium transition-all duration-200"
+        :class="[
+          $route.path === '/UserAuth'
+            ? 'bg-pink-500/20 text-pink-200 shadow-lg shadow-pink-500/30 border border-pink-400/60'
+            : 'text-gray-300 hover:bg-white/5 hover:text-white border border-transparent',
+          isCollapse ? 'justify-center px-0' : 'px-4'
+        ]"
+      >
+        <Setting class="w-5 h-5 flex-shrink-0" />
+        <span v-if="!isCollapse" class="whitespace-nowrap">设置</span>
+      </router-link>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import circleUrl from '@/assets/logo.jpg'
-import { ref } from 'vue'
 import {
   House,
-  User,
-  Tickets,
-  View,
   Setting,
+  Tickets,
+  User,
+  View,
 } from '@element-plus/icons-vue'
+import { ref } from 'vue'
 
+const isCollapse = ref(false)
 
-const router = ref(true)
-const isCollapse = ref(true)
-const handleOpen = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath)
-}
-const handleClose = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath)
-}
+const menuItems = [
+  { path: '/', title: '首页', icon: House },
+  { path: '/artist', title: '歌手', icon: View },
+  { path: '/album', title: '专辑', icon: Tickets },
+  { path: '/user', title: '个人', icon: User },
+]
 
 const changeCollapse = () => {
-  return isCollapse.value = !isCollapse.value
+  isCollapse.value = !isCollapse.value
 }
 </script>
 
 <style scoped>
-:deep(.avatar){
-  margin-left: 10px;
+/* 确保图标和文字对齐 */
+nav a {
+  min-height: 44px;
 }
 
-.el-menu-vertical-demo:not(.el-menu--collapse) {
-  width: 150px;
-  min-height: 400px;
-}
-
-.el-icon svg{
-  width: 24px;
-  height: 24px;
-  font-size: 24px;
-}
-
-::v-deep .el-menu-item {
-  margin-bottom: 14px;
- }
-
- .el-menu--horizontal {
-  --el-menu-horizontal-height: 150px;
-}
+/* 路由激活状态样式已在模板中通过动态类名处理 */
 </style>
 
 

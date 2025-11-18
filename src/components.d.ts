@@ -11,6 +11,8 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AlbumCard: typeof import('./components/AlbumPage/AlbumCard.vue')['default']
+    CommonCard: typeof import('./components/CommonCard.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElButton: typeof import('element-plus/es')['ElButton']
@@ -27,8 +29,11 @@ declare module 'vue' {
     ElSubMenu: typeof import('element-plus/es')['ElSubMenu']
     IconFontSymbol: typeof import('./components/IconFontSymbol.vue')['default']
     LeftMenu: typeof import('./components/HomePage/LeftMenu.vue')['default']
+    MusicCard: typeof import('./components/MusicCard.vue')['default']
+    MusicListItem: typeof import('./components/MusicListItem.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    TagBar: typeof import('./components/TagBar.vue')['default']
     TopHeader: typeof import('./components/HomePage/TopHeader.vue')['default']
     TopSearch: typeof import('./components/HomePage/TopSearch.vue')['default']
   }
