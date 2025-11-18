@@ -6,10 +6,12 @@
       <router-link to="/">首页 ( / )</router-link>
       <router-link to="/artist">歌手页 ( /artist )</router-link>
       <router-link to="/album">专辑页 ( /album )</router-link>
-      <router-link to="/user">个人主页</router-link>
+      <router-link to="/User/Index">个人主页</router-link>
       <router-link to="/UserAuth">去登录页 ( /user-auth )</router-link>
+      <router-link to="/User/PersonalCenter">去个人主页 ( /user/personal-center )</router-link>
+      <router-link to="/User/MusicianCenter">去音乐人主页 ( /user/musician-center ) </router-link>
+      <router-link to="/User/MusicianCenter/AdminUser">222主页(/user/admin-user)</router-link>
       <hr />
-
     </nav>
     <main>
       <slot />
