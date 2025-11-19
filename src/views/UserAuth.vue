@@ -8,7 +8,6 @@
     - p-4: 在手机上保留一些内边距
   -->
   <div class="min-h-screen bg-neutral-900 text-white flex items-center justify-center p-4">
-
     <!--
       表单卡片：
       - w-full max-w-md: 在手机上占满宽度，但在桌面上最大宽度为 md (中等)
@@ -18,7 +17,6 @@
       - p-8 md:p-10: 较大的内边距
     -->
     <div class="w-full max-w-md bg-neutral-800 rounded-lg shadow-lg p-8 md:p-10">
-
       <!-- 1. 顶部 Logo 和标题 -->
       <div class="text-center mb-8">
         <!-- 你可以在这里替换成你的 Logo SVG -->
@@ -34,7 +32,7 @@
             'w-1/2 py-3 text-center font-semibold rounded-t-lg transition-colors',
             isLoginMode
               ? 'text-white border-b-2 border-[#ff2e93]'
-              : 'text-neutral-400 hover:text-white'
+              : 'text-neutral-400 hover:text-white',
           ]"
         >
           登录
@@ -45,7 +43,7 @@
             'w-1/2 py-3 text-center font-semibold rounded-t-lg transition-colors',
             !isLoginMode
               ? 'text-white border-b-2 border-[#ff2e93]'
-              : 'text-neutral-400 hover:text-white'
+              : 'text-neutral-400 hover:text-white',
           ]"
         >
           注册
@@ -59,7 +57,7 @@
           <!-- 邮箱/手机号 -->
           <div>
             <label for="login-email" class="block text-sm font-medium text-neutral-300 mb-2">
-              邮箱或手机号
+              邮箱
             </label>
             <input
               type="text"
@@ -164,29 +162,34 @@
               <span class="w-full border-t border-neutral-600"></span>
             </div>
             <div class="relative flex justify-center text-sm">
-              <span class="px-2 bg-neutral-800 text-neutral-400">
-                或使用其他方式登录
-              </span>
+              <span class="px-2 bg-neutral-800 text-neutral-400"> 或使用其他方式登录 </span>
             </div>
           </div>
 
           <div class="mt-6 flex justify-center space-x-4">
             <!-- 示例图标 (你可以替换成 SVG 或 FontAwesome) -->
-            <button class="w-12 h-12 flex items-center justify-center bg-neutral-700 rounded-full hover:bg-neutral-600 transition-colors">
+            <button
+              class="w-12 h-12 flex items-center justify-center bg-neutral-700 rounded-full hover:bg-neutral-600 transition-colors"
+            >
               <!-- 微信图标 (示例) -->
               <svg class="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm... (省略路径)" />
+                <path
+                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm... (省略路径)"
+                />
               </svg>
             </button>
-            <button class="w-12 h-12 flex items-center justify-center bg-neutral-700 rounded-full hover:bg-neutral-600 transition-colors">
+            <button
+              class="w-12 h-12 flex items-center justify-center bg-neutral-700 rounded-full hover:bg-neutral-600 transition-colors"
+            >
               <!-- QQ图标 (示例) -->
               <svg class="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm... (省略路径)" />
+                <path
+                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm... (省略路径)"
+                />
               </svg>
             </button>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -194,9 +197,7 @@
 
 <script lang="ts" setup>
 import { ElMessage } from 'element-plus'
-import { ref } from 'vue'
-
-// 控制是显示登录还是注册表单
+import { ref } from 'vue' // 控制是显示登录还是注册表单
 const isLoginMode = ref(true)
 
 // 表单数据
@@ -208,8 +209,8 @@ const password = ref('')
 const handleLogin = () => {
   if (!email.value || !password.value) {
     ElMessage({
-      message:'请填写所有登录信息',
-      type:'warning'
+      message: '请填写所有登录信息',
+      type: 'warning',
     })
     return
   }
@@ -222,12 +223,16 @@ const handleLogin = () => {
 const handleRegister = () => {
   if (!username.value || !email.value || !password.value) {
     ElMessage({
-      message:'请填写所有注册信息',
-      type:'warning'
+      message: '请填写所有注册信息',
+      type: 'warning',
     })
     return
   }
-  console.log('注册中...', { username: username.value, email: email.value, password: password.value })
+  console.log('注册中...', {
+    username: username.value,
+    email: email.value,
+    password: password.value,
+  })
   // 调用注册 API
   // ...
 }
@@ -235,14 +240,12 @@ const handleRegister = () => {
 
 <route lang="yaml">
 meta:
-    layout: auth
+  layout: auth
 </route>
 
-<style scoped>
-
-</style>
+<style scoped></style>
 
 <route lang="yaml">
 meta:
-    layout: auth
+  layout: auth
 </route>
