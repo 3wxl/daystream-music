@@ -45,6 +45,7 @@
     "jsdom": "^27.0.1",
     "npm-run-all2": "^8.0.4",
     "prettier": "3.6.2",
+    "sass-embedded": "^1.93.3",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.4",
     "unplugin-auto-import": "^20.2.0",
@@ -52,6 +53,7 @@
     "vite": "^7.1.11",
     "vite-plugin-pages": "^0.33.1",
     "vite-plugin-vue-devtools": "^8.0.3",
+    "vite-plugin-vue-router": "^1.0.18",
     "vitest": "^3.2.4",
     "vue-tsc": "^3.1.1"
   }

@@ -9,3 +9,8 @@ declare module '~pages' {
   const routes: RouteRecordRaw[]
   export default routes
 }
+
+declare module '*.jpg' {
+  const src: string
+  export default src
+}
