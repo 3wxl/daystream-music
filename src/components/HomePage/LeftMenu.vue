@@ -64,7 +64,7 @@ const menuItems = [
   { path: '/', title: '首页', icon: House },
   { path: '/artist', title: '歌手', icon: View },
   { path: '/album', title: '专辑', icon: Tickets },
-  { path: '/user', title: '个人', icon: User },
+  { path: '/User/PersonalCenter', title: '个人', icon: User },
 ]
 
 const changeCollapse = () => {

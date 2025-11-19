@@ -6,7 +6,7 @@
   <div class="h-full flex flex-col bg-gray-800 rounded-lg">
 
     <!-- 1. 顶部导航栏 -->
-    <header class="flex-shrink-0 p-4 flex items-center justify-between border-b border-purple-900/50">
+    <header class="shrink-0 p-4 flex items-center justify-between border-b border-purple-900/50">
       <!-- 左侧：歌单/专辑名 -->
       <div>
         <h1 class="text-lg font-semibold text-gray-500">{{ playlist.name || 'EXO神曲' }}</h1>
