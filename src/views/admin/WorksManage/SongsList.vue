@@ -1,6 +1,6 @@
 <template>
   <el-container class="songs-container">
-    <el-aside width="260px" class="shadow-md border-[#e4e7ed] bg-white rounded-[10px] p-[10px]">
+    <el-aside width="260px" class="shadow-md border-[#e4e7ed] bg-white rounded-[10px] p-[10px] overflow-hidden">
       <el-scrollbar height="87vh" class="relative" always>
         <AdminInput type="text" placeholder="请输入歌手名" value="" width="w-[220px]" lable="" rightIcon="sousuo"  class="flex ml-2 absolute top-0"></AdminInput>
         <ul class="mt-[50px] flex flex-col items-center">
@@ -16,7 +16,8 @@
     </el-aside>
     <el-main style="padding:0 10px 15px 8px">
       <div class="shadow-md border-[#e4e7ed] bg-white rounded-[10px] p-[15px] flex items-center">
-        <AdminInput class="ml-4" type="text" placeholder="请输入歌曲名" value="" width="w-[220px]" label="歌名:"></AdminInput>
+        <AdminInput class="ml-4 mr-4" type="text" placeholder="请输入歌曲名" value="" width="w-[220px]" label="歌名:"></AdminInput>
+        <AdminSelect class="mr-15" :options="[{value:'1',label:'全部'},{value:'2',label:'指定歌手'}]" label="歌手" ></AdminSelect>
         <el-button type="primary" class="ml-4">
           <IconFontSymbol name="sousuo" class="mr-1"></IconFontSymbol>
           搜索
@@ -31,8 +32,6 @@
 </template>
 
 <script setup lang="ts">
-  import AdminInput from "@/components/admin/AdminInput.vue";
-  import IconFontSymbol from '@/components/IconFontSymbol.vue';
   let musicianList = reactive([
     {
       name: '张杰',

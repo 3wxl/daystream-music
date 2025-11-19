@@ -4,7 +4,7 @@
       <div class="flex justify-between px-4 items-center">
         <div class="flex items-center h-full">
           <AdminInput class="mr-5" type="text" placeholder="请输入用户名:" value="" width="w-[300px]" label="用户名:"></AdminInput>
-          <AdminSelect class="mr-18"></AdminSelect>
+          <AdminSelect class="mr-18" :options="[{value:'1',label:'启用'},{value:'0',label:'禁用'}]" label="状态"></AdminSelect>
           <el-button type="primary">
             <IconFontSymbol name="sousuo" class="mr-1"></IconFontSymbol>
             搜索

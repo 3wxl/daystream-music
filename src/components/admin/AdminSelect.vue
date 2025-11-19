@@ -8,12 +8,13 @@
 </template>
 
 <script setup lang="ts">
-  import { ref,reactive} from 'vue'
-  let value = ref('')
-  let options = reactive([
-    { value: '1', label: '启用' },
-    { value: '0', label: '禁用' }
-  ])
-  let label = ref('状态')
+  let value = ref("1");
+  let props = defineProps<{
+    label: string;
+    options: {
+      label: string;
+      value: string;
+    }[];
+  }>();
 </script>
 
