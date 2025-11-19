@@ -12,7 +12,7 @@
             <div
               class="cover-overlay opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
             >
-              <el-icon class="play-icon"><Play /></el-icon>
+              <i class="iconfont" style="font-size: 27px">&#xe623;</i>
             </div>
           </div>
 
@@ -80,10 +80,13 @@
                 v-model="searchKeyword"
                 placeholder="搜索歌曲、歌手"
                 class="search-input"
-                prefix-icon="Search"
                 @focus="isSearchFocused = true"
                 @blur="isSearchFocused = false"
-              />
+              >
+                <template #prefix>
+                  <i class="iconfont">&#xe721;</i>
+                </template>
+              </el-input>
             </div>
             <likedSongs />
           </div>
@@ -254,7 +257,9 @@ const handlePlayAll = () => {
   transition: all 0.3s ease !important;
   box-shadow: 0 4px 12px rgba(255, 153, 204, 0.3) !important;
 }
-
+::v-deep .el-input__wrapper {
+  background-color: transparent !important;
+}
 .play-all-btn:hover {
   background-color: #e63493 !important;
   border-color: #e63493 !important;
@@ -365,11 +370,6 @@ const handlePlayAll = () => {
   background-color: #1a1a30 !important;
   border-color: rgba(255, 153, 204, 0.2) !important;
   transition: all 0.3s ease !important;
-}
-
-.search-input:focus-within {
-  border-color: #ff8fab !important;
-  box-shadow: 0 0 0 2px rgba(255, 153, 204, 0.2) !important;
 }
 
 ::v-deep .el-input__inner {
