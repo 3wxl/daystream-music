@@ -29,14 +29,14 @@
               <IconFontSymbol name="file-music" class="mr-1"></IconFontSymbol>
               <span>歌曲审核</span>
             </el-menu-item>
-            <el-menu-item index="3-3"  @click="router.push('/admin/worksManage/mvList')">
+            <!-- <el-menu-item index="3-3"  @click="router.push('/admin/worksManage/mvList')">
               <IconFontSymbol name="songbook_mv" size="18px"  class="mr-1"></IconFontSymbol>
               <span>MV列表</span>
             </el-menu-item>
             <el-menu-item index="3-4" @click="router.push('/admin/worksManage/mvReview')">
               <IconFontSymbol name="shenhe" class="mr-1"></IconFontSymbol>
               <span>MV审核</span>
-            </el-menu-item>
+            </el-menu-item> -->
           </el-sub-menu>
           <el-sub-menu index="4">
             <template #title>
@@ -58,30 +58,30 @@
               <span>运营管理</span>
             </template>
             <el-menu-item index="5-1">
-              <IconFontSymbol name="lunbotuguanli" class="mr-1"></IconFontSymbol>
-              <span>轮播图</span>
-            </el-menu-item>
-            <el-menu-item index="5-2">
               <IconFontSymbol name="resou" class="mr-1"></IconFontSymbol>
               <span>热搜列表</span>
             </el-menu-item>
-            <el-menu-item index="5-3">
+            <el-menu-item index="5-2">
               <IconFontSymbol name="shouyetuijianwei" class="mr-1"></IconFontSymbol>
               <span>首页推荐位</span>
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu index="6">
             <template #title>
-              <IconFontSymbol name="yunyingguanli" class="mr-1"></IconFontSymbol>
+              <IconFontSymbol name="shequ-jihuo" class="mr-1"></IconFontSymbol>
               <span>社区管理</span>
             </template>
-            <el-menu-item index="6-1">
-              <IconFontSymbol name="lunbotuguanli" class="mr-1"></IconFontSymbol>
-              <span>评论管理</span>
-            </el-menu-item>
-            <el-menu-item index="6-2">
-              <IconFontSymbol name="lunbotuguanli" class="mr-1"></IconFontSymbol>
+            <el-menu-item index="6-1" @click="router.push('/admin/communityManage/dynamicManage')">
+              <IconFontSymbol name="dongtaiguanli" class="mr-1"></IconFontSymbol>
               <span>动态管理</span>
+            </el-menu-item>
+            <el-menu-item index="6-2" @click="router.push('/admin/communityManage/dynamicReview')">
+              <IconFontSymbol name="gongzuotai-dongtaishenhe" class="mr-1"></IconFontSymbol>
+              <span>动态审核</span>
+            </el-menu-item>
+            <el-menu-item index="6-3" @click="router.push('/admin/communityManage/commentsManage')">
+              <IconFontSymbol name="review" class="mr-1"></IconFontSymbol>
+              <span>评论管理</span>
             </el-menu-item>
           </el-sub-menu>
           <el-menu-item index="7">
@@ -108,7 +108,7 @@
                 </el-col>
                 <el-col :span="16">
                   <div class="h-full flex gap-[10px] text-[15px]/[60px] cursor-pointer">
-                    <el-avatar src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" :size="36" class="my-[12px]"/>
+                    <el-avatar src="../../public/头像.png" :size="36" class="my-[12px]"/>
                     <span class="inline-block h-[60px] max-w-[60px] text-ellipsis line-clamp-1">admin</span>
                   </div>
                 </el-col>
