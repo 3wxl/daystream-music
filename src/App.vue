@@ -1,6 +1,6 @@
 <template>
   <component :is="layoutComponent">
-    <router-view />
+    <router-view></router-view>
   </component>
 </template>
 
@@ -11,6 +11,7 @@ import { useRoute } from 'vue-router'
 // 1. 导入布局
 import MainLayout from './layouts/MainLayout.vue'
 import AuthLayout from './layouts/AuthLayout.vue'
+import AdminLayout from './layouts/AdminLayout.vue'
 
 const route = useRoute()
 
@@ -18,6 +19,7 @@ const route = useRoute()
 const layouts = {
   main: MainLayout,
   auth: AuthLayout,
+  admin:AdminLayout
 }
 
 // 3. 核心逻辑
