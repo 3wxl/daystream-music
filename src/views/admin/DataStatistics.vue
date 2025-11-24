@@ -18,7 +18,7 @@
           <div class="flex w-full">
             <div class="flex flex-col text-center ml-6">
               <div>
-                <el-avatar :size="70"/>
+                <el-avatar src="../../../public/头像.png" :size="70"/>
               </div>
               <span class="text-[15px]">admin</span>
               <p class="text-[12px] text-[#666] whitespace-nowrap">上次登录时间：<span>2025-11-04</span></p>

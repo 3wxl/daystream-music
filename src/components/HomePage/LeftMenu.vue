@@ -55,6 +55,7 @@ import {
   Tickets,
   User,
   View,
+  ChatLineSquare
 } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 
@@ -65,6 +66,7 @@ const menuItems = [
   { path: '/artist', title: '歌手', icon: View },
   { path: '/album', title: '专辑', icon: Tickets },
   { path: '/User/PersonalCenter', title: '个人', icon: User },
+  { path: '/community/CommunityDisplay', title: '社区', icon: ChatLineSquare}
 ]
 
 const changeCollapse = () => {

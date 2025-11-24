@@ -2,12 +2,14 @@
   <!-- 作用：后台的layout -->
   <el-container class="admin-container">
     <el-aside width="220px">
-      <el-scrollbar height="100vh" class="bg-linear-to-tr from-[#58768a] to-[#544464] shadow-xl/20 shadow-[#A070EE]">
+      <el-scrollbar height="100vh" class="bg-linear-to-tr from-[#58768a] to-[#68537d] shadow-xl/20 shadow-[#A070EE]">
+      <!-- bg-linear-to-tr from-[#58768a] to-[#544464] shadow-xl/20 shadow-[#A070EE] -->
+      <!-- bg-linear-to-tr from-[#517185] to-[#8b62b6] shadow-xl/20 shadow-[#A070EE] -->
         <div class="w-full my-4">
-          <img class="w-full h-[80px] object-contain" src="@/assets/logo_0.png" alt="" >
+          <img class="w-full h-[70px] object-contain" src="@/assets/logo_0.png" alt="" >
           <p class="bg-clip-text text-center font-[700] text-[20px] bg-linear-to-r from-[#EC369F] to-[#AE4AFE] text-transparent">Daystream Music</p>
         </div>
-        <el-menu mode="vertical" class="admin-menu" default-active="1" background-color="transparent" text-color="rgb(168,177,194)" active-text-color="white">
+        <el-menu mode="vertical" class="admin-menu" default-active="1" background-color="transparent" text-color="rgb(200,200,200)" active-text-color="white">
           <el-menu-item index="1" @click="router.push('/admin/dataStatistics')">
             <IconFontSymbol name="shouye" class="mr-1"></IconFontSymbol>
             <span>首页</span>

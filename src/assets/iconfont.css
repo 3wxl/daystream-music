@@ -1,17 +1,96 @@
-/* 在线链接服务仅供平台体验和调试使用，平台不承诺服务的稳定性，企业客户需下载字体包自行发布使用并做好备份。 */
 @font-face {
-  font-family: 'iconfont'; /* Project id 5061369 */
-  src:
-    url('//at.alicdn.com/t/c/font_5061369_usm7ckc9or.woff2?t=1763473079706') format('woff2'),
-    url('//at.alicdn.com/t/c/font_5061369_usm7ckc9or.woff?t=1763473079706') format('woff'),
-    url('//at.alicdn.com/t/c/font_5061369_usm7ckc9or.ttf?t=1763473079706') format('truetype');
+  font-family: "iconfont"; /* Project id 5061369 */
+  src: url('//at.alicdn.com/t/c/font_5061369_selhremy90p.woff2?t=1763955623401') format('woff2'),
+       url('//at.alicdn.com/t/c/font_5061369_selhremy90p.woff?t=1763955623401') format('woff'),
+       url('//at.alicdn.com/t/c/font_5061369_selhremy90p.ttf?t=1763955623401') format('truetype');
 }
+
 .iconfont {
-  font-family: 'iconfont' !important;
+  font-family: "iconfont" !important;
   font-size: 16px;
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-baocun:before {
+  content: "\e63d";
+}
+
+.icon-bianji-copy-copy:before {
+  content: "\e615";
+}
+
+.icon-shanchu1:before {
+  content: "\e607";
+}
+
+.icon-chakanquanbu:before {
+  content: "\e696";
+}
+
+.icon-bofangliang:before {
+  content: "\e8d8";
+}
+
+.icon-lujing:before {
+  content: "\e84e";
+}
+
+.icon-gequ:before {
+  content: "\e6ac";
+}
+
+.icon-icon:before {
+  content: "\e651";
+}
+
+.icon-sandian:before {
+  content: "\e7e3";
+}
+
+.icon-notfind01:before {
+  content: "\e64c";
+}
+
+.icon-zanwuguanzhu:before {
+  content: "\e63e";
+}
+
+.icon-meiyouzhaodao:before {
+  content: "\e624";
+}
+
+.icon-wodeguanzhu-zanwuguanzhu:before {
+  content: "\e625";
+}
+
+.icon-faxian:before {
+  content: "\e660";
+}
+
+.icon-qingchu:before {
+  content: "\e633";
+}
+
+.icon-gedan:before {
+  content: "\e66a";
+}
+
+.icon-dongtai:before {
+  content: "\e612";
+}
+
+.icon-geshou:before {
+  content: "\e7f2";
+}
+
+.icon-yonghu1:before {
+  content: "\e611";
+}
+
+.icon-chakantiezihuifu:before {
+  content: "\e663";
 }
 
 .icon-qianshoushenpitongguo-xianxing:before {
@@ -235,5 +314,5 @@
 }
 
 .icon-shuju:before {
-  content: '\e627';
+  content: "\e627";
 }
