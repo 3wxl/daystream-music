@@ -5,8 +5,15 @@
   >
     <!-- Logo 区域 -->
     <div class="flex flex-col items-center justify-center gap-2 px-4 py-6 border-b border-white/5">
-      <img :src="circleUrl" alt="Logo" class="w-12 h-12 rounded-2xl cursor-pointer shadow-lg ring-2 ring-white/10" @click="changeCollapse()" />
-      <span v-if="!isCollapse" class="text-lg font-semibold tracking-wide text-white">Daystream</span>
+      <img
+        :src="circleUrl"
+        alt="Logo"
+        class="w-12 h-12 rounded-2xl cursor-pointer shadow-lg ring-2 ring-white/10"
+        @click="changeCollapse()"
+      />
+      <span v-if="!isCollapse" class="text-lg font-semibold tracking-wide text-white"
+        >Daystream</span
+      >
     </div>
 
     <!-- 导航菜单 -->
@@ -20,7 +27,7 @@
           $route.path === item.path
             ? 'bg-pink-500/20 text-pink-200 shadow-lg shadow-pink-500/30 border border-pink-400/60'
             : 'text-gray-300 hover:bg-white/5 hover:text-white border border-transparent',
-          isCollapse ? 'justify-center px-0' : 'px-4'
+          isCollapse ? 'justify-center px-0' : 'px-4',
         ]"
       >
         <component :is="item.icon" class="w-5 h-5 flex-shrink-0" />
@@ -37,7 +44,7 @@
           $route.path === '/UserAuth'
             ? 'bg-pink-500/20 text-pink-200 shadow-lg shadow-pink-500/30 border border-pink-400/60'
             : 'text-gray-300 hover:bg-white/5 hover:text-white border border-transparent',
-          isCollapse ? 'justify-center px-0' : 'px-4'
+          isCollapse ? 'justify-center px-0' : 'px-4',
         ]"
       >
         <Setting class="w-5 h-5 flex-shrink-0" />
@@ -49,13 +56,7 @@
 
 <script lang="ts" setup>
 import circleUrl from '@/assets/logo.jpg'
-import {
-  House,
-  Setting,
-  Tickets,
-  User,
-  View,
-} from '@element-plus/icons-vue'
+import { House, Setting, Tickets, User, View, Histogram } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 
 const isCollapse = ref(false)
@@ -64,6 +65,7 @@ const menuItems = [
   { path: '/', title: '首页', icon: House },
   { path: '/artist', title: '歌手', icon: View },
   { path: '/album', title: '专辑', icon: Tickets },
+  { path: '/MusicRanking', title: '榜单', icon: Histogram },
   { path: '/User/PersonalCenter', title: '个人', icon: User },
 ]
 
@@ -80,7 +82,3 @@ nav a {
 
 /* 路由激活状态样式已在模板中通过动态类名处理 */
 </style>
-
-
-
-

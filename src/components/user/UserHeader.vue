@@ -105,20 +105,26 @@
       </div>
 
       <div class="grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-6 mt-6 md:mt-10">
-        <div
-          class="stat-item text-center p-2 hover:scale-105 transition-all duration-300 hover:text-[#FFD1DC] cursor-pointer"
-        >
-          <div class="text-2xl md:text-3xl font-bold text-white">
-            {{ userInfo.followCount || 0 }}
+        <router-link to="/User/FollowList">
+          <div
+            class="stat-item text-center p-2 hover:scale-105 transition-all duration-300 hover:text-[#FFD1DC] cursor-pointer"
+          >
+            <div class="text-2xl md:text-3xl font-bold text-white">
+              {{ userInfo.followCount || 0 }}
+            </div>
+            <div class="text-gray-300 text-xs md:text-sm mt-1">关注</div>
           </div>
-          <div class="text-gray-300 text-xs md:text-sm mt-1">关注</div>
-        </div>
-        <div
-          class="stat-item text-center p-2 hover:scale-105 transition-all duration-300 hover:text-[#FFD1DC] cursor-pointer"
-        >
-          <div class="text-2xl md:text-3xl font-bold text-white">{{ userInfo.fansCount || 0 }}</div>
-          <div class="text-gray-300 text-xs md:text-sm mt-1">粉丝</div>
-        </div>
+        </router-link>
+        <router-link to="/User/FollowerList">
+          <div
+            class="stat-item text-center p-2 hover:scale-105 transition-all duration-300 hover:text-[#FFD1DC] cursor-pointer"
+          >
+            <div class="text-2xl md:text-3xl font-bold text-white">
+              {{ userInfo.fansCount || 0 }}
+            </div>
+            <div class="text-gray-300 text-xs md:text-sm mt-1">粉丝</div>
+          </div>
+        </router-link>
         <div
           class="stat-item text-center p-2 hover:scale-105 transition-all duration-300 hover:text-[#FFD1DC] cursor-pointer"
         >
@@ -442,7 +448,7 @@ const handleSaveEdit = () => {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .user-header .rounded-full:not(.vip-tag) {
   animation: pulse1 3s infinite;
 }
