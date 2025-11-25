@@ -15,6 +15,7 @@ declare module 'vue' {
     AdminConfirm: typeof import('./components/admin/AdminConfirm.vue')['default']
     AdminInput: typeof import('./components/admin/AdminInput.vue')['default']
     AdminSelect: typeof import('./components/admin/AdminSelect.vue')['default']
+    AdminTextarea: typeof import('./components/admin/AdminTextarea.vue')['default']
     CommentSection: typeof import('./components/user/CommentSection.vue')['default']
     CommunityDisplay: typeof import('./components/community/CommunityDisplay.vue')['default']
     DailyLife: typeof import('./components/admin/dataStatistics/DailyLife.vue')['default']

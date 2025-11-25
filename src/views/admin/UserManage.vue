@@ -38,7 +38,11 @@
                 <IconFontSymbol name="xiaohuatuijianxuanzhong" color="red" size="18px"></IconFontSymbol>
                 <AdminInput class="ml-2 mr-5" type="text" placeholder="新用户邮箱" value="" width="w-[230px]" label="邮箱:"></AdminInput>
                 <IconFontSymbol name="xiaohuatuijianxuanzhong" color="red" size="18px"></IconFontSymbol>
-                <AdminInput class="ml-2" type="text" placeholder="" value="Aa12345!" width="w-[230px]" label="密码:"></AdminInput>
+                <AdminInput class="ml-2" type="text" placeholder="新用户手机号" value="" width="w-[230px]" label="手机号:"></AdminInput>
+              </div>
+              <div class="flex items-start mb-2">
+                <label for="jj" class="mr-1">简介：</label>
+                <textarea name="" id="jj" placeholder="简介"></textarea>
               </div>
             </div>
           </AdminConfirm>

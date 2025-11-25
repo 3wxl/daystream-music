@@ -84,22 +84,19 @@
     }
   })
   let {authorId, avatar, author, time, identity, title, content} = props.dynamic;
-  function extractImgSrcByReg(html) {
+  function extractImgSrcByReg(html) {     // 这里是获取一个hmtl片段里面的图片的src组成的数组
     if (!html || typeof html !== 'string') return [];
-    // 更完善的正则表达式，能够匹配各种形式的 img 标签
     const imgSrcReg = /<img[^>]+src\s*=\s*["']([^"']*)["'][^>]*>/gi;
     const srcList = [];
     let match;
     let count = 0;
-    // 循环匹配所有符合条件的 src
     while ((match = imgSrcReg.exec(html)) !== null && count < 5) {
-      const src = match[1]; // 直接获取第一个捕获组
+      const src = match[1];
       if (src) {
         srcList.push(src);
         count++;
       }
     }
-    // 去重（避免重复图片）
     return [...new Set(srcList)];
   }
   function removeImgTags(html) {
