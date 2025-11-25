@@ -4,7 +4,7 @@
       <div class="flex justify-between px-4 items-center">
         <div class="flex items-center h-full">
           <AdminInput class="mr-5" type="text" placeholder="请输入用户名:" value="" width="w-[300px]" label="用户名:"></AdminInput>
-          <AdminSelect class="mr-18" :options="[{value:'1',label:'启用'},{value:'0',label:'禁用'}]" label="状态"></AdminSelect>
+          <AdminSelect v-model="typeVal" class="mr-18" :options="[{value:'1',label:'全部'},{value:'2',label:'启用'},{value:'3',label:'禁用'}]" label="状态"></AdminSelect>
           <el-button type="primary">
             <IconFontSymbol name="sousuo" class="mr-1"></IconFontSymbol>
             搜索
@@ -16,10 +16,32 @@
       <div class="flex justify-between">
         <span class="text-[18px] font-700 ml-2">用户管理</span>
         <div class="flex mr-4">
-          <el-button type="primary" class="mr-4">
+          <el-button type="primary" class="mr-4" @click="addUser">
             <IconFontSymbol name="tianjia" class="mr-1"></IconFontSymbol>
             添加用户
           </el-button>
+          <AdminConfirm
+            v-model="isAddUser"
+            width="700px"
+            iconName="yonghushuliang"
+            iconColor="#76B0FD"
+            title="添加用户"
+            :isCustom="true"
+          >
+            <div class="px-2">
+              <div class="flex mb-4">
+                <IconFontSymbol name="xiaohuatuijianxuanzhong" color="red" size="18px"></IconFontSymbol>
+                <AdminInput class="ml-2 mr-5" type="text" placeholder="新用户昵称" value="" width="w-[230px]" label="昵称:"></AdminInput>
+                <AdminInput class="ml-2" type="text" placeholder="密码" value="Aa12345!" width="w-[230px]" label="密码:"></AdminInput>
+              </div>
+              <div class="flex mb-2">
+                <IconFontSymbol name="xiaohuatuijianxuanzhong" color="red" size="18px"></IconFontSymbol>
+                <AdminInput class="ml-2 mr-5" type="text" placeholder="新用户邮箱" value="" width="w-[230px]" label="邮箱:"></AdminInput>
+                <IconFontSymbol name="xiaohuatuijianxuanzhong" color="red" size="18px"></IconFontSymbol>
+                <AdminInput class="ml-2" type="text" placeholder="" value="Aa12345!" width="w-[230px]" label="密码:"></AdminInput>
+              </div>
+            </div>
+          </AdminConfirm>
           <el-tooltip content="删除所选用户">
             <IconFontSymbol name="shanchu" class="font-700 relative top-[3px] cursor-pointer hover:text-red-700 mr-4"></IconFontSymbol>
           </el-tooltip>
@@ -69,7 +91,15 @@
                 <IconFontSymbol name="xiugai" size="18px" class="mr-1"></IconFontSymbol>
                 修改
               </el-button>
-              <el-button type="danger">
+              <AdminConfirm
+                v-model="isShowDel"
+                width="470px"
+                iconName="gongzuotai-dongtaishenhe"
+                iconColor="#F72A33"
+                title="操作确认"
+                :content="`是否删除该用户？操作执行后将无法撤销。`"
+              ></AdminConfirm>
+              <el-button type="danger" @click="deleteUser">
                 <IconFontSymbol name="shanchu" class="mr-1"></IconFontSymbol>
                 删除
               </el-button>
@@ -93,7 +123,9 @@
   import AdminInput from "@/components/admin/AdminInput.vue";
   import AdminSelect from "@/components/admin/AdminSelect.vue";
   import IconFontSymbol from "@/components/IconFontSymbol.vue";
+  import AdminConfirm from "@/components/admin/AdminConfirm.vue";
 
+  let typeVal = ref('1')
   let data = reactive([
     {
       avatar:'awdaw',
@@ -152,6 +184,17 @@
       createTime: "2021-01-01 12:00:00"
     }
   ])
+
+  // 添加用户
+  let isAddUser = ref(false)
+  function addUser(){
+    isAddUser.value = true
+  }
+  // 删除用户
+  let isShowDel = ref(false)
+  function deleteUser(){
+    isShowDel.value = true
+  }
 </script>
 
 <style scoped>

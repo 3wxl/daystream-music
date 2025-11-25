@@ -104,7 +104,7 @@
   import { ref } from 'vue'
   let router = useRouter()
   // 双向绑定
-  const editorContent = ref('')
+  const editorContent = ref('请输入内容（支持图片上传）')
   let title = ref('')
   // 绑定ref
   const tinyRef = ref(null)
@@ -172,6 +172,10 @@
       /* 段落样式 */
       p {
         margin: 10px 0;
+        text-indent: 2em;
+        font-size: 15px;
+        text-break: break-word;
+        word-break: break-all;
       }
       /* 列表样式 */
       ul, ol {
@@ -273,25 +277,6 @@
       }
     }
   }
-
-  /*function extractImgSrcByReg(html) {
-    if (!html || typeof html !== 'string') return [];
-
-    // 正则表达式：匹配 <img> 标签中 src 属性（支持单引号、双引号、无引号三种写法）
-    const imgSrcReg = /<img[^>]*?src\s*=\s*["']?([^"']*?)["']?\s*\/?>/gi;
-
-    const srcList = [];
-    let match;
-
-    // 循环匹配所有符合条件的 src
-    while ((match = imgSrcReg.exec(html)) !== null) {
-      const src = match[1].trim(); // 去除首尾空格
-      if (src) srcList.push(src); // 过滤空值
-    }
-
-    // 去重（避免重复图片）
-    return [...new Set(srcList)];
-  }*/
 </script>
 
 <style scoped lang="scss">
