@@ -56,7 +56,15 @@
 
 <script lang="ts" setup>
 import circleUrl from '@/assets/logo.jpg'
-import { House, Setting, Tickets, User, View, Histogram } from '@element-plus/icons-vue'
+import {
+  House,
+  Setting,
+  Tickets,
+  User,
+  View,
+  Histogram,
+  ChatLineSquare,
+} from '@element-plus/icons-vue'
 import { ref } from 'vue'
 
 const isCollapse = ref(false)
@@ -67,6 +75,7 @@ const menuItems = [
   { path: '/album', title: '专辑', icon: Tickets },
   { path: '/MusicRanking', title: '榜单', icon: Histogram },
   { path: '/User/PersonalCenter', title: '个人', icon: User },
+  { path: '/community/CommunityDisplay', title: '社区', icon: ChatLineSquare },
 ]
 
 const changeCollapse = () => {
