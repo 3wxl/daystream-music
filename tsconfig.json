@@ -28,5 +28,5 @@
     "src/auto-imports.d.ts",
     ".eslintrc-auto-import.json",
     "node_modules/axios/index.d.ts"
-  ]
+, "src/api/Auth/Register.ts"  ]
 }

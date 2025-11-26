@@ -10,13 +10,30 @@
 
     <section class="main-header px-10">
       <div class="card-row">
-        <MusicCard
-          v-for="item in musicData"
-          :type="item.type"
-          :key="item.data.id"
-          :data="item.data"
-          :to="item.to"
-        />
+        <MusicCards
+        :to = recommendData.to
+        :imgUrl = recommendData.data.imgUrl
+        variant="recommend"
+        >
+         <h3 class="text-xl font-bold mb-2">每日推荐</h3>
+          <ul class="text-sm space-y-1 opacity-90">
+            <li v-for="song in recommendData.data.list" :key="song.songName">
+              {{ song.songName }}
+            </li>
+          </ul>
+        </MusicCards>
+
+        <MusicCards
+        v-for="item in musicData"
+        :to="item.to"
+        :img-url="item.data.imgUrl"
+        variant="artist"
+        show-play-button
+        :key="item.to"
+        >
+          <span class="font-bold text-lg">{{ item.data.songCount }} 首单曲</span>
+          <span class="font-bold text-2xl">{{ item.data.singerName }}</span>
+        </MusicCards>
       </div>
     </section>
 
@@ -45,13 +62,16 @@
           <router-link to="/album" class="more-link">更多</router-link>
         </div>
         <div class="main-cards">
-          <MusicCard
+           <MusicCards
             v-for="item in albumData"
-            :type="item.type"
-            :key="item.data.id"
-            :data="item.data"
-            :to="item.to"
-          />
+            :key="item.name"
+            :imgUrl = item.data.imgUrl
+            :title = item.data.title
+            :to = item.to
+            variant = 'album'
+     >
+        <h2 class="album-title">{{ item.data.albumTitle }}</h2>
+     </MusicCards>
         </div>
       </div>
     </section>
@@ -59,7 +79,7 @@
 </template>
 
 <script lang="ts" setup>
-import MusicCard from '@/components/MusicCard.vue';
+import MusicCards from '@/components/MusicCards.vue';
 import MusicListItem from '@/components/MusicListItem.vue';
 import TagBar from '@/components/TagBar.vue';
 
@@ -67,9 +87,9 @@ defineOptions({
   name: 'HomeIndex'
 })
 
-// musicCard模拟数据1
-const musicData = [
-  // 1. 类型: recommend
+// recommend模拟数据
+const recommendData =
+    // 1. 类型: recommend
   {
     type: 'recommend',
     to: '/list/daily-recommend-123', // 指向每日推荐详情页
@@ -84,8 +104,11 @@ const musicData = [
         { id: 'song-003', songName: '泡沫 - G.E.M.邓紫棋' }
       ]
     }
-  },
+  }
 
+
+// musicCard模拟数据1
+const musicData = [
   // 2. 类型: artist
   {
     type: 'artist',
