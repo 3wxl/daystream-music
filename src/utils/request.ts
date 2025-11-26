@@ -27,6 +27,8 @@ const removeToken = () => {
 type Data<T = unknown> = {
   code: string
   message: string
+  success: boolean
+  errorMsg: string
   data: T
 }
 

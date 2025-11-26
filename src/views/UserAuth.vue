@@ -230,7 +230,7 @@
 
 <script lang="ts" setup>
 import { setNewpassword } from '@/api/Auth/forgot'
-import { getCaptcha, LoginByemail } from '@/api/Auth/Login'
+import { getCaptcha } from '@/api/Auth/Login'
 import { getEmailCaptcha, registerUser } from '@/api/Auth/Register'
 import { useUserStore } from '@/stores/user'
 import { ForgotForm } from '@/types/Auth/forgot'
@@ -280,11 +280,14 @@ const handleLogin = async (formEl: FormInstance | undefined) => {
       })
       userStore.login(LoginData)
         .then((res) => {
-          if (res.data.success === false) {
-            ElMessage.error('登录失败，请重试')
+          if (res.success === false) {
+            const msg = res.errorMsg || '登录失败请重试'
+            ElMessage.error(msg)
             // 登录失败，后端会销毁相关验证码，此时要换一个验证码
             changeCaptcha()
             return
+          }else{
+            console.log('表单校验失败，请检查输入')
           }
           formEl.resetFields()
           ElMessage.success('登录成功')
@@ -443,7 +446,7 @@ const handleResetPassword = async (formEl: FormInstance | undefined) => {
     if (valid) {
       setNewpassword(forgotForm)
         .then((res) => {
-          if (res.data.success == false) {
+          if (res.success == false) {
             ElMessage.error('设置新密码失败，请重试')
             return
           }
