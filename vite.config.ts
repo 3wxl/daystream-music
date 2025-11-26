@@ -1,13 +1,13 @@
+import vue from '@vitejs/plugin-vue'
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 // 1. 引入 vite-plugin-pages 插件
-import Pages from 'vite-plugin-pages'
-import AutoImport from 'unplugin-auto-import/vite'
-import Components from 'unplugin-vue-components/vite'
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import tailwindcss from '@tailwindcss/vite'
+import AutoImport from 'unplugin-auto-import/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import Components from 'unplugin-vue-components/vite'
+import Pages from 'vite-plugin-pages'
 export default defineConfig({
   plugins: [
     tailwindcss(),
@@ -22,7 +22,7 @@ export default defineConfig({
         }
         return route
       },
-      routeBlockLang:'yaml',
+      routeBlockLang: 'yaml',
     }),
     vue(),
     vueDevTools(),
@@ -45,12 +45,22 @@ export default defineConfig({
     Components({
       resolvers: [ElementPlusResolver()],
       // 生成组件类型声明文件（可选，建议开启）
-      dts: 'src/components.d.ts'
-    })
+      dts: 'src/components.d.ts',
+    }),
   ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://39.96.214.163:8080',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
     },
   },
 })

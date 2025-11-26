@@ -1,19 +1,22 @@
 <template>
   <div class="music-card-container">
     <div class="music-card">
-      <MusicCard
-        v-for="item in ListData"
-        :key="item.name"
-        :data="item.data"
-        :to="item.to"
-        :type="item.type"
-      />
+     <MusicCards
+     v-for="item in ListData"
+     :key="item.name"
+     :imgUrl = item.data.imgUrl
+     :title = item.data.title
+     :to = item.to
+     variant = 'album'
+     >
+        <h2 class="album-title">{{ item.data.albumTitle }}</h2>
+     </MusicCards>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import MusicCard from '@/components/MusicCard.vue';
+import MusicCards from '@/components/MusicCards.vue';
 import { ref } from 'vue';
 
 const ListData = ref(Array.from({ length: 50 }, (_, i) => {
@@ -30,7 +33,7 @@ const ListData = ref(Array.from({ length: 50 }, (_, i) => {
     data: {
       // 使用 picsum.photos 并提供唯一的 seed 来获取 50 张不同的图片
       imgUrl: `https://picsum.photos/seed/${albumId}/400/400`,
-      alt: `专辑封面 ${i + 1}`,
+      title: `专辑封面 ${i + 1}`,
       albumTitle: `测试专辑 ${i + 1}`
     }
   };
@@ -72,6 +75,18 @@ const ListData = ref(Array.from({ length: 50 }, (_, i) => {
   justify-content: start; /* 左对齐 */
   width: 100%;
   box-sizing: border-box;
+}
+
+.album-title {
+  font-size: 18px; /* 4xl 太大了，通常卡片标题 16-20px */
+  font-weight: bold;
+  margin: 0;
+  /* 限制两行，多出省略，大厂标准写法 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 /* 响应式：小屏幕时减少列数 */
