@@ -55,12 +55,8 @@
 
           <ElFormItem label="验证码" prop="captcha">
             <div class="form-input-group captcha-group">
-              <ElInput
-                v-model="loginForm.captcha"
-                class="form-input"
-                placeholder="请输入验证码"
-              />
-              <div class="captcha-wrapper"  @click="changeCaptcha()">
+              <ElInput v-model="loginForm.captcha" class="form-input" placeholder="请输入验证码" />
+              <div class="captcha-wrapper" @click="changeCaptcha()">
                 <div class="captcha-box">
                   <img :src="loginCaptchaUrl" alt="验证码" />
                 </div>
@@ -76,13 +72,9 @@
           </div>
 
           <div class="btn-group">
-            <ElButton class="btn-primary" @click="handleLogin(loginRef)">
-              登 录
-            </ElButton>
+            <ElButton class="btn-primary" @click="handleLogin(loginRef)"> 登 录 </ElButton>
 
-            <ElButton class="btn-secondary" @click="currentView = 'register'">
-              立即注册
-            </ElButton>
+            <ElButton class="btn-secondary" @click="currentView = 'register'"> 立即注册 </ElButton>
           </div>
         </ElForm>
 
@@ -95,19 +87,11 @@
           label-position="top"
         >
           <ElFormItem label="昵称" prop="username">
-            <ElInput
-              v-model="registerForm.username"
-              class="form-input"
-              placeholder="请输入昵称"
-            />
+            <ElInput v-model="registerForm.username" class="form-input" placeholder="请输入昵称" />
           </ElFormItem>
 
           <ElFormItem label="邮箱" prop="email">
-            <ElInput
-              v-model="registerForm.email"
-              class="form-input"
-              placeholder="请输入邮箱"
-            />
+            <ElInput v-model="registerForm.email" class="form-input" placeholder="请输入邮箱" />
           </ElFormItem>
 
           <ElFormItem label="密码" prop="password">
@@ -140,16 +124,14 @@
               <ElButton
                 class="btn-verify"
                 :disabled="countdown > 0"
-                @click="handleGetCode(registerForm,registerRef)"
+                @click="handleGetCode(registerForm, registerRef)"
               >
                 {{ countdown > 0 ? `${countdown}s` : '获取验证码' }}
               </ElButton>
             </div>
           </ElFormItem>
 
-          <ElButton class="btn-primary" @click="insertUser(registerRef)">
-            注 册
-          </ElButton>
+          <ElButton class="btn-primary" @click="insertUser(registerRef)"> 注 册 </ElButton>
         </ElForm>
 
         <ElForm
@@ -161,24 +143,16 @@
           label-position="top"
         >
           <ElFormItem label="邮箱" prop="email">
-            <ElInput
-              v-model="forgotForm.email"
-              class="form-input"
-              placeholder="请输入邮箱"
-            />
+            <ElInput v-model="forgotForm.email" class="form-input" placeholder="请输入邮箱" />
           </ElFormItem>
 
           <ElFormItem label="邮箱验证码" prop="captcha">
             <div class="form-input-group">
-              <ElInput
-                v-model="forgotForm.captcha"
-                class="form-input"
-                placeholder="请输入验证码"
-              />
+              <ElInput v-model="forgotForm.captcha" class="form-input" placeholder="请输入验证码" />
               <ElButton
                 class="btn-verify"
                 :disabled="countdown > 0"
-                @click="handleGetCode(forgotForm,forgotRef)"
+                @click="handleGetCode(forgotForm, forgotRef)"
               >
                 {{ countdown > 0 ? `${countdown}s` : '获取验证码' }}
               </ElButton>
@@ -209,9 +183,7 @@
             重置密码
           </ElButton>
 
-          <ElButton class="btn-back" @click="currentView = 'login'">
-            返回登录
-          </ElButton>
+          <ElButton class="btn-back" @click="currentView = 'login'"> 返回登录 </ElButton>
         </ElForm>
       </div>
 
@@ -222,7 +194,9 @@
       <div class="auth-social">
         <ElButton class="social-btn" @click="showQQDialog = true" circle>
           <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1.17 16.83c-1.9-.19-3.67-.98-5.08-2.31l1.41-1.41c1.2.81 2.5 1.31 3.87 1.48v-2.01c-1.44-.21-2.78-.93-3.87-1.95l1.41-1.41c1.31.97 2.73 1.54 4.46 1.54v-2h2v2c1.73 0 3.15-.57 4.46-1.54l1.41 1.41c-1.09 1.02-2.43 1.74-3.87 1.95v2.01c1.37-.17 2.67-.67 3.87-1.48l1.41 1.41c-1.41 1.33-3.18 2.12-5.08 2.31z"/>
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1.17 16.83c-1.9-.19-3.67-.98-5.08-2.31l1.41-1.41c1.2.81 2.5 1.31 3.87 1.48v-2.01c-1.44-.21-2.78-.93-3.87-1.95l1.41-1.41c1.31.97 2.73 1.54 4.46 1.54v-2h2v2c1.73 0 3.15-.57 4.46-1.54l1.41 1.41c-1.09 1.02-2.43 1.74-3.87 1.95v2.01c1.37-.17 2.67-.67 3.87-1.48l1.41 1.41c-1.41 1.33-3.18 2.12-5.08 2.31z"
+            />
           </svg>
         </ElButton>
       </div>
@@ -239,12 +213,12 @@
         <div class="qq-qrcode">
           <div class="qrcode-placeholder">
             <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="200" height="200" fill="#f3f4f6"/>
-              <rect x="20" y="20" width="40" height="40" fill="#000"/>
-              <rect x="140" y="20" width="40" height="40" fill="#000"/>
-              <rect x="20" y="140" width="40" height="40" fill="#000"/>
-              <rect x="60" y="60" width="80" height="80" fill="#000"/>
-              <rect x="80" y="80" width="40" height="40" fill="#f3f4f6"/>
+              <rect width="200" height="200" fill="#f3f4f6" />
+              <rect x="20" y="20" width="40" height="40" fill="#000" />
+              <rect x="140" y="20" width="40" height="40" fill="#000" />
+              <rect x="20" y="140" width="40" height="40" fill="#000" />
+              <rect x="60" y="60" width="80" height="80" fill="#000" />
+              <rect x="80" y="80" width="40" height="40" fill="#f3f4f6" />
             </svg>
           </div>
         </div>
@@ -255,17 +229,17 @@
 </template>
 
 <script lang="ts" setup>
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { getEmailCaptcha, registerUser } from '@/api/Auth/Register'
-import { RegisterForm } from '@/types/Auth/register'
-import { LoginForm } from '@/types/Auth/login'
-import type { FormInstance, FormRules } from 'element-plus'
-import { reactive, ref ,onMounted} from 'vue'
-import { getCaptcha, LoginByemail } from '@/api/Auth/Login'
-import { ForgotForm } from '@/types/Auth/forgot'
 import { setNewpassword } from '@/api/Auth/forgot'
-
+import { getCaptcha, LoginByemail } from '@/api/Auth/Login'
+import { getEmailCaptcha, registerUser } from '@/api/Auth/Register'
+import { useUserStore } from '@/stores/user'
+import { ForgotForm } from '@/types/Auth/forgot'
+import { LoginForm } from '@/types/Auth/login'
+import { RegisterForm } from '@/types/Auth/register'
+import type { FormInstance, FormRules } from 'element-plus'
+import { ElMessage } from 'element-plus'
+import { onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const currentView = ref<'login' | 'register' | 'forgot'>('login')
 const showQQDialog = ref(false)
@@ -275,61 +249,53 @@ const loginRef = ref<FormInstance>()
 const registerRef = ref<FormInstance>()
 const forgotRef = ref<FormInstance>()
 
-
-
 // 登录逻辑区域
 const router = useRouter()
+const userStore = useUserStore()
 const loginCaptchaUrl = ref('')
 const captchaId = ref('')
 const isloading = ref(false)
 
-
 const loginForm = reactive<LoginForm & { captcha: string }>({
   email: '',
   password: '',
-  captcha: ''
+  captcha: '',
 })
 
 const loginRules = reactive<FormRules<LoginForm & { captcha: string }>>({
-  email: [
-    {required:true,message:'请填写对应邮箱',trigger:'blur'}
-  ],
-  password: [
-    {required:true,message:'填写密码',trigger:'blur'}
-  ],
-  captcha: [
-    {required:true,message:'请输入验证码',trigger:'blur'}
-  ]
+  email: [{ required: true, message: '请填写对应邮箱', trigger: 'blur' }],
+  password: [{ required: true, message: '填写密码', trigger: 'blur' }],
+  captcha: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
 })
 
 // 登录
 // 后端连接上就是200 所以成功不能以这个为判断标准 要多判断一遍
-const handleLogin = async (formEl:FormInstance | undefined) => {
-  if(!formEl) return
+const handleLogin = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
   await formEl.validate((valid) => {
-    if(valid) {
+    if (valid) {
       const LoginData = reactive({
         ...loginForm,
-        captchaUUId:captchaId
-            })
-      LoginByemail(LoginData)
-      .then((res) => {
-        if(res.data.success === false){
-          ElMessage.error('登录失败，请重试')
-          // 登录失败，后端会销毁相关验证码，此时要换一个验证码
-          changeCaptcha()
-          return
-        }
+        captchaUUId: captchaId,
+      })
+      userStore.login(LoginData)
+        .then((res) => {
+          if (res.data.success === false) {
+            ElMessage.error('登录失败，请重试')
+            // 登录失败，后端会销毁相关验证码，此时要换一个验证码
+            changeCaptcha()
+            return
+          }
           formEl.resetFields()
           ElMessage.success('登录成功')
           router.push('/')
-      })
-      .catch((error) => {
-        console.log(error)
-        ElMessage.error('登录失败，请重试')
-        // 登录失败，后端会销毁相关验证码，此时要换一个验证码
-        changeCaptcha()
-      })
+        })
+        .catch((error) => {
+          console.log(error)
+          ElMessage.error('登录失败，请重试')
+          // 登录失败，后端会销毁相关验证码，此时要换一个验证码
+          changeCaptcha()
+        })
     }
   })
 }
@@ -341,23 +307,23 @@ onMounted(() => {
 
 const changeCaptcha = () => {
   // 判断是否已经发送过请求了 发过来就为true
-    if(isloading.value) return
+  if (isloading.value) return
 
-    isloading.value = true
-    getCaptcha()
-    .then(res => {
+  isloading.value = true
+  getCaptcha()
+    .then((res) => {
       loginCaptchaUrl.value = res.data.captchaBase64Image
       captchaId.value = res.data.captchaUUId
       console.log(res)
-    }).catch(error => {
+    })
+    .catch((error) => {
       console.error('获取验证码失败', error)
       ElMessage.error('加载失败，请点击重试')
-    }).finally(() => {
+    })
+    .finally(() => {
       isloading.value = false
     })
 }
-
-
 
 // 注册逻辑区域
 const registerForm = reactive<RegisterForm>({
@@ -365,72 +331,67 @@ const registerForm = reactive<RegisterForm>({
   email: '',
   password: '',
   newPassword: '',
-  captcha: ''
+  captcha: '',
 })
 
-const validatePass = (rule: any,value: string,callback: any) => {
+const validatePass = (rule: any, value: string, callback: any) => {
   if (value === '') {
     callback(new Error('请再次输入密码'))
-  } else if (value !== registerForm.password){
+  } else if (value !== registerForm.password) {
     callback(new Error('两次输入密码不一致！'))
-  }else {
+  } else {
     callback()
   }
 }
 
 const registerRules = reactive<FormRules<RegisterForm>>({
-  username: [
-    {required: true,message:'请填写用户名',trigger:'blur'},
-  ],
-  email: [
-    {required:true,message:'请填写对应邮箱',trigger:'blur'}
-  ],
-  password:[
-    { required:true ,message:'请输入密码',trigger:'blur'},
+  username: [{ required: true, message: '请填写用户名', trigger: 'blur' }],
+  email: [{ required: true, message: '请填写对应邮箱', trigger: 'blur' }],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
     {
       pattern: /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,20}$/,
       message: '密码需8-20位，含大写字母、数字及特殊字符',
-      trigger: 'blur'
-    }
-  ],
-  newPassword:[
-    {required:true,message:'请再次输入密码',trigger:'blur'},
-    {
-      pattern: /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,20}$/,
-      message: '密码需8-20位，含大写字母、数字及特殊字符',
-      trigger: 'blur'
+      trigger: 'blur',
     },
-    {validator: validatePass,trigger:'blur'}
   ],
-  captcha:[
-    {required:true,message:'请输入验证码',trigger:'blur'}
-  ]
+  newPassword: [
+    { required: true, message: '请再次输入密码', trigger: 'blur' },
+    {
+      pattern: /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,20}$/,
+      message: '密码需8-20位，含大写字母、数字及特殊字符',
+      trigger: 'blur',
+    },
+    { validator: validatePass, trigger: 'blur' },
+  ],
+  captcha: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
 })
 
-const insertUser = async (formEl:FormInstance | undefined) => {
-  if(!formEl) return
-  await formEl.validate((valid) => {
-    if(valid) {
+const insertUser = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  try{
+     await formEl.validate()
       registerUser(registerForm)
-        .then(res => {
-         if(res.data.success === false){
-          ElMessage.error('注册失败，请重试')
-          return
-         }
+        .then((res) => {
+          if (res.success === false) {
+            const msg = res.errorMsg || '注册失败，请重试'
+            ElMessage.error(msg)
+            return
+          }
           // 清空输入框
-        formEl.resetFields()
-        ElMessage.success('注册成功，请登录')
-        currentView.value = 'login'
-      }).catch(err => {
-        console.log(err)
-        // 失败不要删除表单，用户体验差
-        ElMessage.error('注册失败，请重试')
-      })
-    }else{
-        console.log('表单校验失败')
-        return false
-      }
-  })
+          formEl.resetFields()
+          ElMessage.success('注册成功，请登录')
+          currentView.value = 'login'
+        })
+        .catch((err) => {
+          console.log(err)
+          // 失败不要删除表单，用户体验差
+          ElMessage.error('网络连接异常，请稍后重试')
+        })
+  }catch(error) {
+    console.log('表单校验未通过', error)
+    return false
+  }
 }
 
 // 忘记密码逻辑区
@@ -439,69 +400,65 @@ const insertUser = async (formEl:FormInstance | undefined) => {
 const forgotForm = reactive<ForgotForm>({
   email: '',
   captcha: '',
-  newPassword: '',//再次确认的密码
-  password: ''//设定的新密码
+  newPassword: '', //再次确认的密码
+  password: '', //设定的新密码
 })
 
-const validatePass2 = (rule:any,value: string,callback: any) => {
-  if(value === ''){
+const validatePass2 = (rule: any, value: string, callback: any) => {
+  if (value === '') {
     callback(new Error('请再次输入密码'))
-  }else if(value !== forgotForm.password){
+  } else if (value !== forgotForm.password) {
     callback(new Error('两次输入的密码不一致！'))
-  }else {
+  } else {
     callback()
   }
 }
 
 const forgotRules = reactive<FormRules<ForgotForm>>({
-  email: [
-    {required:true,message:'请填写对应邮箱',trigger:'blur'}
-  ],
-  password:[
-    { required:true ,message:'请输入密码',trigger:'blur'},
+  email: [{ required: true, message: '请填写对应邮箱', trigger: 'blur' }],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
     {
       pattern: /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,20}$/,
       message: '密码需8-20位，含大写字母、数字及特殊字符',
-      trigger: 'blur'
-    }
-  ],
-  newPassword:[
-    {required:true,message:'请再次输入密码',trigger:'blur'},
-    {
-      pattern: /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,20}$/,
-      message: '密码需8-20位，含大写字母、数字及特殊字符',
-      trigger: 'blur'
+      trigger: 'blur',
     },
-    {validator: validatePass2,trigger:'blur'}
   ],
-   captcha:[
-    {required:true,message:'请输入验证码',trigger:'blur'}
-  ]
+  newPassword: [
+    { required: true, message: '请再次输入密码', trigger: 'blur' },
+    {
+      pattern: /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,20}$/,
+      message: '密码需8-20位，含大写字母、数字及特殊字符',
+      trigger: 'blur',
+    },
+    { validator: validatePass2, trigger: 'blur' },
+  ],
+  captcha: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
 })
 
 // 忘记密码 先找到自己的表单 然后检验rules通过没有 通过了就发请求呗
 const handleResetPassword = async (formEl: FormInstance | undefined) => {
-  if(!formEl) return
+  if (!formEl) return
   await formEl.validate((valid) => {
-     if(valid){
+    if (valid) {
       setNewpassword(forgotForm)
-      .then(res => {
-        if(res.data.success == false){
+        .then((res) => {
+          if (res.data.success == false) {
+            ElMessage.error('设置新密码失败，请重试')
+            return
+          }
+          formEl.resetFields()
+          ElMessage.success('设置密码成功，请登录')
+          currentView.value = 'login'
+        })
+        .catch((err) => {
+          console.log(err)
           ElMessage.error('设置新密码失败，请重试')
-          return
-        }
-        formEl.resetFields()
-        ElMessage.success('设置密码成功，请登录')
-        currentView.value = 'login'
-      })
-      .catch((err)=> {
-        console.log(err)
-        ElMessage.error('设置新密码失败，请重试')
-      })
-     }else{
+        })
+    } else {
       ElMessage.error('请正确填写数据')
       return
-     }
+    }
   })
 }
 
@@ -511,21 +468,18 @@ interface EmailForm {
   [key: string]: any
 }
 
-const handleGetCode = async (
-  formData:  EmailForm,
-  formRef: FormInstance | undefined
-) => {
+const handleGetCode = async (formData: EmailForm, formRef: FormInstance | undefined) => {
   // 1.防抖处理，不可重复获取
   if (countdown.value > 0) return
 
   // 2.检验表单
-  if(!formRef) return
+  if (!formRef) return
 
   try {
     // 4.单独校验email格式
     await formRef.validateField('email')
     // 5.调用验证码接口
-    await  getEmailCaptcha(formData.email)
+    await getEmailCaptcha(formData.email)
     ElMessage.success('验证码已发送')
 
     // 6.倒计时逻辑
@@ -537,10 +491,9 @@ const handleGetCode = async (
         clearInterval(timer)
       }
     }, 1000)
-    }catch( error ){
-      console.log(error,'校验失败，或者验证码发送不成功')
+  } catch (error) {
+    console.log(error, '校验失败，或者验证码发送不成功')
   }
-
 }
 </script>
 
@@ -839,8 +792,6 @@ const handleGetCode = async (
     color: #ec4899 !important;
   }
 }
-
-
 
 .btn-group {
   display: flex;
