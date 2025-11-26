@@ -18,8 +18,8 @@
     <el-main style="padding:0 10px 0px 8px">
       <div class="shadow-md border-[#e4e7ed] bg-white rounded-[10px] p-[15px] flex items-center">
         <AdminInput class="ml-4 mr-4" type="text" placeholder="请输入歌曲名" value="" width="w-[220px]" label="歌名:"></AdminInput>
-        <AdminSelect class="mr-15" :options="[{value:'1',label:'全部'},{value:'2',label:'指定歌手'}]" label="歌手" ></AdminSelect>
-        <AdminSelect class="mr-15" :options="[{value:'1',label:'歌曲'},{value:'2',label:'MV'}]" label="类型" ></AdminSelect>
+        <AdminSelect v-model="typeVal1" class="mr-15" :options="[{value:'1',label:'全部'},{value:'2',label:'指定歌手'}]" label="歌手" ></AdminSelect>
+        <AdminSelect v-model="typeVal2" class="mr-15" :options="[{value:'1',label:'歌曲'},{value:'2',label:'MV'}]" label="类型" ></AdminSelect>
         <el-button type="primary" class="ml-4">
           <IconFontSymbol name="sousuo" class="mr-1"></IconFontSymbol>
           搜索
@@ -118,6 +118,8 @@
 </template>
 
 <script setup lang="ts">
+  let typeVal1 = ref('1')
+  let typeVal2 = ref('1')
   let musicianList = reactive([
     {
       name: '张杰',
