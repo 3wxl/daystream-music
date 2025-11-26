@@ -8,16 +8,18 @@ export const useUserStore =defineStore('user',() => {
   const userInfo = ref([])
 
   const login = async (loginForm: any) => {
+        console.log('登录记性中')
         // 调用登录api(
         const res = await LoginByemail(loginForm)
         // 拿到数据存一下
+        console.log(res)
         const accessToken = res.data.token
         // 把toekn数据赋值给token 存pinia
         token.value = accessToken
         // 存本地
         setToken(accessToken)
         //结果返回去，让组件进行跳转
-        return
+        return res
   }
 
   const logout = () => {
