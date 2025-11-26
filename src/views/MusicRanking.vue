@@ -218,7 +218,7 @@
                         class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center transition-all duration-300 hover:bg-white/30 hover:scale-110 flex-shrink-0 ml-2"
                         @click.stop="playSong(song)"
                       >
-                        <i class="iconfont text-xs">&#xe623;</i>
+                        <i class="iconfont text-xs" style="font-size: 12px">&#xe623;</i>
                       </button>
                     </div>
                   </div>

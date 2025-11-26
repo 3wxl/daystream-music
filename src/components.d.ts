@@ -12,6 +12,9 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     A: typeof import('./components/user/a.vue')['default']
+    AdminButton: typeof import('./components/admin/AdminButton.vue')['default']
+    AdminInput: typeof import('./components/admin/AdminInput.vue')['default']
+    AdminSelect: typeof import('./components/admin/AdminSelect.vue')['default']
     AlbumCard: typeof import('./components/user/musician/AlbumCard.vue')['default']
     CollectedAlbum: typeof import('./components/user/CollectedAlbum.vue')['default']
     CollectedAlbums: typeof import('./components/user/CollectedAlbums.vue')['default']
@@ -27,6 +30,7 @@ declare module 'vue' {
     ElCarousel: typeof import('element-plus/es')['ElCarousel']
     ElCarouselItem: typeof import('element-plus/es')['ElCarouselItem']
     ElChart: typeof import('element-plus/es')['ElChart']
+    ElCol: typeof import('element-plus/es')['ElCol']
     ElContainer: typeof import('element-plus/es')['ElContainer']
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
     ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
@@ -49,6 +53,7 @@ declare module 'vue' {
     ElRadio: typeof import('element-plus/es')['ElRadio']
     ElRadioButton: typeof import('element-plus/es')['ElRadioButton']
     ElRadioGroup: typeof import('element-plus/es')['ElRadioGroup']
+    ElRow: typeof import('element-plus/es')['ElRow']
     ElScrollbar: typeof import('element-plus/es')['ElScrollbar']
     ElSelect: typeof import('element-plus/es')['ElSelect']
     ElSlider: typeof import('element-plus/es')['ElSlider']
