@@ -1,13 +1,13 @@
-import axios from 'axios'
 import type {
+  AxiosError,
   AxiosRequestConfig,
-  Method,
   AxiosResponse,
   InternalAxiosRequestConfig,
-  AxiosError,
+  Method,
 } from 'axios'
-import { ElLoading, ElMessage } from 'element-plus'
+import axios from 'axios'
 import type { LoadingInstance } from 'element-plus'
+import { ElLoading, ElMessage } from 'element-plus'
 
 const TOKEN_KEY = 'auth_token'
 
@@ -42,7 +42,7 @@ interface RequestConfig<T = unknown> extends AxiosRequestConfig {
 }
 
 const service = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: '/api',
   timeout: 5000,
 })
 
@@ -132,4 +132,4 @@ const request = <T = unknown>(
 }
 
 export default request
-export { setToken, getToken, removeToken }
+export { getToken, removeToken, setToken }
