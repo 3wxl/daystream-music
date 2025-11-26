@@ -29,20 +29,31 @@
             :isCustom="true"
           >
             <div class="px-2">
-              <div class="flex mb-4">
+              <div class="flex mb-6 mt-2">
                 <IconFontSymbol name="xiaohuatuijianxuanzhong" color="red" size="18px"></IconFontSymbol>
                 <AdminInput class="ml-2 mr-5" type="text" placeholder="新用户昵称" value="" width="w-[230px]" label="昵称:"></AdminInput>
                 <AdminInput class="ml-2" type="text" placeholder="密码" value="Aa12345!" width="w-[230px]" label="密码:"></AdminInput>
               </div>
-              <div class="flex mb-2">
+              <div class="flex mb-6 items-center">
                 <IconFontSymbol name="xiaohuatuijianxuanzhong" color="red" size="18px"></IconFontSymbol>
                 <AdminInput class="ml-2 mr-5" type="text" placeholder="新用户邮箱" value="" width="w-[230px]" label="邮箱:"></AdminInput>
-                <IconFontSymbol name="xiaohuatuijianxuanzhong" color="red" size="18px"></IconFontSymbol>
-                <AdminInput class="ml-2" type="text" placeholder="新用户手机号" value="" width="w-[230px]" label="手机号:"></AdminInput>
+                <span class="mr-3 text-[16px] text-[#666] ml-2">状态:</span>
+                <el-switch
+                  v-model="addStatus"
+                  class="ml-2"
+                  style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
+                />
               </div>
-              <div class="flex items-start mb-2">
-                <label for="jj" class="mr-1">简介：</label>
-                <textarea name="" id="jj" placeholder="简介"></textarea>
+              <div class="flex items-start mb-2 mt-4">
+                <label for="jj" class="mr-1 ml-[22px] text-[#666]">简介：</label>
+                <textarea name="" id="jj" placeholder="新用户简介" class="h-25 custom-scrollbar resize-none w-100 z-11 outline-none border-[#666] bg-[#E9F0FE] hover:bg-[#e4ecfd] focus:bg-[#dee9ff] rounded-[8px] px-[15px] py-[8px] text-[15px] text-[#666]"></textarea>
+              </div>
+              <div class="flex justify-end gap-3 mt-8 mb-3">
+                <el-button type="primary" class="w-[85px]">
+                  <IconFontSymbol name="tianjia" class="mr-1"></IconFontSymbol>
+                  添加
+                </el-button>
+                <el-button type="default" class="mr-5 w-[80px]" @click="isAddUser = false">取消</el-button>
               </div>
             </div>
           </AdminConfirm>
@@ -191,6 +202,7 @@
 
   // 添加用户
   let isAddUser = ref(false)
+  let addStatus = ref(true)
   function addUser(){
     isAddUser.value = true
   }
@@ -280,4 +292,23 @@
   ::v-deep .admin-page .el-pager .more:hover{
     border-color: #0084ff;
   }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px; /* 滚动条宽度 */
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3); /* 滚动滑块颜色 */
+    border-radius: 3px; /* 滚动滑块圆角 */
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent; /* 隐藏滚动轨道 */
+  }
+
+  /* Firefox 浏览器 */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+  }
+
 </style>

@@ -5,7 +5,7 @@
         <input
             v-model="input"
             type="text"
-            placeholder="搜索歌手"
+            placeholder="搜索动态或用户"
             class="w-[200px] px-4 py-[6px] pl-10 bg-gray-700 text-gray-200 placeholder-gray-400 rounded-full border border-gray-600 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:border-transparent transition-all"
           />
         <Search class="cursor-pointer absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -28,7 +28,7 @@
     </el-header>
     <el-container>
       <el-main>
-        <div class="ml-5 flex relative items-start">
+        <div class="ml-5 flex relative items-start overflow-y-auto" style="height: calc(100vh - 174px)">
           <div class="flex-grow-0 shrink-0 basis-[67%]">
             <!-- <div class="mb-4 duration-[.2s] bg-gray-900/60 rounded-xl border border-gray-800 overflow-hidden shadow-lg backdrop-blur-sm w-240 p-[15px]">
               <div class="flex justify-between">
@@ -125,7 +125,7 @@
             </div> -->
             <community-display v-for="(dynamic, index) in dymamicList" :key="index" :dynamic="dynamic"></community-display>
           </div>
-          <div class="flex-grow-0 shrink-0 basis-[28%] ml-10 duration-[.2s] bg-gray-900/60 rounded-xl border border-gray-800 overflow-hidden shadow-lg backdrop-blur-sm w-100 p-[15px]">
+          <div class="flex-grow-0 shrink-0 basis-[28%] ml-10 duration-[.2s] bg-gray-900/60 rounded-xl border border-gray-800 overflow-hidden shadow-lg backdrop-blur-sm w-100 p-[15px] sticky top-0 self-start">
             <div class="flex flex-col items-center">
               <div class="w-30 h-30 md:w-30 md:h-30 rounded-full border-4 border-white/20 overflow-hidden shadow-lg">
                 <img
@@ -308,6 +308,80 @@
         </p>
       `
     },
+    {
+      authorId:'1',
+      avatar:'../../../public/头像.png',
+      author:'白昼音流👑',
+      time:'11-19 17:30',
+      identity:'轻音乐领域创作者',
+      title:'我是一个普普通通的标题',
+      content:`
+        <p class="indent-[2em] break-words break-all text-[15px]">
+          #四个大人喜人第四赛段第一#
+        </p>
+        <p class="indent-[2em] break-words break-all text-[15px]">
+          感谢大家抬爱啊啊啊啊啊！
+        </p>
+        <p class="indent-[2em] break-words break-all text-[15px]">
+          [泪][泪][泪][努力][努力][努力]好开心！
+        </p>
+        <p class="indent-[2em] break-words break-all text-[15px]">
+          我们一定会继续努力的！！
+        </p>
+        <p class="indent-[2em] break-words break-all text-[15px]">
+          冲啊！！！！！！！！！！！！！！！
+        </p>
+        <p class="indent-[2em] break-words break-all text-[15px]">
+          #喜人奇妙夜# ​
+        </p>
+        <p class="indent-[2em] break-words break-all text-[15px]">
+          ......
+        </p>
+        <p>
+          <img src="http://39.96.214.163:9000/file/70567a01-09d0-443b-9d8a-bab6e5623967.png" alt="">
+        </p>
+        <p>
+          <img src="../../../public/头像.png" alt="">
+        </p>
+      `
+    },
+    {
+      authorId:'1',
+      avatar:'../../../public/头像.png',
+      author:'白昼音流👑',
+      time:'11-19 17:30',
+      identity:'轻音乐领域创作者',
+      title:'我是一个普普通通的标题',
+      content:`
+        <p class="indent-[2em] break-words break-all text-[15px]">
+          #四个大人喜人第四赛段第一#
+        </p>
+        <p class="indent-[2em] break-words break-all text-[15px]">
+          感谢大家抬爱啊啊啊啊啊！
+        </p>
+        <p class="indent-[2em] break-words break-all text-[15px]">
+          [泪][泪][泪][努力][努力][努力]好开心！
+        </p>
+        <p class="indent-[2em] break-words break-all text-[15px]">
+          我们一定会继续努力的！！
+        </p>
+        <p class="indent-[2em] break-words break-all text-[15px]">
+          冲啊！！！！！！！！！！！！！！！
+        </p>
+        <p class="indent-[2em] break-words break-all text-[15px]">
+          #喜人奇妙夜# ​
+        </p>
+        <p class="indent-[2em] break-words break-all text-[15px]">
+          ......
+        </p>
+        <p>
+          <img src="http://39.96.214.163:9000/file/70567a01-09d0-443b-9d8a-bab6e5623967.png" alt="">
+        </p>
+        <p>
+          <img src="../../../public/头像.png" alt="">
+        </p>
+      `
+    },
   ])
   let activedId = ref(0)
   let router = useRouter()
@@ -341,5 +415,8 @@
     .BtnPing{
       animation: myButtonPing 1s ease-in-out infinite;
     }
+  }
+  .layout-scrollbar{
+
   }
 </style>

@@ -99,12 +99,59 @@
     }
     return [...new Set(srcList)];
   }
+  function limitHtmlWordCount(html, maxCount) {
+    if (!html || typeof html !== 'string') return '';
+    if (maxCount <= 0) return '';
+    const pureText = html.replace(/<[^>]+>/g, '');
+    if (pureText.length <= maxCount) {
+      return html;
+    }
+    let remainingCount = maxCount;
+    let resultHtml = '';
+    const pTagReg = /<p[^>]*>([\s\S]*?)<\/p>/gi;
+    let match;
+    let isTruncated = false;
+    while ((match = pTagReg.exec(html)) !== null && !isTruncated) {
+      const pTagStart = match[0].split('>')[0] + '>';
+      const pContent = match[1];
+      const pPureText = pContent.replace(/<[^>]+>/g, '');
+      if (pPureText.length <= remainingCount) {
+        resultHtml += pTagStart + pContent + '</p>';
+        remainingCount -= pPureText.length;
+      } else {
+        let truncatedContent = '';
+        let currentContent = pContent;
+        let currentRemaining = remainingCount;
+        for (let i = 0; i < currentContent.length && currentRemaining > 0; i++) {
+          const char = currentContent[i];
+          if (char === '<') {
+            const tagEndIndex = currentContent.indexOf('>', i);
+            if (tagEndIndex !== -1) {
+              truncatedContent += currentContent.substring(i, tagEndIndex + 1);
+              i = tagEndIndex; // 跳过标签内容
+            } else {
+              truncatedContent += char;
+            }
+          } else {
+            truncatedContent += char;
+            currentRemaining--;
+          }
+        }
+        if (!truncatedContent.endsWith('>') && currentRemaining <= 0) {
+          truncatedContent += '...';
+        }
+        resultHtml += pTagStart + truncatedContent + '</p>';
+        isTruncated = true;
+      }
+    }
+    return resultHtml;
+  }
   function removeImgTags(html) {
     if (!html || typeof html !== 'string') return '';
     return html.replace(/<img[^>]*>/gi, '');
   }
   let images = extractImgSrcByReg(content);
-  content = removeImgTags(content);
+  content = limitHtmlWordCount(removeImgTags(content), 300);    // 限制内容字数为300字，防止内容过长
 </script>
 
 <style scoped></style>
