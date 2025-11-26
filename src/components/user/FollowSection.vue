@@ -293,7 +293,7 @@ const fans = ref([
 ])
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 ::v-deep(.el-tabs__nav) {
   background: linear-gradient(to right, rgba(30, 30, 30, 0.5), rgba(40, 40, 40, 0.3)) !important;
   padding: 0 12px !important;
