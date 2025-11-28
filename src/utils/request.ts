@@ -25,18 +25,20 @@ const removeToken = () => {
 
 // 响应数据通用类型
 type Data<T = unknown> = {
-  code: string
-  message: string
+  success: boolean
+  errorMsg: string
   data: T
+  total?: number
+  errCode?: number
 }
 
 // Axios 请求配置接口
 interface RequestConfig<T = unknown> extends AxiosRequestConfig {
   interceptors?: {
     requestInterceptor?: (config: AxiosRequestConfig) => AxiosRequestConfig
-    requestInterceptorCatch?: (error: AxiosError) => Promise<AxiosError>
+    requestInterceptorCatch?: (error: AxiosError) => Promise<any>
     responseInterceptor?: (res: AxiosResponse<Data<T>>) => AxiosResponse<Data<T>>
-    responseInterceptorCatch?: (error: AxiosError) => Promise<AxiosError>
+    responseInterceptorCatch?: (error: AxiosError) => Promise<any>
   }
   showLoading?: boolean
 }
@@ -85,7 +87,7 @@ const request = <T = unknown>(
   method: Method = 'get',
   submitData?: Record<string, unknown> | undefined,
   config?: RequestConfig<T>,
-) => {
+): Promise<Data<T>> => {
   let loading: LoadingInstance | undefined
   if (config?.showLoading) {
     loading = ElLoading.service({
