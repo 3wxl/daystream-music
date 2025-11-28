@@ -1,6 +1,10 @@
 <template>
-  <div class="flex items-start">
-    <div class="bg-white mb-4 duration-[.2s] rounded-xl  overflow-hidden shadow-lg backdrop-blur-sm w-240 py-[15px] px-[30px] pb-10">
+  <button class="absolute top-3 z-100 left-60 flex items-center cursor-pointer px-[10px] py-[2px] hover:bg-[#f5f5f5] rounded-md shadow-md/5" @click="router.back()">
+    <IconFontSymbol name="fanhui" size="20px" class="relative top-[1px]"></IconFontSymbol>
+    <span class="ml-1 text-[16px] font-[500]">返回</span>
+  </button>
+  <div class="flex items-start relative" style="height: calc(100vh - 174px)">
+    <div class="bg-white flex-grow-0 shrink-0 basis-[67%] mb-4 duration-[.2s] rounded-xl  overflow-hidden shadow-lg backdrop-blur-sm w-240 py-[15px] px-[30px] pb-10">
       <div class="">
         <h1 class="text-[black] font-[600] text-[36px]">我是一个普普通通的标题</h1>
         <div class="my-3">
@@ -38,9 +42,10 @@
         </div>
       </div>
     </div>
-    <div class="bg-white ml-10 mb-4 duration-[.2s] rounded-xl overflow-hidden shadow-lg backdrop-blur-sm w-100 p-[15px]">
+    <div class="bg-white flex-grow-0 shrink-0 w-[28%] sticky top-0 self-start ml-10 mb-4 duration-[.2s] rounded-xl overflow-hidden shadow-lg backdrop-blur-sm w-100 p-[15px]">
       <!-- 右侧作者栏 -->
       <div class="flex flex-col items-center">
+        <p class="text-[14px] text-[#666] self-start">作者:</p>
         <div class="w-30 h-30 md:w-30 md:h-30 rounded-full border-4 border-white/20 overflow-hidden shadow-lg">
           <img
             :src="'http://39.96.214.163:9000/file/70567a01-09d0-443b-9d8a-bab6e5623967.png'"
@@ -64,15 +69,12 @@
             关注
           </span>
         </div>
-        <div class="flex mt-3 gap-4">        <!-- 审核按钮 -->
-          <button class="primary-btn">
-            <IconFontSymbol name="qianshoushenpitongguo-xianxing" size="17px" class="mr-1"></IconFontSymbol>
-            通过
-          </button>
-          <button class="primary-btn" style="background-color: #ff4d4f;">
-            <IconFontSymbol name="bohui" size="16px" class="mr-1">
+        <div class="flex mt-3 gap-7 flex-col">        <!-- 审核按钮 -->
+
+          <button class="danger-btn" style="background-color: #ff4d4f;">
+            <IconFontSymbol name="shanchu" size="16px" class="mr-1">
             </IconFontSymbol>
-            驳回
+            删除
           </button>
         </div>
       </div>
@@ -85,6 +87,7 @@
   let commentInput = ref(null);
   let router = useRouter();
   let isAttent = ref(false);
+  let status = ref(true);
   function updateWords(event) {
     commentWords.value = event.target.value.length;
   }
@@ -99,10 +102,10 @@
 </script>
 
 <style scoped>
-  .primary-btn {
+  .danger-btn {
     border: none;
     color: #fff;
-    background-image: linear-gradient(30deg, #0400ff, #4ce3f7);
+    background-image: linear-gradient(30deg, rgb(255, 37, 37), rgb(247, 214, 106));
     border-radius: 20px;
     background-size: 100% auto;
     font-family: inherit;
@@ -111,24 +114,24 @@
     cursor: pointer;
   }
 
-  .primary-btn:hover {
+  .danger-btn:hover {
     background-position: right center;
     background-size: 200% auto;
     -webkit-animation: pulse 2s infinite;
-    animation: pulse512 1.5s infinite;
+    animation: pulse513 1.5s infinite;
   }
 
-  @keyframes pulse512 {
-  0% {
-    box-shadow: 0 0 0 0 #05bada66;
-  }
+  @keyframes pulse513 {
+    0% {
+      box-shadow: 0 0 0 0 #f81c1c66;
+    }
 
-  70% {
-    box-shadow: 0 0 0 10px rgb(218 103 68 / 0%);
-  }
+    70% {
+      box-shadow: 0 0 0 10px rgb(218 103 68 / 0%);
+    }
 
-  100% {
-    box-shadow: 0 0 0 0 rgb(218 103 68 / 0%);
-  }
+    100% {
+      box-shadow: 0 0 0 0 rgb(218 103 68 / 0%);
+    }
   }
 </style>

@@ -19,7 +19,7 @@
       <div class="shadow-md border-[#e4e7ed] bg-white rounded-[10px] p-[15px] flex items-center">
         <AdminInput class="ml-4 mr-4" type="text" placeholder="请输入歌曲名" value="" width="w-[220px]" label="歌名:"></AdminInput>
         <AdminSelect v-model="typeVal1" class="mr-15" :options="[{value:'1',label:'全部'},{value:'2',label:'指定歌手'}]" label="歌手" ></AdminSelect>
-        <AdminSelect v-model="typeVal2" class="mr-15" :options="[{value:'1',label:'歌曲'},{value:'2',label:'MV'}]" label="类型" ></AdminSelect>
+        <AdminSelect v-model="typeVal2" class="mr-15" :options="[{value:'1',label:'歌曲'},{value:'2',label:'MV'},{value:'3',label:'专辑'}]" label="类型" ></AdminSelect>
         <el-button type="primary" class="ml-4">
           <IconFontSymbol name="sousuo" class="mr-1"></IconFontSymbol>
           搜索
@@ -72,7 +72,7 @@
                 <!-- <span class="px-[3px] border-[1.5px] rounded-[6px] border-[#3278EA] text-[12px] text-[#3278EA]">免费</span> -->
               </template>
             </el-table-column>
-            <el-table-column label="曲风" width="150" align="center">
+            <el-table-column label="分类" width="150" align="center">
               <template #default="scope">
                 <span v-for="type,index in scope.row.type" :key="index" class="text-[14px] px-[8px] py-[3px] rounded-[8px] bg-[#EDF3F9] mx-1 text-[#529FFD]">{{ type }}</span>
               </template>

@@ -25,11 +25,11 @@
             </template>
             <el-menu-item index="3-1" @click="router.push('/admin/worksManage/songsList')">
               <IconFontSymbol name="bofangqi_shouyegequliebiao_" size="18px"></IconFontSymbol>
-              <span>歌曲列表</span>
+              <span>作品列表</span>
             </el-menu-item>
             <el-menu-item index="3-2" @click="router.push('/admin/worksManage/songsReview')">
               <IconFontSymbol name="file-music" class="mr-1"></IconFontSymbol>
-              <span>歌曲审核</span>
+              <span>作品审核</span>
             </el-menu-item>
             <!-- <el-menu-item index="3-3"  @click="router.push('/admin/worksManage/mvList')">
               <IconFontSymbol name="songbook_mv" size="18px"  class="mr-1"></IconFontSymbol>
@@ -67,6 +67,10 @@
               <IconFontSymbol name="shouyetuijianwei" class="mr-1"></IconFontSymbol>
               <span>首页推荐位</span>
             </el-menu-item>
+            <el-menu-item index="5-3" @click="router.push('/admin/operationManage/bannerManage')">
+              <IconFontSymbol name="lunbotuguanli" class="mr-1"></IconFontSymbol>
+              <span>首页轮播图</span>
+            </el-menu-item>
           </el-sub-menu>
           <el-sub-menu index="6">
             <template #title>
@@ -86,7 +90,7 @@
               <span>评论管理</span>
             </el-menu-item>
           </el-sub-menu>
-          <el-menu-item index="7">
+          <el-menu-item index="7" @click="logout">
             <IconFontSymbol name="tuichudenglu" class="mr-1"></IconFontSymbol>
             <span>退出登录</span>
           </el-menu-item>
@@ -132,6 +136,11 @@
 <script setup>
   import {useRouter } from 'vue-router'
   let router = useRouter()
+  function logout() {
+    // 退出登录时的一些处理工作，如清除用户信息等
+
+    router.push('/')
+  }
 </script>
 
 <style scoped>

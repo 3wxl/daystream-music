@@ -77,48 +77,7 @@
                 </div>
               </div>
               <div class="mt-12">    <!-- 其他人的评论 -->
-                <div class="flex gap-4 items-start mb-11">
-                  <div>
-                    <img src="../../../public/头像.png" alt="我的头像" class="w-[44px] h-[44px] rounded-[38px] ml-2 flex-shrink-0">
-                  </div>
-                  <div style="width:calc(100% - 60px)">
-                    <div class="flex justify-between">
-                      <p class="font-bold text-[17px] text-white cursor-pointer hover:text-pink-400 mt-[6px]">白昼音流👑</p>
-                      <span class="text-[#e5e7eb] mr-1 cursor-pointer hover:text-pink-500" >
-                        0 <IconFontSymbol name="icon" size="17px"></IconFontSymbol>
-                      </span>
-                    </div>
-                    <div class="mt-[14px]">
-                      <p class="text-white">希望湾湾早日回归祖国怀抱😀</p>
-                    </div>
-                    <div class="mt-3 text-[#e5e7eb] text-[14px] flex gap-2">
-                      <span class="cursor-pointer hover:text-pink-400">12回复</span>
-                      ·
-                      <span>1小时前</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex gap-4 items-start">
-                  <div>
-                    <img src="../../../public/头像.png" alt="我的头像" class="w-[44px] h-[44px] rounded-[38px] ml-2 flex-shrink-0">
-                  </div>
-                  <div style="width:calc(100% - 60px)">
-                    <div class="flex justify-between">
-                      <p class="font-bold text-[17px] text-white cursor-pointer hover:text-pink-400 mt-[6px]">白昼音流👑</p>
-                      <span class="text-[#e5e7eb] mr-1 cursor-pointer hover:text-pink-500" >
-                        0 <IconFontSymbol name="icon" size="17px"></IconFontSymbol>
-                      </span>
-                    </div>
-                    <div class="mt-[14px]">
-                      <p class="text-white">希望湾湾早日回归祖国怀抱😀</p>
-                    </div>
-                    <div class="mt-3 text-[#e5e7eb] text-[14px] flex gap-2">
-                      <span class="cursor-pointer hover:text-pink-400">12回复</span>
-                      ·
-                      <span>1小时前</span>
-                    </div>
-                  </div>
-                </div>
+                <CommentCard v-for="commentObj in commentList" :key="commentObj.commentId" :commentObj="commentObj"></CommentCard>
               </div>
               <div class="mt-4 mb-2 text-center">
                 <!-- <p class="text-[#d2d4d8] text-[15px]">暂无更多评论</p> -->
@@ -173,10 +132,52 @@
 
 <script setup lang="ts">
   import { on } from 'events';
-  let commentWords = ref(0);
-  let commentInput = ref(null);
-  let router = useRouter();
-  let isAttent = ref(false);
+  import CommentCard from '@/components/community/CommentCard.vue';
+
+  // 数据
+  let commentWords = ref(0);    // 你的输入评论字数
+  let commentInput = ref(null);   // 你的评论输入框
+  let router = useRouter();   // 路由实例
+  let isAttent = ref(false);    // 是否已关注，后续从接口获取
+  let commentList = reactive([
+    {
+      authorId:'1',
+      commentId:'1',
+      avatar: '../../../public/头像.png',
+      author: '白昼音流👑',
+      linkCount: 0,
+      replyCount: 0,
+      time: '1小时前',
+      content: '希望湾湾早日回归祖国怀抱😀',
+      SonCommentCount: 2,
+      isLike:false
+    },
+    {
+      authorId:'2',
+      commentId:'2',
+      avatar: '../../../public/头像.png',
+      author: '周杰伦',
+      linkCount: '1w',
+      replyCount: 454,
+      time: '2小时前',
+      content: '加油，中国加油！',
+      SonCommentCount: 15,
+      isLike:true
+    },
+    {
+      authorId:'3',
+      commentId:'3',
+      avatar: '../../../public/头像.png',
+      author: '爱吃鱼的猫',
+      linkCount: 46,
+      replyCount: 454,
+      time: '1小时前',
+      content: '支持祖国统一，反对台独分裂！',
+      SonCommentCount: 15,
+      isLike:false
+    }
+  ])
+  // 方法
   function updateWords(event) {
     commentWords.value = event.target.value.length;
   }
