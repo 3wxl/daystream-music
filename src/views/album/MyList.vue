@@ -1,43 +1,44 @@
 <template>
   <div class="music-card-container">
     <div class="music-card">
-     <MusicCards
-     v-for="item in ListData"
-     :key="item.name"
-     :imgUrl = item.data.imgUrl
-     :title = item.data.title
-     :to = item.to
-     variant = 'album'
-     >
+      <MusicCard
+        v-for="item in ListData"
+        :key="item.name"
+        :imgUrl="item.data.imgUrl"
+        :title="item.data.title"
+        :to="item.to"
+        variant="album"
+      >
         <h2 class="album-title">{{ item.data.albumTitle }}</h2>
-     </MusicCards>
+      </MusicCard>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import MusicCards from '@/components/MusicCards.vue';
-import { ref } from 'vue';
+import { ref } from 'vue'
 
-const ListData = ref(Array.from({ length: 50 }, (_, i) => {
-  const albumId = `album-${i + 1}`; // 唯一的ID
+const ListData = ref(
+  Array.from({ length: 50 }, (_, i) => {
+    const albumId = `album-${i + 1}` // 唯一的ID
 
-  return {
-    name: albumId,             // 用于 :key, 必须唯一
-    type: 'album',             // 统一类型为 'album'
+    return {
+      name: albumId, // 用于 :key, 必须唯一
+      type: 'album', // 统一类型为 'album'
 
-    // 路由指向 "List下的id页面"
-    to: { name: 'list-id', params: { id: albumId } },
+      // 路由指向 "List下的id页面"
+      to: { name: 'list-id', params: { id: albumId } },
 
-    // 'album' 类型所需的数据
-    data: {
-      // 使用 picsum.photos 并提供唯一的 seed 来获取 50 张不同的图片
-      imgUrl: `https://picsum.photos/seed/${albumId}/400/400`,
-      title: `专辑封面 ${i + 1}`,
-      albumTitle: `测试专辑 ${i + 1}`
+      // 'album' 类型所需的数据
+      data: {
+        // 使用 picsum.photos 并提供唯一的 seed 来获取 50 张不同的图片
+        imgUrl: `https://picsum.photos/seed/${albumId}/400/400`,
+        title: `专辑封面 ${i + 1}`,
+        albumTitle: `测试专辑 ${i + 1}`,
+      },
     }
-  };
-}));
+  }),
+)
 </script>
 
 <style lang="scss" scoped>
@@ -103,5 +104,4 @@ const ListData = ref(Array.from({ length: 50 }, (_, i) => {
     gap: 12px;
   }
 }
-
 </style>
