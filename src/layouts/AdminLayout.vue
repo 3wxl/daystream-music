@@ -59,11 +59,11 @@
               <IconFontSymbol name="yunyingguanli" class="mr-1"></IconFontSymbol>
               <span>运营管理</span>
             </template>
-            <el-menu-item index="5-1">
+            <el-menu-item index="5-1" @click="router.push('/admin/operationManage/hotList')">
               <IconFontSymbol name="resou" class="mr-1"></IconFontSymbol>
               <span>热搜列表</span>
             </el-menu-item>
-            <el-menu-item index="5-2">
+            <el-menu-item index="5-2" @click="router.push('/admin/operationManage/recommendManage')">
               <IconFontSymbol name="shouyetuijianwei" class="mr-1"></IconFontSymbol>
               <span>首页推荐位</span>
             </el-menu-item>
