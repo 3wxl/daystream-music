@@ -82,12 +82,27 @@ service.interceptors.response.use(
   },
 )
 // 请求函数
-const request = <T = unknown>(
+// 请求函数
+async function request<T = unknown>(
+  url: string,
+  method?: Method,
+  submitData?: Record<string, unknown>,
+  config?: RequestConfig<T> & { returnFullResponse?: false },
+): Promise<Data<T>>
+
+async function request<T = unknown>(
+  url: string,
+  method?: Method,
+  submitData?: Record<string, unknown>,
+  config?: RequestConfig<T> & { returnFullResponse: true },
+): Promise<AxiosResponse<Data<T>>>
+
+async function request<T = unknown>(
   url: string,
   method: Method = 'get',
   submitData?: Record<string, unknown> | undefined,
-  config?: RequestConfig<T>,
-): Promise<Data<T>> => {
+  config?: RequestConfig<T> & { returnFullResponse?: boolean },
+) {
   let loading: LoadingInstance | undefined
   if (config?.showLoading) {
     loading = ElLoading.service({
@@ -120,6 +135,9 @@ const request = <T = unknown>(
       }
 
       loading?.close()
+      if (config?.returnFullResponse) {
+        return res
+      }
       return res.data
     })
     .catch((err: AxiosError) => {

@@ -281,7 +281,7 @@ const handleLogin = async (formEl: FormInstance | undefined) => {
       userStore
         .login(LoginData)
         .then((res) => {
-          if (res.success === false) {
+          if (res.success == false) {
             const msg = res.errorMsg || '登录失败请重试'
             ElMessage.error(msg)
             // 登录失败，后端会销毁相关验证码，此时要换一个验证码
@@ -377,7 +377,7 @@ const insertUser = async (formEl: FormInstance | undefined) => {
     await formEl.validate()
     registerUser(registerForm)
       .then((res) => {
-        if (res.success === false) {
+        if (res.success == false) {
           const msg = res.errorMsg || '注册失败，请重试'
           ElMessage.error(msg)
           return

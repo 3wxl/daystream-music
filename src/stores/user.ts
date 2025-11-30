@@ -1,29 +1,36 @@
 import { LoginByemail } from '@/api/Auth/Login'
-import { getToken, setToken, removeToken } from '@/utils/request'
-import {defineStore} from 'pinia'
+import { getToken, removeToken, setToken } from '@/utils/request'
+import { defineStore } from 'pinia'
 
-export const useUserStore =defineStore('user',() => {
-
+export const useUserStore = defineStore('user', () => {
   const token = ref(getToken() || '')
-  const userInfo = ref([])
+  const userInfo = ref<any>({})
 
   const login = async (loginForm: any) => {
-    LoginByemail(loginForm).then((res) => {
-      const newToken = res.headers.get('Authorization')
-      const isRefreshed = res.headers.get('Token-Refreshed')
-      if (isRefreshed) {
-        token.value = newToken
-        setToken(newToken)
-        return res
-      }else{
-         const accessToken = res.data.token
-         if (accessToken) {
-           token.value = accessToken
-           setToken(accessToken)
-         }
-         return res
-      }
-    })
+    const res = await LoginByemail(loginForm)
+    const headers = res.headers || {}
+
+    const newToken = headers['authorization'] || headers['Authorization']
+    const isRefreshed = headers['token-refreshed'] || headers['Token-Refreshed']
+
+    let accessToken = ''
+
+    if (isRefreshed && newToken) {
+      accessToken = newToken
+    } else {
+      accessToken = res.data.token
+    }
+
+    if (accessToken) {
+      removeToken()
+      token.value = accessToken
+      setToken(accessToken)
+      // userInfo.value = res.data.userInfo
+    } else {
+      console.warn('登录成功但未获取到 Token')
+    }
+
+    return res
   }
 
   const logout = () => {
