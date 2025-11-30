@@ -282,10 +282,13 @@ const handleLogin = async (formEl: FormInstance | undefined) => {
         .login(LoginData)
         .then((res) => {
           if (res.success === false) {
-            ElMessage.error('登录失败，请重试')
+            const msg = res.errorMsg || '登录失败请重试'
+            ElMessage.error(msg)
             // 登录失败，后端会销毁相关验证码，此时要换一个验证码
             changeCaptcha()
             return
+          }else{
+            console.log('表单校验失败，请检查输入')
           }
           formEl.resetFields()
           ElMessage.success('登录成功')

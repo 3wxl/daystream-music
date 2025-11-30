@@ -13,10 +13,7 @@ export default defineConfig({
     tailwindcss(),
     // 2. 配置自动路由插件（放在 vue() 之前）
     Pages({
-      dirs: [
-        // 指定页面存放目录（与之前的 src/views 保持一致）
-        { dir: 'src/views', baseRoute: '' },
-      ],
+      dirs: 'src/views',
       // 可选：配置路由生成规则（如文件名是否转小写等）
       extendRoute(route) {
         // 示例：给所有路由添加 meta.title

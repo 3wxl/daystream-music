@@ -1,7 +1,9 @@
 <template>
   <section id="stats" class="lg:col-span-1">
-    <h3 class="text-white font-semibold text-lg mb-4">音乐统计</h3>
-
+    <div class="flex items-center">
+      <img src="../../assets/headphones-11207_256.gif" alt="" class="w-20" />
+      <h3 class="text-white font-semibold text-lg">音乐统计</h3>
+    </div>
     <div class="bg-dark/30 rounded-xl p-6 border border-gray-800">
       <h3 class="text-lg font-semibold mb-4">本周聆听时长</h3>
       <div class="h-64 mb-6">
@@ -155,7 +157,7 @@ const props = withDefaults(
 )
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 ::-webkit-scrollbar {
   width: 4px;
 }

@@ -176,7 +176,7 @@ const handleLike = (songId: number) => {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 ::v-deep .text-\[\#FF4D4F\] {
   text-shadow: 0 0 6px rgba(255, 77, 79, 0.4);
 }
