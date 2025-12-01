@@ -15,7 +15,5 @@ export interface LoginResult {
 }
 
 export function LoginByemail(data: LoginForm) {
-  return request<LoginResult>('/login/loginByemail', 'post', data as any, {
-    returnFullResponse: true,
-  })
+  return request<LoginResult>('/login/loginByemail', 'post', data as any)
 }

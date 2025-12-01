@@ -8,26 +8,17 @@ export const useUserStore = defineStore('user', () => {
 
   const login = async (loginForm: any) => {
     const res = await LoginByemail(loginForm)
-    const headers = res.headers || {}
+    console.log('登录响应:', res)
 
-    const newToken = headers['authorization'] || headers['Authorization']
-    const isRefreshed = headers['token-refreshed'] || headers['Token-Refreshed']
-
-    let accessToken = ''
-
-    if (isRefreshed && newToken) {
-      accessToken = newToken
-    } else {
-      accessToken = res.data.token
-    }
+    const accessToken = res.data?.token
 
     if (accessToken) {
-      removeToken()
-      token.value = accessToken
+      // 务必先更新 localStorage，因为 request.ts 依赖它
       setToken(accessToken)
-      // userInfo.value = res.data.userInfo
+      token.value = accessToken
+      console.log('Token 已更新:', accessToken)
     } else {
-      console.warn('登录成功但未获取到 Token')
+      console.error('登录成功但 Token 解析失败', res)
     }
 
     return res
