@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px]">
-    <!-- 头部标题 -->
     <header class="mb-3">
       <h1 class="text-[clamp(1.8rem,3vw,2.5rem)] font-bold text-gray-800 flex items-center gap-3">
         <IconFontSymbol name="lunbotuguanli" class="text-[#363636]" size="45px"></IconFontSymbol>
@@ -26,6 +25,15 @@
           <IconFontSymbol name="refresh" class="text-[#363636] mr-1"  size="15px" ></IconFontSymbol>
           刷新
         </el-button>
+        <el-button
+          type="default"
+          @click="isPreview = true"
+          class="bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all hover:text-blue-600 relative"
+        >
+          <IconFontSymbol name="print-view" class="text-[#363636] mr-1 relative top-[1px]" size="13px" ></IconFontSymbol>
+          预览
+        </el-button>
+        <BannerPreview v-model="isPreview" :bannerData="currentDisplayBanners"></BannerPreview>
       </div>
       <div class="w-[250px]">
         <AdminInput
@@ -49,7 +57,7 @@
       </div>
     </div>
 
-    <!-- 时间重叠可视化表格 -->
+    <!-- 轮播图列表 -->
     <div class="bg-white rounded-xl shadow-sm p-4 mb-6 border border-gray-100">
       <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
         <IconFontSymbol name="liebiao" ></IconFontSymbol>
@@ -112,12 +120,12 @@
       </div>
     </div>
 
-    <!-- 当前展示轮播图 -->
+    <!-- 当前展示的轮播图 -->
     <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 mb-6">
       <div class="p-4 border-b border-gray-100 flex justify-between items-center">
         <h2 class="text-lg font-semibold flex items-center gap-2">
-          <el-icon class="text-blue-500"><PlayCircleFilled /></el-icon>
-          当前展示的轮播图（共4个）
+          <IconFontSymbol name="gongzuotai-dongtaishenhe"></IconFontSymbol>
+          <span>当前展示的轮播图（共4个）</span>
         </h2>
         <span class="text-sm text-gray-500">更新时间: {{ formatDate(currentDisplayUpdateTime) }}</span>
       </div>
@@ -159,8 +167,8 @@
     <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
       <div class="p-4 border-b border-gray-100 flex justify-between items-center">
         <h2 class="text-lg font-semibold flex items-center gap-2">
-          <el-icon class="text-blue-500"><Grid /></el-icon>
-          所有轮播图
+          <IconFontSymbol name="sandian"></IconFontSymbol>
+          <span>所有轮播图</span>
         </h2>
         <span class="text-sm text-gray-500">共 {{ banners.length }} 张轮播图（1张默认 + {{ banners.length - 1 }} 张自定义）</span>
       </div>
@@ -510,6 +518,7 @@
 <script setup>
 import AdminInput from '@/components/admin/AdminInput.vue';
 import AdminConfirm from '@/components/admin/AdminConfirm.vue';
+import BannerPreview from '@/components/admin/OperationManage/BannerPreview.vue';
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { ElMessage, ElEmpty, ElTag, ElTooltip, ElTable, ElTableColumn , ElOption } from 'element-plus';
 import {
@@ -613,9 +622,10 @@ const searchKeyword = ref('');      // 搜索关键字
 const isDialogOpen = ref(false);        // 弹窗状态
 const isDeleteDialogOpen = ref(false);  // 删除弹窗状态
 const isActionDrawerOpen = ref(false);    // 动作抽屉状态
-const isEditMode = ref(false);      // 编辑模式状态
+const isEditMode = ref(false);        // 是否激活编辑弹窗
 const isSubmitting = ref(false);      // 提交状态
 const isDeleting = ref(false);        // 删除状态
+const isPreview = ref(false);         // 是否预览
 const deleteId = ref(null);           // 待删除的轮播图ID
 const formRef = ref(null);            // 表单引用
 const uploadFileList = ref([]);       // 上传文件列表

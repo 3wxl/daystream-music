@@ -52,7 +52,7 @@ const props = defineProps({
   },
   iconName: {
     type: String,
-    required: true
+    required: false
   },
   iconColor: {
     type: String,
@@ -66,7 +66,7 @@ const props = defineProps({
   },
   title: {
     type: String,
-    required: true
+    required: false
   },
   isCustom: {
     type: Boolean,

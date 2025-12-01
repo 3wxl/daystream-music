@@ -1,8 +1,8 @@
 <template>
   <!-- 作用：后台的layout -->
-  <el-container class="admin-container">
+  <el-container class="admin-container relative" >
     <el-aside width="220px">
-      <el-scrollbar height="100vh" class="bg-linear-to-tr from-[#2b4c60] to-[#645078] shadow-xl/20 shadow-[#A070EE]">
+      <el-scrollbar height="100vh" class="bg-linear-to-tr from-[#2b4c60] to-[#645078] shadow-xl/20 shadow-[#A070EE] fixed top-0">
       <!-- bg-linear-to-tr from-[#58768a] to-[#544464] shadow-xl/20 shadow-[#A070EE] -->
       <!-- bg-linear-to-tr from-[#517185] to-[#8b62b6] shadow-xl/20 shadow-[#A070EE] -->
         <div class="w-full my-4">
