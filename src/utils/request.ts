@@ -42,6 +42,7 @@ interface RequestConfig<T = unknown> extends AxiosRequestConfig {
   }
   showLoading?: boolean
   returnFullResponse?: boolean
+  noToken?: boolean
 }
 
 const service = axios.create({
@@ -51,9 +52,9 @@ const service = axios.create({
 
 // 请求拦截器
 service.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  (config: InternalAxiosRequestConfig & { noToken?: boolean }) => {
     const token = getToken()
-    if (token) {
+    if (token && !config.noToken) {
       config.headers = config.headers || {}
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -71,13 +72,13 @@ service.interceptors.response.use(
     const headers = response.headers
     const newToken = headers['authorization'] || headers['Authorization']
     const isRefreshed = headers['token-refreshed'] || headers['Token-Refreshed']
-    if(newToken && isRefreshed){
+    if (newToken && isRefreshed) {
       setToken(newToken)
     }
 
     const res = response.data
 
-    if(res.success === false){
+    if (res.success === false) {
       const msg = res.errorMsg || '请求失败'
       ElMessage.error(msg)
       return Promise.reject(new Error(msg))
@@ -88,17 +89,17 @@ service.interceptors.response.use(
     console.error('响应错误：', error)
     let msg = '网络异常'
 
-    if(error.response) {
+    if (error.response) {
       const status = error.response.status
-      if(status === 401){
+      if (status === 401) {
         removeToken()
         ElMessage.error('登录已过期，请重新登录')
         window.location.href = '/UserAuth'
         return Promise.reject(error)
       }
-      if(status === 404) msg = '接口不存在'
-      if(status === 500) msg = '服务器错误'
-    }else if (error.message.includes('timeout')){
+      if (status === 404) msg = '接口不存在'
+      if (status === 500) msg = '服务器错误'
+    } else if (error.message.includes('timeout')) {
       msg = '请求超时'
     }
     ElMessage.error(msg)
