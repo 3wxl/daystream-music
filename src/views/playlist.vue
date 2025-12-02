@@ -1,7 +1,10 @@
 <template>
   <div class="h-full flex flex-col overflow-hidden">
     <div class="shrink-0 overflow-x-auto overflow-y-hidden tag-bar-container">
-      <MultiBar v-model="filterValue" :filter-groups="filterGroups" />
+      <MultiBar 
+      v-model="filterValue" 
+      :filter-groups="filterGroups" 
+      />
     </div>
 
     <div class="flex-1 min-h-0 overflow-y-auto">
@@ -11,11 +14,12 @@
 </template>
 
 <script lang="ts" setup>
-import MultiBar from '@/components/MultiBar.vue'
-import { ref,onMounted } from 'vue'
 import { getAllTags } from '@/api/playlist/AllTag'
+import MultiBar from '@/components/MultiBar.vue'
 import { transformFilterGroups } from '@/utils/transformFilterGroups'
 import { ElMessage } from 'element-plus'
+import { provide, onMounted, ref } from 'vue'
+
 
 const filterValue = ref({
   area: '',
@@ -26,15 +30,20 @@ const filterValue = ref({
 let filterGroups = ref()
 
 onMounted(() => {
-  getAllTags().then(res => {
-    if(!res.data) return 
-    const tags = transformFilterGroups(res.data)
-    console.log(tags)
-    filterGroups.value = tags
-  }).catch(err => {
-    ElMessage.error(err.message)
-  })
+  getAllTags()
+    .then((res) => {
+      if (!res.data) return
+      const tags = transformFilterGroups(res.data)
+      filterGroups.value = tags
+    })
+    .catch((err) => {
+      ElMessage.error(err.message)
+    })
 })
+
+
+provide('globalFilterValue',filterValue)
+
 
 // const filterGroups = [
 //   {

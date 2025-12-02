@@ -7,7 +7,7 @@ export interface CaptchaResult {
 }
 
 export function getCaptcha() {
-  return request<CaptchaResult>('/login/getCaptcha', 'get')
+  return request<CaptchaResult>('/login/getCaptcha', 'get', undefined, { noToken: true })
 }
 
 export interface LoginResult {
@@ -15,5 +15,9 @@ export interface LoginResult {
 }
 
 export function LoginByemail(data: LoginForm) {
-  return request<LoginResult>('/login/loginByemail', 'post', data as any)
+  return request<LoginResult>(
+    '/login/loginByemail',
+     'post', data as any,
+      { noToken: true }
+    )
 }

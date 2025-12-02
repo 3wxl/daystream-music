@@ -366,7 +366,7 @@ const insertUser = async (formEl: FormInstance | undefined) => {
   try {
     await formEl.validate()
     registerUser(registerForm)
-      .then((res) => {
+      .then(() => {
         formEl.resetFields()
         ElMessage.success('注册成功，请登录')
         currentView.value = 'login'
@@ -429,7 +429,7 @@ const handleResetPassword = async (formEl: FormInstance | undefined) => {
   await formEl.validate((valid) => {
     if (valid) {
       setNewpassword(forgotForm)
-        .then((res) => {
+        .then(() => {
           formEl.resetFields()
           ElMessage.success('设置密码成功，请登录')
           currentView.value = 'login'
