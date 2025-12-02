@@ -77,7 +77,6 @@
   import { useRouter } from 'vue-router';
   import communityDisplay from '../../components/community/CommunityDisplay.vue'
   import {getDynamicList} from '@/api/community/GetDynamicList'
-import { on } from 'events';
   let input = ref('')
   let musicians = reactive([
     {
@@ -180,131 +179,28 @@ import { on } from 'events';
     },
   ])
   let dymamicList = reactive([
-    {
-      authorId:'1',
-      avatar:'../../../public/头像.png',
-      author:'白昼音流👑',
-      time:'11-19 17:30',
-      identity:'轻音乐领域创作者',
-      title:'我是一个普普通通的标题',
-      content:`
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          #四个大人喜人第四赛段第一#
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          感谢大家抬爱啊啊啊啊啊！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          [泪][泪][泪][努力][努力][努力]好开心！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          我们一定会继续努力的！！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          冲啊！！！！！！！！！！！！！！！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          #喜人奇妙夜# ​
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          ......
-        </p>
-        <p>
-          <img src="http://39.96.214.163:9000/file/70567a01-09d0-443b-9d8a-bab6e5623967.png" alt="">
-        </p>
-        <p>
-          <img src="../../../public/头像.png" alt="">
-        </p>
-      `
-    },
-    {
-      authorId:'1',
-      avatar:'../../../public/头像.png',
-      author:'白昼音流👑',
-      time:'11-19 17:30',
-      identity:'轻音乐领域创作者',
-      title:'我是一个普普通通的标题',
-      content:`
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          #四个大人喜人第四赛段第一#
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          感谢大家抬爱啊啊啊啊啊！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          [泪][泪][泪][努力][努力][努力]好开心！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          我们一定会继续努力的！！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          冲啊！！！！！！！！！！！！！！！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          #喜人奇妙夜# ​
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          ......
-        </p>
-        <p>
-          <img src="http://39.96.214.163:9000/file/70567a01-09d0-443b-9d8a-bab6e5623967.png" alt="">
-        </p>
-        <p>
-          <img src="../../../public/头像.png" alt="">
-        </p>
-      `
-    },
-    {
-      authorId:'1',
-      avatar:'../../../public/头像.png',
-      author:'白昼音流👑',
-      time:'11-19 17:30',
-      identity:'轻音乐领域创作者',
-      title:'我是一个普普通通的标题',
-      content:`
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          #四个大人喜人第四赛段第一#
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          感谢大家抬爱啊啊啊啊啊！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          [泪][泪][泪][努力][努力][努力]好开心！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          我们一定会继续努力的！！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          冲啊！！！！！！！！！！！！！！！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          #喜人奇妙夜# ​
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          ......
-        </p>
-        <p>
-          <img src="http://39.96.214.163:9000/file/70567a01-09d0-443b-9d8a-bab6e5623967.png" alt="">
-        </p>
-        <p>
-          <img src="../../../public/头像.png" alt="">
-        </p>
-      `
-    },
   ])
   let activedId = ref(0)
   let router = useRouter()
 
-  let submitData = reactive({
+  let submitData = reactive({     // 获取动态列表的参数
     "userId": null,
     "keyword": input,
     "lastId": null,
     "pageSize": 10
   })
+  let hasMore = ref(true)     // 是否还有更多数据
   // 方法
   async function getDynamic() {
-    let dynamicList = await getDynamicList(submitData)
-    console.log(dynamicList)
+    if(hasMore){
+      let dynamicList = await getDynamicList(submitData)
+      console.log(dynamicList)
+      hasMore = dynamicList.data.hasMore
+      submitData.lastId = dynamicList.data.lastId
+      for(let i = 0; i < dynamicList.data.dateList.length; i++){
+        dymamicList.push(dynamicList.data.dateList[i])
+      }
+    }
   }
 
   onMounted(() => {

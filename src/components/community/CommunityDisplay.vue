@@ -7,21 +7,21 @@
           <div class="group-hover:opacity-100 opacity-0 cursor-pointer duration-[.2s] w-full h-full rounded-[50%] bg-[rgba(0,0,0,.1)] absolute top-0 left-0"></div>
         </div>
         <div class="flex flex-col ml-4">
-          <span class="font-bold text-[17px] text-white cursor-pointer hover:text-pink-400 mt-1">{{author}}</span>
+          <span class="font-bold text-[17px] text-white cursor-pointer hover:text-pink-400 mt-1">{{userName}}</span>
           <div class="mt-2 text-[12px] text-[#e5e7eb]">
-            <span class="mr-2">{{time}}</span>
-            <span>{{identity}}</span>
+            <span class="mr-2">{{createTime}}</span>
+            <span>{{introduction}}</span>
           </div>
         </div>
       </div>
       <div class="mt-[10px] mr-4">
-        <span class="text-[#cfcfcf] text-[14px] border-[1.3px] border-[#e5e7eb] rounded-[16px] hover:bg-[rgba(255,255,255,.1)] px-2 py-1 cursor-pointer">
+        <span v-show="!isFollow" class="text-[#cfcfcf] text-[14px] border-[1.3px] border-[#e5e7eb] rounded-[16px] hover:bg-[rgba(255,255,255,.1)] px-2 py-1 cursor-pointer">
           <IconFontSymbol name="tianjia" size="14px"></IconFontSymbol>
           关注
         </span>
-        <!-- <span class="text-[#cfcfcf] text-[14px] border-[1.3px] border-[#e5e7eb] rounded-[16px] hover:bg-[rgba(255,255,255,.1)] px-2 py-1 cursor-pointer">
+        <span v-show="isFollow" class="text-[#cfcfcf] text-[14px] border-[1.3px] border-[#e5e7eb] rounded-[16px] hover:bg-[rgba(255,255,255,.1)] px-2 py-1 cursor-pointer">
           已关注
-        </span> -->
+        </span>
       </div>
     </div>
     <div class="pl-[30px] font-[700] text-[24px] mt-[20px] text-white cursor-pointer hover:text-pink-400 duration-[0.2s]" @click="router.push('/community/communityDetail')">
@@ -48,18 +48,18 @@
         >
           <IconFontSymbol name="chakantiezihuifu" class="text-white font-[700] group-hover:text-pink-400" size="20px"></IconFontSymbol>
         </el-tooltip>
-        <span class="text-[white] text-[14px] ml-1 group-hover:text-pink-400">11050</span>
+        <span class="text-[white] text-[14px] ml-1 group-hover:text-pink-400">{{commentCount}}</span>
       </span>
-      <span class="cursor-pointer group">
+      <span class="cursor-pointer group" >
         <el-tooltip
           class="box-item"
           effect="dark"
           content="点赞"
           placement="bottom"
-        >
-          <IconFontSymbol name="icon" class="text-white group-hover:text-pink-400" size="20px"></IconFontSymbol>
+        ><!--:style="`color:${isLike?'#DE5DA8':'white'}`"-->
+          <IconFontSymbol name="icon" class="group-hover:text-pink-400" :class="isLike?'text-pink-400':'text-white'"  @click="isLike=!isLike" size="20px"></IconFontSymbol>
         </el-tooltip>
-        <span class="text-[white] text-[14px] ml-1 group-hover:text-pink-400">11050</span>
+        <span class="text-[14px] ml-1 group-hover:text-pink-400" :class="isLike?'text-pink-400':'text-white'" @click="isLike=!isLike" >{{likeCount}}</span>
       </span>
     </div>
   </div>
@@ -73,17 +73,22 @@
       type: Object,
       required: true,
       default: () => ({
-        authorId: '',
+        userId: '',
         avatar: '',
-        author: '',
-        time: '',
-        identity: '',
+        userName: '',
+        createTime: '',
+        introduction: '',
         title: '',
-        content: ''
+        content: '',
+        commentCount: 0,
+        likeCount: 0,
+        isLike: false,
+        isFollow:false
       })
     }
   })
-  let {authorId, avatar, author, time, identity, title, content} = props.dynamic;
+  let {content} = props.dynamic
+  let {userId, avatar, userName, createTime, introduction, title,commentCount,likeCount,isLike,isFollow} = toRefs(props.dynamic);
   function extractImgSrcByReg(html) {     // 这里是获取一个hmtl片段里面的图片的src组成的数组
     if (!html || typeof html !== 'string') return [];
     const imgSrcReg = /<img[^>]+src\s*=\s*["']([^"']*)["'][^>]*>/gi;

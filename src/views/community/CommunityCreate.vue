@@ -102,40 +102,62 @@
   import Editor from '@tinymce/tinymce-vue';
   import { useRouter } from 'vue-router'
   import { ref } from 'vue'
+  import {updateImage} from '@/api/community/updateImage'
+  import {DeleteImage} from '@/api/community/DeleteImage'
   let router = useRouter()
   // 双向绑定
   const editorContent = ref('请输入内容（支持图片上传）')
   let title = ref('')
-  // 绑定ref
+
   const tinyRef = ref(null)
+  const uploadedImages = reactive([])      // 上传的图片列表
+  let usedImages = reactive([])       // 使用的图片列表
   const editorInit = {
     skin: 'oxide-dark',
-    height: '100%',      // 编辑区高度（单位：px）
-    width: '100%',    // 宽度（默认100%，可写固定值如 800）
-    menubar: false,    // 是否显示顶部菜单栏（文件、编辑、格式等，默认true）
-    statusbar: false,  // 是否显示底部状态栏（字数统计、缩放等，默认true）
+    height: '100%',
+    width: '100%',
+    menubar: false,
+    statusbar: false,
 
-    // 自定义工具栏（按需求排序/隐藏按钮，用 | 分组）
     toolbar: [
       'undo redo | formatselect | bold italic | fontsize forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
     ],
-
      plugins:
       'advlist autolink lists link image advimage imagetools charmap print preview anchor searchreplace visualblocks code fullscreen insertdatetime media table paste code help wordcount fontsize',
 
-    // 粘贴配置：保留 Word 格式（核心需求）
-    paste_as_text: false,  // 不强制转为纯文本（默认false）
+    paste_as_text: false,
     paste_preprocess: (plugin, args) => {
-      // 预处理粘贴内容：清除 Word 自带的多余样式（可选优化）
       let content = args.content
-      content = content.replace(/<style[\s\S]*?<\/style>/gi, '')  // 移除内嵌样式
-      content = content.replace(/<xml>[\s\S]*?<\/xml>/gi, '')      // 移除 XML 标签
+      content = content.replace(/<style[\s\S]*?<\/style>/gi, '')
+      content = content.replace(/<xml>[\s\S]*?<\/xml>/gi, '')
       args.content = content
     },
 
-    // 图片上传基础配置（后续详解自定义上传）
-    images_upload_url: '/api/upload/image',  // 后端上传接口（临时占位）
-    images_file_types: 'jpeg,jpg,png,gif,webp',  // 允许的图片格式
+    file_picker_callback: async (callback, value, meta) => {
+    if (meta.filetype === 'image') {
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = 'image/*'
+      input.onchange = async (e) => {
+        const file = e.target.files[0]
+        if (!file) return
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('type', 'image')
+        try {
+          const res = await updateImage(formData)
+          const data = res
+          if (data.success && data.data) {
+            uploadedImages.push(data.data)
+            callback(data.data, { alt: file.name })
+          }
+        } catch (err) {
+          console.error('图片上传失败：', err)
+        }
+      }
+      input.click()
+    }
+  },
     images_max_file_size: '5MB',  // 最大文件大小（默认2MB）
     images_upload_credentials: true,  // 上传时携带 Cookie/Token（跨域时需开启）
     content_style: `
@@ -211,14 +233,45 @@
       }
     `
   }
-  const getContent = () => {
+  const getContent = () => {      // 获取编辑器内容
     return editorContent.value
   }
-  const getContent2 = () => {
+  const getContent2 = () => {     // 获取编辑器内容，并去除html标签
     return editorContent.value.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
   }
-
-
+  function extractImgSrcByReg(html) {     // 这里是获取一个hmtl片段里面的图片的src组成的数组
+    if (!html || typeof html !== 'string') return [];
+    const imgSrcReg = /<img[^>]+src\s*=\s*["']([^"']*)["'][^>]*>/gi;
+    const srcList = [];
+    let match;
+    let count = 0;
+    while ((match = imgSrcReg.exec(html)) !== null && count < 5) {
+      const src = match[1];
+      if (src) {
+        srcList.push(src);
+        count++;
+      }
+    }
+    return [...new Set(srcList)];
+  }
+  onBeforeUnmount(async () => {
+    usedImages = extractImgSrcByReg(getContent())
+    const deleteImages = uploadedImages.filter(item => !usedImages.includes(item))
+    if (deleteImages.length === 0) return
+    const deletePromises = deleteImages.map(imgUrl => DeleteImage(imgUrl))
+    try {
+      const results = await Promise.all(deletePromises)
+      results.forEach((res, index) => {
+        if (!res.success) {
+          console.log('图片删除失败:', deleteImages[index])
+        } else {
+          console.log('图片删除成功:', deleteImages[index])
+        }
+      })
+    } catch (error) {
+      console.log('批量删除图片时发生错误:', error)
+    }
+  })
   // 文章数据
   let titleNum = ref(0)
   let titleInput = ref(null)

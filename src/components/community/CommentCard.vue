@@ -1,16 +1,16 @@
 <template>
   <div class="flex gap-4 items-start mb-8">
     <div>
-      <img :src="avatar" alt="我的头像" class="w-[44px] h-[44px] rounded-[38px] ml-2 flex-shrink-0 cursor-pointer" :id="authorId">
+      <img :src="avatar" alt="我的头像" class="w-[44px] h-[44px] rounded-[38px] ml-2 flex-shrink-0 cursor-pointer" :id="userId">
     </div>
     <div style="width:calc(100% - 60px)">
       <div class="flex justify-between">
-        <p class="font-bold text-[17px] text-white cursor-pointer hover:text-pink-400 mt-[6px]">{{ author }}</p>
+        <p class="font-bold text-[17px] text-white cursor-pointer hover:text-pink-400 mt-[6px]">{{ userName }}</p>
         <span class="text-[#e5e7eb] mr-1 cursor-pointer hover:text-pink-500" v-if="!isLike">
-          {{ linkCount }} <IconFontSymbol name="icon" size="17px"></IconFontSymbol>
+          {{ likeCount }} <IconFontSymbol name="icon" size="17px"></IconFontSymbol>
         </span>
         <span class="text-[#e5e7eb] mr-1 cursor-pointer text-pink-500" v-if="isLike">
-          {{ linkCount }} <IconFontSymbol name="icon" size="17px"></IconFontSymbol>
+          {{ likeCount }} <IconFontSymbol name="icon" size="17px"></IconFontSymbol>
         </span>
       </div>
       <div class="mt-[14px]">
@@ -22,7 +22,7 @@
         <span>{{ time }}</span>
       </div>
       <div class="mt-1 text-[#a7a7a7] text-[14px] cursor-pointer" @click="isSpradSonComment = !isSpradSonComment">
-        共 {{ SonCommentCount }} 条回复,点击展开
+        共 {{ commentCount }} 条回复,点击展开
       </div>
       <transition name="el-zoom-in-top">
         <div class="text-white mt-3" v-show="isSpradSonComment">
@@ -110,20 +110,19 @@
       type: Object,
       required: true,
       default: () => ({
-        authorId:'1',
-        commentId:'1',
+        userId:'1',
         avatar: '../../../public/头像.png',
-        author: '白昼音流👑',
-        linkCount: 0,
+        userName: '白昼音流👑',
+        likeCount: 0,
         replyCount: 0,
         time: '1小时前',
         content: '希望湾湾早日回归祖国怀抱😀',
-        SonCommentCount: 15,
+        commentCount: 15,
         isLike:false
       })
     }
   })
-  let {authorId,commentId,avatar,author,linkCount,replyCount,time,content,isLike,SonCommentCount} = props.commentObj;
+  let {userId,avatar,userName,likeCount,replyCount,time,content,isLike,commentCount} = props.commentObj;
   let isSpradSonComment = ref(false);   // 是否展开子评论
   let isSpradInput = ref(false);        // 是否展开回复输入框
   let commentWords = ref(0);    // 你的输入评论字数
