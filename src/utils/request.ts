@@ -56,7 +56,7 @@ service.interceptors.request.use(
     const token = getToken()
     if (token && !config.noToken) {
       config.headers = config.headers || {}
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers.Authorization = `${token}`
     }
     return config
   },

@@ -107,4 +107,7 @@ declare module 'vue' {
     UserHeader: typeof import('./components/user/UserHeader.vue')['default']
     UserNumDataCard: typeof import('./components/admin/dataStatistics/UserNumDataCard.vue')['default']
   }
+  export interface GlobalDirectives {
+    vInfiniteScroll: typeof import('element-plus/es')['ElInfiniteScroll']
+  }
 }
