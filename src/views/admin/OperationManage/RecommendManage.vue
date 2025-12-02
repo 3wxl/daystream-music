@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px]">
+  <div class="shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px]">
     <!-- 推荐歌曲管理 -->
     <RecommendSongs />
     <!-- 推荐歌单管理 -->

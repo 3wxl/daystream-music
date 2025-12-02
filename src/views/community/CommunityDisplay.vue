@@ -30,99 +30,6 @@
       <el-main>
         <div class="ml-5 flex relative items-start overflow-y-auto" style="height: calc(100vh - 174px)">
           <div class="flex-grow-0 shrink-0 basis-[67%]">
-            <!-- <div class="mb-4 duration-[.2s] bg-gray-900/60 rounded-xl border border-gray-800 overflow-hidden shadow-lg backdrop-blur-sm w-240 p-[15px]">
-              <div class="flex justify-between">
-                <div class="flex">
-                  <div class="w-[60px] h-[60px] rounded-[50%] relative group">
-                    <el-avatar src="../../public/头像.png" :size="60"></el-avatar>
-                    <div class="group-hover:opacity-100 opacity-0 cursor-pointer duration-[.2s] w-full h-full rounded-[50%] bg-[rgba(0,0,0,.1)] absolute top-0 left-0"></div>
-                  </div>
-                  <div class="flex flex-col ml-4">
-                    <span class="font-bold text-[17px] text-white cursor-pointer hover:text-pink-400 mt-1">白昼音流👑</span>
-                    <div class="mt-2 text-[12px] text-[#e5e7eb]">
-                      <span class="mr-2">11-19 17:30</span>
-                      <span>轻音乐领域创作者</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="mt-[10px] mr-4">
-                  <span class="text-[#cfcfcf] text-[14px] border-[1.3px] border-[#e5e7eb] rounded-[16px] hover:bg-[rgba(255,255,255,.1)] px-2 py-1 cursor-pointer">
-                    <IconFontSymbol name="tianjia" size="14px"></IconFontSymbol>
-                    关注
-                  </span>
-                  <span class="text-[#cfcfcf] text-[14px] border-[1.3px] border-[#e5e7eb] rounded-[16px] hover:bg-[rgba(255,255,255,.1)] px-2 py-1 cursor-pointer">
-                    已关注
-                  </span>
-                </div>
-              </div>
-              <div class="pl-[30px] font-[700] text-[24px] mt-[20px] text-white cursor-pointer hover:text-pink-400 duration-[0.2s]" @click="router.push('/community/communityDetail')">
-                我是一个普普通通的标题
-              </div>
-              <div class="mt-[8px] text-white cursor-pointer hover:text-pink-400 duration-[0.2s]" @click="router.push('/community/communityDetail')">
-                <p class="indent-[2em] break-words break-all text-[15px]">
-                  #四个大人喜人第四赛段第一#
-                </p>
-                <p class="indent-[2em] break-words break-all text-[15px]">
-                  感谢大家抬爱啊啊啊啊啊！
-                </p>
-                <p class="indent-[2em] break-words break-all text-[15px]">
-                  [泪][泪][泪][努力][努力][努力]好开心！
-                </p>
-                <p class="indent-[2em] break-words break-all text-[15px]">
-                  我们一定会继续努力的！！
-                </p>
-                <p class="indent-[2em] break-words break-all text-[15px]">
-                  冲啊！！！！！！！！！！！！！！！
-                </p>
-                <p class="indent-[2em] break-words break-all text-[15px]">
-                  #喜人奇妙夜# ​
-                </p>
-                <p class="indent-[2em] break-words break-all text-[15px]">
-                  ......
-                </p>
-              </div>
-              <div class="flex gap-4 px-6 flex-wrap mt-2 mb-3">
-                <div class="w-[16%] h-[16%] rounded-[10px] overflow-hidden">
-                  <img src="../../../public/头像.png" alt="" @click="router.push('/community/communityDetail')" class="cursor-pointer duration-[0.5s] w-full h-full rounded-[10px] hover:scale-[1.1]">
-                </div>
-                <div class="w-[16%] h-[16%] rounded-[10px] overflow-hidden">
-                  <img src="../../../public/头像.png" alt="" @click="router.push('/community/communityDetail')" class="cursor-pointer duration-[0.5s] w-full h-full rounded-[10px] hover:scale-[1.1]">
-                </div>
-                <div class="w-[16%] h-[16%] rounded-[10px] overflow-hidden">
-                  <img src="../../../public/头像.png" alt="" @click="router.push('/community/communityDetail')" class="cursor-pointer duration-[0.5s] w-full h-full rounded-[10px] hover:scale-[1.1]">
-                </div>
-                <div class="w-[16%] h-[16%] rounded-[10px] overflow-hidden">
-                  <img src="../../../public/头像.png" alt="" @click="router.push('/community/communityDetail')" class="cursor-pointer duration-[0.5s] w-full h-full rounded-[10px] hover:scale-[1.1]">
-                </div>
-                <div class="w-[16%] h-[16%] rounded-[10px] overflow-hidden">
-                  <img src="../../../public/头像.png" alt="" @click="router.push('/community/communityDetail')" class="cursor-pointer duration-[0.5s] w-full h-full rounded-[10px] hover:scale-[1.1]">
-                </div>
-              </div>
-              <div class="px-10 pt-3 flex justify-end">
-                <span class="mr-10 cursor-pointer group" @click="router.push('/community/communityDetail')">
-                  <el-tooltip
-                    class="box-item"
-                    effect="dark"
-                    content="评论"
-                    placement="bottom"
-                  >
-                    <IconFontSymbol name="chakantiezihuifu" class="text-white font-[700] group-hover:text-pink-400" size="20px"></IconFontSymbol>
-                  </el-tooltip>
-                  <span class="text-[white] text-[14px] ml-1 group-hover:text-pink-400">11050</span>
-                </span>
-                <span class="cursor-pointer group">
-                  <el-tooltip
-                    class="box-item"
-                    effect="dark"
-                    content="点赞"
-                    placement="bottom"
-                  >
-                    <IconFontSymbol name="icon" class="text-white group-hover:text-pink-400" size="20px"></IconFontSymbol>
-                  </el-tooltip>
-                  <span class="text-[white] text-[14px] ml-1 group-hover:text-pink-400">11050</span>
-                </span>
-              </div>
-            </div> -->
             <community-display v-for="(dynamic, index) in dymamicList" :key="index" :dynamic="dynamic"></community-display>
           </div>
           <div class="flex-grow-0 shrink-0 basis-[28%] ml-10 duration-[.2s] bg-gray-900/60 rounded-xl border border-gray-800 overflow-hidden shadow-lg backdrop-blur-sm w-100 p-[15px] sticky top-0 self-start">
@@ -169,6 +76,8 @@
   import { Search } from '@element-plus/icons-vue';
   import { useRouter } from 'vue-router';
   import communityDisplay from '../../components/community/CommunityDisplay.vue'
+  import {getDynamicList} from '@/api/community/GetDynamicList'
+import { on } from 'events';
   let input = ref('')
   let musicians = reactive([
     {
@@ -385,6 +294,22 @@
   ])
   let activedId = ref(0)
   let router = useRouter()
+
+  let submitData = reactive({
+    "userId": null,
+    "keyword": input,
+    "lastId": null,
+    "pageSize": 10
+  })
+  // 方法
+  async function getDynamic() {
+    let dynamicList = await getDynamicList(submitData)
+    console.log(dynamicList)
+  }
+
+  onMounted(() => {
+    getDynamic()
+  })
 </script>
 
 <style scoped lang="scss">

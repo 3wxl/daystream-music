@@ -2,7 +2,7 @@
   <!-- 动态页详情 -->
   <div class="bg-gradient-to-b from-gray-900 to-gray-950 w-full min-h-full p-5">
     <div class="ml-5 flex items-start">
-      <div class="mb-4 duration-[.2s] bg-gray-900/60 rounded-xl border border-gray-800 overflow-hidden shadow-lg backdrop-blur-sm w-240 py-[15px] px-[30px]">
+      <div class="flex-grow-0 shrink-0 basis-[67%] mb-4 duration-[.2s] bg-gray-900/60 rounded-xl border border-gray-800 overflow-hidden shadow-lg backdrop-blur-sm w-240 py-[15px] px-[30px]">
         <div class="">
           <h1 class="text-[#e5e7eb] font-[600] text-[36px]">我是一个普普通通的标题</h1>
           <div class="my-3">
@@ -87,7 +87,7 @@
           </div>
         </div>
       </div>
-      <div class=" ml-10 mb-4 duration-[.2s] bg-gray-900/60 rounded-xl border border-gray-800 overflow-hidden shadow-lg backdrop-blur-sm w-100 p-[15px]">
+      <div class="flex-grow-0 shrink-0 basis-[28%] ml-10 mb-4 duration-[.2s] bg-gray-900/60 rounded-xl border border-gray-800 overflow-hidden shadow-lg backdrop-blur-sm w-100 p-[15px]">
         <!-- 右侧作者栏 -->
         <div class="flex flex-col items-center">
           <div class="w-30 h-30 md:w-30 md:h-30 rounded-full border-4 border-white/20 overflow-hidden shadow-lg">

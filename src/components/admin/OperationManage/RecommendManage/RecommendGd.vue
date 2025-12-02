@@ -22,7 +22,7 @@
     </div>
   </div>
   <el-drawer
-    title="点击行为设置"
+    title="推荐歌单选择"
     v-model="isActionDrawerOpen"
     direction="rtl"
     size="50%"
@@ -45,7 +45,7 @@
               :height="600"
               @row-click="selectGd"
               stripe
-              class=""
+              :row-class-name="(row) => row.row.id === selectedPlaylist.id ? 'bg-blue-50' : ''"
             >
               <el-table-column label="歌单名称" prop="name" width="200"/>
               <el-table-column label="歌曲数量" prop="songCount" width="100" />
@@ -64,15 +64,20 @@
         </div>
       </div>
       <!-- 底部按钮 -->
-      <div class="mt-4 flex justify-end gap-3">
-        <el-button @click="isActionDrawerOpen = false">取消</el-button>
-        <el-button
-          type="primary"
-          @click="confirmActionSetting"
-          class="bg-blue-500 hover:bg-blue-600 text-white"
-        >
-          确认选择
-        </el-button>
+      <div class="mt-4 flex justify-between gap-3">
+        <div class="text-[15px] text-[#666]">
+          当前选择歌单：{{ selectedPlaylist.name }}
+        </div>
+        <div>
+          <el-button @click="isActionDrawerOpen = false">取消</el-button>
+          <el-button
+            type="primary"
+            @click="confirmActionSetting"
+            class="bg-blue-500 hover:bg-blue-600 text-white"
+          >
+            确认选择
+          </el-button>
+        </div>
       </div>
     </div>
   </el-drawer>
@@ -97,13 +102,21 @@
       singerName: string;
     };
   }
+  interface selectedPlaylistInterface {
+    id: string;
+    name: string;
+    songCount: string;
+    createTime: string;
+    description: string;
+    singerName: string;
+  }
 
   // 数据
   let isActionDrawerOpen = ref(false);      // 是否打开选择歌单的抽屉
   let playlistSearchKeyword = ref('')       // 歌单搜索关键字
   let nowGdId = ref('')
-  let selectedPlaylist = reactive({});
-  const mockPlaylists = reactive([
+  let selectedPlaylist = reactive<selectedPlaylistInterface>({});
+  const mockPlaylists = reactive([      // 静态可选歌单数据
     { id: 1, name: '华语流行精选', songCount: 30, createTime: '2025-10-01', description: '汇集当下最热门的华语流行歌曲',singerName: '林俊杰' },
     { id: 2, name: '经典老歌回顾', songCount: 45, createTime: '2025-09-15', description: '那些年我们一起听过的经典老歌',singerName: '林俊杰' },
     { id: 3, name: '轻音乐合集', songCount: 28, createTime: '2025-09-20', description: '放松心情的纯音乐精选',singerName: '林俊杰' },
@@ -121,7 +134,7 @@
       playlist.description.toLowerCase().includes(keyword)
     );
   });
-  let musicData = reactive<musicDataObjInterface[]>([
+  let musicData = reactive<musicDataObjInterface[]>([       // 推荐歌单数据
     {
       type: 'artist',
       to: '/list/artist-1001',
@@ -184,8 +197,9 @@
     isActionDrawerOpen.value = true;
     nowGdId.value = id
   }
-  function selectGd(Gd){
-    selectedPlaylist = Gd
+  function selectGd(row){
+    console.log(row)
+    Object.assign(selectedPlaylist, row.row || row);
   }
   function confirmActionSetting() {      // 确认选择歌单
     if(!selectedPlaylist.id){
@@ -203,7 +217,7 @@
         musicData[i].data.singerName = selectedPlaylist.singerName
       }
     }
-    selectedPlaylist = {}
+    Object.assign(selectedPlaylist, {});
     isActionDrawerOpen.value = false;
   }
   // 获取容器DOM
@@ -266,4 +280,69 @@
   box-shadow: 0 8px 24px rgba(24, 144, 255, 0.3);
   opacity: 0.9;
 }
+::v-deep .gedanSelect .el-table__row{
+  height: 70px;
+}
+::v-deep .admin-page .btn-prev{
+    border: 1px solid #cecece;
+    border-radius: 8px;
+    color: #8e8e8e;
+    background-color: rgb(255, 255, 255);
+    font-family: Microsoft Yahei, Helvetica Neue, Helvetica, Arial, sans-serif;
+    width: 35px;
+    height: 35px;
+    text-align: center;
+  }
+  ::v-deep .admin-page .btn-prev:hover{
+    border-color: #0084ff;
+  }
+  ::v-deep .admin-page .btn-prev .el-icon{
+    font-size: 16px;
+    position: relative;
+    left: 5px;
+  }
+  ::v-deep .admin-page .btn-next{
+    border: 1px solid #cecece;
+    border-radius: 8px;
+    color: #8e8e8e;
+    background-color: rgb(255, 255, 255);
+    font-family: Microsoft Yahei, Helvetica Neue, Helvetica, Arial, sans-serif;
+    width: 35px;
+    height: 35px;
+    text-align: center;
+  }
+  ::v-deep .admin-page .btn-next:hover{
+    border-color: #0084ff;
+  }
+  ::v-deep .admin-page .btn-next .el-icon{
+    font-size: 16px;
+    position: relative;
+    left: 5px;
+  }
+  ::v-deep .admin-page .el-pager .number{
+    border: 1px solid #cecece;
+    border-radius: 8px;
+    color: #8e8e8e;
+    background-color: rgb(255, 255, 255);
+    font-family: Microsoft Yahei, Helvetica Neue, Helvetica, Arial, sans-serif;
+    width: 35px;
+    height: 35px;
+    text-align: center;
+  }
+  ::v-deep .admin-page .el-pager .number:hover{
+    border-color: #0084ff;
+  }
+  ::v-deep .admin-page .el-pager .more{
+    border: 1px solid #cecece;
+    border-radius: 8px;
+    color: #8e8e8e;
+    background-color: rgb(255, 255, 255);
+    font-family: Microsoft Yahei, Helvetica Neue, Helvetica, Arial, sans-serif;
+    width: 35px;
+    height: 35px;
+    text-align: center;
+  }
+  ::v-deep .admin-page .el-pager .more:hover{
+    border-color: #0084ff;
+  }
 </style>

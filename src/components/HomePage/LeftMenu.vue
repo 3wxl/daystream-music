@@ -55,7 +55,9 @@
 <script lang="ts" setup>
 import circleUrl from '@/assets/logo.jpg'
 import {
+  Files,
   House,
+  Mic,
   Setting,
   Tickets,
   User,
@@ -69,8 +71,10 @@ const isCollapse = ref(false)
 
 const menuItems = [
   { path: '/', title: '首页', icon: House },
-  { path: '/Mv', title: '歌手', icon: View },
+  { path: '/mv', title: 'MV', icon: View },
   { path: '/album', title: '专辑', icon: Tickets },
+  { path: '/aritist', title: '歌手', icon: Mic },
+  { path: '/playlist', title: '歌单', icon: Files },
   { path: '/MusicRanking', title: '榜单', icon: Histogram },
   { path: '/User/PersonalCenter', title: '个人', icon: User },
   { path: '/community/CommunityDisplay', title: '社区', icon: ChatLineSquare },
