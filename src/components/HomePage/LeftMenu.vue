@@ -23,9 +23,7 @@
         :key="item.path"
         :to="item.path"
         class="flex items-center gap-3 mb-2 rounded-2xl py-3 text-sm font-medium transition-all duration-200 text-gray-300 hover:bg-white/5 hover:text-white border border-transparent"
-        :class="[
-          isCollapse ? 'justify-center px-0' : 'px-4'
-        ]"
+        :class="[isCollapse ? 'justify-center px-0' : 'px-4']"
         active-class="bg-pink-500/20 text-pink-200 shadow-lg shadow-pink-500/30 border border-pink-400/60"
       >
         <component :is="item.icon" class="w-5 h-5 shrink-0" />
@@ -62,6 +60,7 @@ import {
   View,
   Histogram,
   ChatLineSquare,
+  Service,
 } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 
@@ -72,8 +71,9 @@ const menuItems = [
   { path: '/Mv', title: '歌手', icon: View },
   { path: '/album', title: '专辑', icon: Tickets },
   { path: '/MusicRanking', title: '榜单', icon: Histogram },
-  { path: '/User/PersonalCenter', title: '个人', icon: User },
   { path: '/community/CommunityDisplay', title: '社区', icon: ChatLineSquare },
+  { path: '/musician/MusicianSettleIn', title: '音乐人', icon: Service },
+  { path: '/User/PersonalCenter', title: '个人中心', icon: User },
 ]
 
 const changeCollapse = () => {
@@ -86,5 +86,4 @@ const changeCollapse = () => {
 nav a {
   min-height: 44px;
 }
-
 </style>
