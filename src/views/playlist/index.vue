@@ -6,7 +6,7 @@
         :key="item.id"
         :imgUrl="item.cover"
         :title="item.name"
-        :to="item.to"
+        :to="{name:'playlist-detaiPage-id',params:{id:item.id}}"
         variant="album"
         v-infinite-scroll="handleScrollLoad"
         :infinite-scroll-disabled="loading || noMore"
@@ -22,7 +22,6 @@
 
 <script lang="ts" setup>
 import { useLoadMore } from '@/Hooks/LoadMore'
-import { changeGlobalNodesTarget } from 'element-plus/es/utils'
 import { inject, onMounted, ref, watch } from 'vue'
 
 const activeTags = inject('globalFilterValue', ref({}))
@@ -51,7 +50,6 @@ const handleScrollLoad = () => {
 
 onMounted(() => {
   loadData(getTagValues(activeTags.value), true)
-  console.log(listData.value.records)
 })
 // const ListData = ref(
 //   Array.from({ length: 50 }, (_, i) => {

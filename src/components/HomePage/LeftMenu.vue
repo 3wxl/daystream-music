@@ -23,9 +23,7 @@
         :key="item.path"
         :to="item.path"
         class="flex items-center gap-3 mb-2 rounded-2xl py-3 text-sm font-medium transition-all duration-200 text-gray-300 hover:bg-white/5 hover:text-white border border-transparent"
-        :class="[
-          isCollapse ? 'justify-center px-0' : 'px-4'
-        ]"
+        :class="[isCollapse ? 'justify-center px-0' : 'px-4']"
         active-class="bg-pink-500/20 text-pink-200 shadow-lg shadow-pink-500/30 border border-pink-400/60"
       >
         <component :is="item.icon" class="w-5 h-5 shrink-0" />
@@ -44,9 +42,10 @@
             : 'text-gray-300 hover:bg-white/5 hover:text-white border border-transparent',
           isCollapse ? 'justify-center px-0' : 'px-4',
         ]"
+        @click="logout"
       >
         <Setting class="w-5 h-5 shrink-0" />
-        <span v-if="!isCollapse" class="whitespace-nowrap">设置</span>
+        <span v-if="!isCollapse" class="whitespace-nowrap">退出登录</span>
       </router-link>
     </div>
   </div>
@@ -54,16 +53,17 @@
 
 <script lang="ts" setup>
 import circleUrl from '@/assets/logo.jpg'
+import { useUserStore } from '@/stores/user'
 import {
+  ChatLineSquare,
   Files,
+  Histogram,
   House,
   Mic,
   Setting,
   Tickets,
   User,
   View,
-  Histogram,
-  ChatLineSquare,
 } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 
@@ -83,6 +83,12 @@ const menuItems = [
 const changeCollapse = () => {
   isCollapse.value = !isCollapse.value
 }
+
+const userStore = useUserStore()
+
+const logout = () => {
+  userStore.logout()
+}
 </script>
 
 <style scoped>
@@ -90,5 +96,4 @@ const changeCollapse = () => {
 nav a {
   min-height: 44px;
 }
-
 </style>
