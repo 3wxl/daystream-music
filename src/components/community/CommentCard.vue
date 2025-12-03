@@ -5,7 +5,7 @@
     </div>
     <div style="width:calc(100% - 60px)">
       <div class="flex justify-between">
-        <p class="font-bold text-[17px] text-white cursor-pointer hover:text-pink-400 mt-[6px]">{{ userName }}</p>
+        <p class="font-bold text-[17px] text-white cursor-pointer hover:text-pink-400 mt-[6px]">{{ username }}</p>
         <span class="text-[#e5e7eb] mr-1 cursor-pointer hover:text-pink-500" v-if="!isLike">
           {{ likeCount }} <IconFontSymbol name="icon" size="17px"></IconFontSymbol>
         </span>
@@ -17,61 +17,36 @@
         <p class="text-white">{{ content }}</p>
       </div>
       <div class="mt-3 text-[#e5e7eb] text-[14px] flex gap-2">
-        <span class="cursor-pointer hover:text-pink-400" @click="isSpradInput = !isSpradInput ;">{{ replyCount }}回复</span>
+        <span class="cursor-pointer hover:text-pink-400" @click="isSpradInput = !isSpradInput ;Object.assign(nowCommentData,commentObj)">{{ replyCount }}回复</span>
         ·
-        <span>{{ time }}</span>
+        <span>{{ formatDateTime(createdTime) }}</span>
       </div>
-      <div class="mt-1 text-[#a7a7a7] text-[14px] cursor-pointer" @click="isSpradSonComment = !isSpradSonComment">
-        共 {{ commentCount }} 条回复,点击展开
+      <div class="mt-1 text-[#a7a7a7] text-[14px] cursor-pointer" v-if="childCount>0" @click="isSpradSonComment = !isSpradSonComment;spreadSonComment">
+        共 {{ childCount }} 条回复,点击展开
       </div>
       <transition name="el-zoom-in-top">
         <div class="text-white mt-3" v-show="isSpradSonComment">
-          <div class="flex w-full flex-col gap-1 mb-4">
+          <div class="flex w-full flex-col gap-1 mb-4" v-for="sonComment in sonCommentList" :key="sonComment.id">
             <div class="flex flex-shrink-0 w-full items-center">
-              <img :src="avatar" alt="评论者头像" class="w-[30px] h-[30px] rounded-[50%] mr-2 cursor-pointer">
-              <span class="text-[15px] text-[#fe65ce] mr-2 cursor-pointer">评论者昵称</span>
+              <img :src="sonComment.avatar" alt="评论者头像" class="w-[30px] h-[30px] rounded-[50%] mr-2 cursor-pointer">
+              <span class="text-[15px] text-[#fe65ce] mr-2 cursor-pointer">{{ sonComment.username }}</span>
               <span class="text-white">
-                回复 <span class="text-[#31A2D4] cursor-pointer">@被回复者昵称:</span>
+                回复 <span class="text-[#31A2D4] cursor-pointer">@{{sonComment.replyUsername}}:</span>
               </span>
             </div>
             <p class="text-[15px] indent-[1.5rem] text-[#e5e7eb]">
-              这是一个子评论的内容，表示对上面的评论进行回复。这是一个子评论的内容，表示对上面的评论进行回复。这是一个子评论的内容，表示对上面的评论进行回复。这是一个子评论的内容，表示对上面的评论进行回复。这是一个子评论的内容，表示对上面的评论进行回复。
+              {{ sonComment.content }}
             </p>
             <div class="flex items-center justify-between">
               <div>
-                <span class="text-[#c4c5c8] text-[13px]">2024-12-11 12:14</span>
-                <span class="text-[13px] text-[#e5e7eb] cursor-pointer ml-3 hover:text-pink-500" @click="isSpradInput = !isSpradInput">
+                <span class="text-[#c4c5c8] text-[13px]">{{ formatDateTime(sonComment.createdTime) }}</span>
+                <span class="text-[13px] text-[#e5e7eb] cursor-pointer ml-3 hover:text-pink-500" @click="isSpradInput = !isSpradInput;nowCommentData = sonComment">
                   回复
                 </span>
               </div>
               <div class="mr-1">
                 <span class="text-[#e5e7eb] mr-1 cursor-pointer hover:text-pink-500 text-[13px] ml-3">
-                  12 <IconFontSymbol name="icon" size="14px"></IconFontSymbol>
-                </span>
-              </div>
-            </div>
-          </div>
-          <div class="flex w-full flex-col gap-1 mb-4">
-            <div class="flex flex-shrink-0 w-full items-center">
-              <img :src="avatar" alt="评论者头像" class="w-[30px] h-[30px] rounded-[50%] mr-2 cursor-pointer">
-              <span class="text-[15px] text-[#fe65ce] mr-2 cursor-pointer">评论者昵称</span>
-              <span class="text-white">
-                回复 <span class="text-[#31A2D4] cursor-pointer">@被回复者昵称:</span>
-              </span>
-            </div>
-            <p class="text-[15px] indent-[1.5rem] text-[#e5e7eb]">
-              这是一个子评论的内容，表示对上面的评论进行回复。
-            </p>
-            <div class="flex items-center justify-between">
-              <div>
-                <span class="text-[#c4c5c8] text-[13px]">2024-12-11 12:14</span>
-                <span class="text-[13px] text-[#e5e7eb] cursor-pointer ml-3 hover:text-pink-500" @click="isSpradInput = !isSpradInput">
-                  回复
-                </span>
-              </div>
-              <div class="mr-1">
-                <span class="text-[#e5e7eb] mr-1 cursor-pointer hover:text-pink-500 text-[13px] ml-3">
-                  12 <IconFontSymbol name="icon" size="14px"></IconFontSymbol>
+                  {{ sonComment.likeCount }} <IconFontSymbol name="icon" size="14px"></IconFontSymbol>
                 </span>
               </div>
             </div>
@@ -83,14 +58,14 @@
         <div class="text-[#e5e7eb]" v-show="isSpradInput">
           <div class="flex-grow-1 rounded-[10px] p-[15px] border-[1px] border-gray-800 bg-[#212533]">
             <div class="">
-              <textarea placeholder="回复 @AAA:" ref="commentInput" @input="updateWords" class="custom-scrollbar resize-none h-[4rem] w-full outline-none focus:outline-none text-[#e5e7eb]"></textarea>
+              <textarea :placeholder="`回复 @${nowCommentData.username}`" ref="commentInput" @input="updateWords" class="custom-scrollbar resize-none h-[4rem] w-full outline-none focus:outline-none text-[#e5e7eb]"></textarea>
             </div>
             <div class="flex justify-between items-center">
               <div class="ml-1">
                 <span class="text-[#e5e7eb] text-[15px]">{{ commentWords }} / 100</span>
               </div>
               <div class="mr-2">
-                <button class="BtnPublish relative text-[#e5e7eb] px-[15px] py-[5px] bg-pink-600 rounded-[10px] cursor-pointer hover:bg-pink-500 active:bg-pink-700 active:scale-95 duration-[0.3s]">
+                <button @click="replyComment(nowCommentData.id)" class="BtnPublish relative text-[#e5e7eb] px-[15px] py-[5px] bg-pink-600 rounded-[10px] cursor-pointer hover:bg-pink-500 active:bg-pink-700 active:scale-95 duration-[0.3s]">
                   <IconFontSymbol name="review" size="16px" class="mr-1"></IconFontSymbol>
                   <span class="text-15px">评论</span>
                 </button>
@@ -104,33 +79,93 @@
 </template>
 
 <script setup lang="ts">
+  import {GetReplyCommentList} from '@/api/community/GetReplyCommentList';    // 获取子评论列表
+  import {ReplyComment} from '@/api/community/ReplyComment';    // 回复评论，即创建子评论
   // 数据
   let props = defineProps({
     commentObj: {
       type: Object,
       required: true,
-      default: () => ({
-        userId:'1',
-        avatar: '../../../public/头像.png',
-        userName: '白昼音流👑',
-        likeCount: 0,
-        replyCount: 0,
-        time: '1小时前',
-        content: '希望湾湾早日回归祖国怀抱😀',
-        commentCount: 15,
-        isLike:false
-      })
     }
   })
-  let {userId,avatar,userName,likeCount,replyCount,time,content,isLike,commentCount} = props.commentObj;
+  let {id,content,userId,username,avatar,createdTime,likeCount,isLike,isSelf,childCount} = toRefs(props.commentObj);
   let isSpradSonComment = ref(false);   // 是否展开子评论
   let isSpradInput = ref(false);        // 是否展开回复输入框
+  let lastId = ref(null)
   let commentWords = ref(0);    // 你的输入评论字数
   let commentInput = ref(null);   // 你的评论输入框
+  let nowCommentData = reactive({})   // 当前回复评论对象的数据,点击一级评论的评论按钮时将该一级评论的数据保存在这里，点击子评论时将子评论的数据保存在这里
+  let sonCommentList = reactive([])    // 子评论列表
   // 方法
   function updateWords(event) {
     commentWords.value = event.target.value.length;
   }
+  function formatDateTime(dateString: string): string {     // 时间格式化
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  }
+  async function getSonCommentList(){     // 获取子评论列表
+    if(childCount.value==0)return;      // 如果没有子评论则返回
+    let data:{parentId:string;size:number;lastId?:string} = {
+      parentId:id.value,
+      size:8
+    }
+    if(lastId)data.lastId = lastId.value;
+    let res = await GetReplyCommentList(data);
+    console.log(res)
+    if(res.success){
+      if(res.data==='后面没有数据了'){
+        Object.assign(sonCommentList,[])
+      }else{
+        for(let i = 0; i < res.data.dateList.length; i++){
+          sonCommentList.push(res.data.dateList[i])
+        }
+      }
+      return true
+    }else{
+      ElMessage({
+        message: '获取子评论列表失败',
+        type: 'warning',
+      })
+      return false
+    }
+  }
+  function spreadSonComment(){    // 展开子评论
+    if(getSonCommentList()){
+    }
+    return
+  }
+  async function replyComment(commentId:string){     // 回复评论,即创建子评论
+    let yourComment = commentInput.value.value
+    let data = {
+      parentId: commentId,
+      content: yourComment
+    }
+    let res = await ReplyComment(data)
+    console.log(res)
+    if(res.success){
+      ElMessage({
+        message: '回复成功',
+        type: 'success',
+      })
+      commentInput.value.value = ''
+      commentWords.value = 0
+      childCount.value++
+      isSpradInput.value = false      // 这里等待后端评论成功后的响应的新评论完整数据，以便把新的评论加上
+    }else{
+      ElMessage({
+        message: '回复失败',
+        type: 'warning',
+      })
+    }
+  }
+
   onMounted(() => {
     watch(commentWords, (value) => {
       if (value > 100) {
@@ -138,6 +173,7 @@
         commentWords.value = 100;
       }
     })
+    getSonCommentList()
   })
 </script>
 

@@ -51,7 +51,7 @@
               保存
               <div class="BtnPing absolute top-0 left-0 w-full h-full bg-pink-600 -z-1 rounded-[10px] "></div>
             </button>
-            <button @click="" class="BtnPublish relative text-[#e5e7eb] px-[25px] py-[5px] bg-pink-600 rounded-[10px] cursor-pointer hover:bg-pink-500 active:bg-pink-700 active:scale-95 duration-[0.3s]">
+            <button @click="release" class="BtnPublish relative text-[#e5e7eb] px-[25px] py-[5px] bg-pink-600 rounded-[10px] cursor-pointer hover:bg-pink-500 active:bg-pink-700 active:scale-95 duration-[0.3s]">
               <IconFontSymbol name="dongtai" size="18px"></IconFontSymbol>
               发布
               <div class="BtnPing absolute top-0 left-0 w-full h-full bg-pink-600 -z-1 rounded-[10px] "></div>
@@ -104,6 +104,8 @@
   import { ref } from 'vue'
   import {updateImage} from '@/api/community/updateImage'
   import {DeleteImage} from '@/api/community/DeleteImage'
+  import {ReleaseDynamic} from '@/api/community/ReleaseDynamic'   // 发布动态
+  import { ElMessage } from 'element-plus'
   let router = useRouter()
   // 双向绑定
   const editorContent = ref('请输入内容（支持图片上传）')
@@ -194,7 +196,6 @@
       /* 段落样式 */
       p {
         margin: 10px 0;
-        text-indent: 2em;
         font-size: 15px;
         text-break: break-word;
         word-break: break-all;
@@ -254,24 +255,71 @@
     }
     return [...new Set(srcList)];
   }
-  onBeforeUnmount(async () => {
-    usedImages = extractImgSrcByReg(getContent())
-    const deleteImages = uploadedImages.filter(item => !usedImages.includes(item))
-    if (deleteImages.length === 0) return
-    const deletePromises = deleteImages.map(imgUrl => DeleteImage(imgUrl))
-    try {
-      const results = await Promise.all(deletePromises)
-      results.forEach((res, index) => {
-        if (!res.success) {
-          console.log('图片删除失败:', deleteImages[index])
-        } else {
-          console.log('图片删除成功:', deleteImages[index])
-        }
-      })
-    } catch (error) {
-      console.log('批量删除图片时发生错误:', error)
+  // onBeforeUnmount(async () => {
+  //   usedImages = extractImgSrcByReg(getContent())
+  //   const deleteImages = uploadedImages.filter(item => !usedImages.includes(item))
+  //   if (deleteImages.length === 0) return
+  //   const deletePromises = deleteImages.map(imgUrl => DeleteImage(imgUrl))
+  //   try {
+  //     const results = await Promise.all(deletePromises)
+  //     results.forEach((res, index) => {
+  //       if (!res.success) {
+  //         console.log('图片删除失败:', deleteImages[index])
+  //       } else {
+  //         console.log('图片删除成功:', deleteImages[index])
+  //       }
+  //     })
+  //   } catch (error) {
+  //     console.log('批量删除图片时发生错误:', error)
+  //   }
+  // })
+
+  // 发布动态
+  async function release(){   // 发布动态的函数
+    if(judge()){
+      let dy_title = title.value
+      let dy_content = getContent()
+      let data = {
+        title: dy_title,
+        content: dy_content
+      }
+      let res = await ReleaseDynamic(data)
+      if(res.success){
+        ElMessage({
+          message: '发布成功',
+          type: 'success',
+        })
+        title.value = ''
+        editorContent.value = ''
+        titleNum.value = 0
+        Object.assign(usedImages,[])
+        Object.assign(uploadedImages,[])
+      }else{
+        ElMessage({
+          message: '发布失败',
+          type: 'error',
+        })
+      }
     }
-  })
+  }
+  function judge(){
+    if(title.value.trim()=== ''){
+      ElMessage({
+        message: '动态标题不能为空',
+        type: 'warning',
+      })
+      return false
+    }else if(getContent2().trim() === ''){
+      ElMessage({
+        message: '动态内容不能为空',
+        type: 'warning',
+      })
+      return false
+    }else{
+      return true
+    }
+  }
+
   // 文章数据
   let titleNum = ref(0)
   let titleInput = ref(null)

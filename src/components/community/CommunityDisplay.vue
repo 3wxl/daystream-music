@@ -24,22 +24,22 @@
         </span>
       </div>
     </div>
-    <div class="pl-[30px] font-[700] text-[24px] mt-[20px] text-white cursor-pointer hover:text-pink-400 duration-[0.2s]" @click="router.push('/community/communityDetail')">
+    <div class="pl-[30px] font-[700] text-[24px] mt-[20px] text-white cursor-pointer hover:text-pink-400 duration-[0.2s]" @click="router.push({path:'/community/communityDetail',query:{postId:postId}})">
       {{title}}
     </div>
-    <div class="mt-[8px] text-white cursor-pointer hover:text-pink-400 duration-[0.2s]" @click="router.push('/community/communityDetail')" v-html="content">
+    <div class="content-p mt-[8px] text-white cursor-pointer hover:text-pink-400 duration-[0.2s]" @click="router.push({path:'/community/communityDetail',query:{postId:postId}})" v-html="content">
 
     </div>
     <div class="flex gap-4 px-6 flex-wrap mt-2 mb-3">     <!-- 图片部分 -->
       <div class="w-[16%] aspect-square rounded-[10px] overflow-hidden" v-if="images.length > 1" v-for="imgUrl in images" :key="imgUrl">
-        <img :src="imgUrl" alt="" @click="router.push('/community/communityDetail')" class="cursor-pointer duration-[0.5s] w-full h-full rounded-[10px] hover:scale-[1.1] object-cover">
+        <img :src="imgUrl" alt="" @click="router.push({path:'/community/communityDetail',query:{postId:postId}})" class="cursor-pointer duration-[0.5s] w-full h-full rounded-[10px] hover:scale-[1.1] object-cover">
       </div>
       <div class="w-[70%] rounded-[10px] overflow-hidden" v-if="images.length === 1" v-for="imgUrl in images" :key="imgUrl">
-        <img :src="imgUrl" alt="" @click="router.push('/community/communityDetail')" class="cursor-pointer duration-[0.5s] w-full h-full rounded-[10px] hover:scale-[1.05] object-cover">
+        <img :src="imgUrl" alt="" @click="router.push({path:'/community/communityDetail',query:{postId:postId}})" class="max-h-[700px] object-cover cursor-pointer duration-[0.5s] w-full h-full rounded-[10px] hover:scale-[1.05] object-cover">
       </div>
     </div>
     <div class="px-10 pt-3 flex justify-end">       <!-- 点赞评论部分 -->
-      <span class="mr-10 cursor-pointer group" @click="router.push('/community/communityDetail')">
+      <span class="mr-10 cursor-pointer group" @click="router.push({path:'/community/communityDetail',query:{postId:postId}})">
         <el-tooltip
           class="box-item"
           effect="dark"
@@ -83,12 +83,14 @@
         commentCount: 0,
         likeCount: 0,
         isLike: false,
-        isFollow:false
+        isFollow:false,
+        postId:''
       })
     }
   })
   let {content} = props.dynamic
-  let {userId, avatar, userName, createTime, introduction, title,commentCount,likeCount,isLike,isFollow} = toRefs(props.dynamic);
+  let {userId,postId, avatar, userName, createTime, introduction, title,commentCount,likeCount,isLike,isFollow} = toRefs(props.dynamic);
+  createTime.value = formatDateTime(createTime.value);
   function extractImgSrcByReg(html) {     // 这里是获取一个hmtl片段里面的图片的src组成的数组
     if (!html || typeof html !== 'string') return [];
     const imgSrcReg = /<img[^>]+src\s*=\s*["']([^"']*)["'][^>]*>/gi;
@@ -151,6 +153,16 @@
     }
     return resultHtml;
   }
+  function formatDateTime(dateString: string): string {     // 时间格式化
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  }
   function removeImgTags(html) {
     if (!html || typeof html !== 'string') return '';
     return html.replace(/<img[^>]*>/gi, '');
@@ -159,4 +171,14 @@
   content = limitHtmlWordCount(removeImgTags(content), 300);    // 限制内容字数为300字，防止内容过长
 </script>
 
-<style scoped></style>
+<style scoped lang="scss">
+.content-p {
+  ::v-deep(p) {
+    text-indent: 2rem;
+  }
+  ::v-deep(img){
+    max-height: 800px;
+    object-fit: cover;
+  }
+}
+</style>
