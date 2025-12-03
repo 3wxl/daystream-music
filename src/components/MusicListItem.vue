@@ -1,14 +1,14 @@
 <template>
   <div
     v-for="item in items"
-    :key="item.title"
+    :key="item.id"
     class="flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors duration-200 bg-gray-900
            hover:bg-purple-900/40 dark:hover:bg-purple-900/40"
   >
     <div class="flex items-center flex-grow min-w-0">
       <img :src="item.imgUrl" alt="Album Cover" class="w-12 h-12 rounded-md object-cover mr-3 flex-shrink-0" />
       <div class="flex flex-col truncate">
-        <span class="text-base font-medium text-gray-100 truncate">{{ item.title }}</span>
+        <span class="text-base font-medium text-gray-100 truncate">{{ item.musicName }}</span>
         <span class="text-sm text-gray-500 truncate">{{ item.artist }}</span>
       </div>
     </div>

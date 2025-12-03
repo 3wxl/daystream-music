@@ -18,6 +18,7 @@ declare module 'vue' {
     AdminSelect: typeof import('./components/admin/AdminSelect.vue')['default']
     AdminTextarea: typeof import('./components/admin/AdminTextarea.vue')['default']
     AlbumCard: typeof import('./components/user/musician/AlbumCard.vue')['default']
+    AlbumView: typeof import('./components/AlbumView.vue')['default']
     CollectedAlbum: typeof import('./components/user/CollectedAlbum.vue')['default']
     CollectedAlbums: typeof import('./components/user/CollectedAlbums.vue')['default']
     CollectorsList: typeof import('./components/user/CollectorsList.vue')['default']
