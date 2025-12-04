@@ -279,9 +279,11 @@
     if(judge()){
       let dy_title = title.value
       let dy_content = getContent()
+      let dy_images = extractImgSrcByReg(dy_content)
       let data = {
         title: dy_title,
-        content: dy_content
+        content: dy_content,
+        images: dy_images,
       }
       let res = await ReleaseDynamic(data)
       if(res.success){
@@ -356,6 +358,10 @@
         content: content,
         date: date,
         wordCount: wordCount
+      })
+      ElMessage({
+        message: '保存本地成功',
+        type: 'success',
       })
     }
     localStorage.setItem('drafts', JSON.stringify(drafts));

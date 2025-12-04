@@ -6,10 +6,10 @@
     <div style="width:calc(100% - 60px)">
       <div class="flex justify-between">
         <p class="font-bold text-[17px] text-white cursor-pointer hover:text-pink-400 mt-[6px]">{{ username }}</p>
-        <span class="text-[#e5e7eb] mr-1 cursor-pointer hover:text-pink-500" v-if="!isLike">
+        <span @click="throttleLikeComment(id)" class="text-[#e5e7eb] mr-1 cursor-pointer hover:text-pink-500" v-if="!isLike">
           {{ likeCount }} <IconFontSymbol name="icon" size="17px"></IconFontSymbol>
         </span>
-        <span class="text-[#e5e7eb] mr-1 cursor-pointer text-pink-500" v-if="isLike">
+        <span @click="throttleLikeComment(id)" class="text-[#e5e7eb] mr-1 cursor-pointer text-pink-500" v-if="isLike">
           {{ likeCount }} <IconFontSymbol name="icon" size="17px"></IconFontSymbol>
         </span>
       </div>
@@ -26,32 +26,8 @@
       </div>
       <transition name="el-zoom-in-top">
         <div class="text-white mt-3" v-show="isSpradSonComment">
-          <div class="flex w-full flex-col gap-1 mb-4" v-for="sonComment in sonCommentList" :key="sonComment.id">
-            <div class="flex flex-shrink-0 w-full items-center">
-              <img :src="sonComment.avatar" alt="评论者头像" class="w-[30px] h-[30px] rounded-[50%] mr-2 cursor-pointer">
-              <span class="text-[15px] text-[#fe65ce] mr-2 cursor-pointer">{{ sonComment.username }}</span>
-              <span class="text-white">
-                回复 <span class="text-[#31A2D4] cursor-pointer">@{{sonComment.replyUsername}}:</span>
-              </span>
-            </div>
-            <p class="text-[15px] indent-[1.5rem] text-[#e5e7eb]">
-              {{ sonComment.content }}
-            </p>
-            <div class="flex items-center justify-between">
-              <div>
-                <span class="text-[#c4c5c8] text-[13px]">{{ formatDateTime(sonComment.createdTime) }}</span>
-                <span class="text-[13px] text-[#e5e7eb] cursor-pointer ml-3 hover:text-pink-500" @click="isSpradInput = !isSpradInput;nowCommentData = sonComment">
-                  回复
-                </span>
-              </div>
-              <div class="mr-1">
-                <span class="text-[#e5e7eb] mr-1 cursor-pointer hover:text-pink-500 text-[13px] ml-3">
-                  {{ sonComment.likeCount }} <IconFontSymbol name="icon" size="14px"></IconFontSymbol>
-                </span>
-              </div>
-            </div>
-          </div>
-          <!-- 上面这一部分是子评论区，后续可改为组件 -->
+          <SonCommentCard v-for="sonComment in sonCommentList" :sonComment="sonComment" :key="sonComment.id" @replyComment="commentInputChange(sonComment)"/>
+          <!-- 上面这一部分是子评论区 -->
         </div>
       </transition>
       <transition name="el-zoom-in-top">      <!-- 回复输入框 -->
@@ -81,6 +57,9 @@
 <script setup lang="ts">
   import {GetReplyCommentList} from '@/api/community/GetReplyCommentList';    // 获取子评论列表
   import {ReplyComment} from '@/api/community/ReplyComment';    // 回复评论，即创建子评论
+  import {debounce,throttle} from '@/utils/debounceThrottle';     // 节流防抖
+  import {Like} from '@/api/community/Like';      // 点赞
+  import SonCommentCard from './SonCommentCard.vue';      // 子评论组件
   // 数据
   let props = defineProps({
     commentObj: {
@@ -141,6 +120,10 @@
     }
     return
   }
+  function commentInputChange(sonComment){
+    isSpradInput.value = true;
+    Object.assign(nowCommentData,sonComment)
+  }
   async function replyComment(commentId:string){     // 回复评论,即创建子评论
     let yourComment = commentInput.value.value
     let data = {
@@ -148,7 +131,6 @@
       content: yourComment
     }
     let res = await ReplyComment(data)
-    console.log(res)
     if(res.success){
       ElMessage({
         message: '回复成功',
@@ -157,7 +139,8 @@
       commentInput.value.value = ''
       commentWords.value = 0
       childCount.value++
-      isSpradInput.value = false      // 这里等待后端评论成功后的响应的新评论完整数据，以便把新的评论加上
+      isSpradInput.value = false
+      sonCommentList.unshift(res.data.detailReply)
     }else{
       ElMessage({
         message: '回复失败',
@@ -165,7 +148,22 @@
       })
     }
   }
-
+  let throttleLikeComment = throttle(async function likeDynamic(commentId:string){     // 点赞评论
+    let submitData = {
+      targetId:commentId,
+      targetType:2
+    }
+    let likeRes = await Like(submitData)
+    if(likeRes.success){
+      isLike.value = !isLike.value;
+      likeCount.value = likeRes.data.likecount
+    }else{
+      ElMessage({
+        message: '点赞失败',
+        type: 'warning',
+      })
+    }
+  },1500)
   onMounted(() => {
     watch(commentWords, (value) => {
       if (value > 100) {
