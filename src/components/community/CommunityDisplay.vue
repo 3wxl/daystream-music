@@ -15,11 +15,11 @@
         </div>
       </div>
       <div class="mt-[10px] mr-4">
-        <span v-show="!isFollow" class="text-[#cfcfcf] text-[14px] border-[1.3px] border-[#e5e7eb] rounded-[16px] hover:bg-[rgba(255,255,255,.1)] px-2 py-1 cursor-pointer">
+        <span @click="throttleFollow" v-show="!isFollow" class="text-[#cfcfcf] text-[14px] border-[1.3px] border-[#e5e7eb] rounded-[16px] hover:bg-[rgba(255,255,255,.1)] px-2 py-1 cursor-pointer">
           <IconFontSymbol name="tianjia" size="14px"></IconFontSymbol>
           关注
         </span>
-        <span v-show="isFollow" class="text-[#cfcfcf] text-[14px] border-[1.3px] border-[#e5e7eb] rounded-[16px] hover:bg-[rgba(255,255,255,.1)] px-2 py-1 cursor-pointer">
+        <span @click="throttleUnFollow" v-show="isFollow" class="text-[#cfcfcf] text-[14px] border-[1.3px] border-[#e5e7eb] rounded-[16px] hover:bg-[rgba(255,255,255,.1)] px-2 py-1 cursor-pointer">
           已关注
         </span>
       </div>
@@ -57,9 +57,9 @@
           content="点赞"
           placement="bottom"
         ><!--:style="`color:${isLike?'#DE5DA8':'white'}`"-->
-          <IconFontSymbol name="icon" class="group-hover:text-pink-400" :class="isLike?'text-pink-400':'text-white'"  @click="isLike=!isLike" size="20px"></IconFontSymbol>
+          <IconFontSymbol name="icon" class="group-hover:text-pink-400" :class="isLike?'text-pink-400':'text-white'"  @click="throttleLikeDynamic(postId)" size="20px"></IconFontSymbol>
         </el-tooltip>
-        <span class="text-[14px] ml-1 group-hover:text-pink-400" :class="isLike?'text-pink-400':'text-white'" @click="isLike=!isLike" >{{likeCount}}</span>
+        <span class="text-[14px] ml-1 group-hover:text-pink-400" :class="isLike?'text-pink-400':'text-white'" @click="throttleLikeDynamic(postId)" >{{likeCount}}</span>
       </span>
     </div>
   </div>
@@ -67,6 +67,10 @@
 
 <script setup lang="ts">
   import {useRouter} from "vue-router";
+  import {FollowOther,UnFollowOther} from '@/api/community/FollowOther';    // 关注和取消关注
+  import {debounce,throttle} from '@/utils/debounceThrottle';     // 节流防抖
+  import {Like} from '@/api/community/Like';      // 点赞
+
   const router = useRouter();
   let props = defineProps({
     dynamic: {
@@ -169,6 +173,52 @@
   }
   let images = extractImgSrcByReg(content);
   content = limitHtmlWordCount(removeImgTags(content), 300);    // 限制内容字数为300字，防止内容过长
+  let throttleFollow = throttle(async function(){      // 关注动态作者
+    let res = await FollowOther(userId.value)
+    if(res.success){
+      ElMessage({
+        message: '关注成功',
+        type: 'success',
+      })
+      isFollow.value = true
+    }else{
+      ElMessage({
+        message: '关注失败',
+        type: 'warning',
+      })
+    }
+  },1500)
+  let throttleUnFollow = throttle(async function(){      // 取消关注动态作者
+    let res = await UnFollowOther(userId.value)
+    if(res.success){
+      ElMessage({
+        message: '取消关注成功',
+        type: 'success',
+      })
+      isFollow.value = false
+    }else{
+      ElMessage({
+        message: '取消关注失败',
+        type: 'warning',
+      })
+    }
+  },1500)
+  let throttleLikeDynamic = throttle(async function likeDynamic(dynamicId:string){     // 点赞动态
+    let submitData = {
+      targetId:dynamicId,
+      targetType:3
+    }
+    let likeRes = await Like(submitData)
+    if(likeRes.success){
+      isLike.value = !isLike.value;
+      likeCount.value = likeRes.data.likecount
+    }else{
+      ElMessage({
+        message: '点赞失败',
+        type: 'warning',
+      })
+    }
+  },1500)
 </script>
 
 <style scoped lang="scss">
