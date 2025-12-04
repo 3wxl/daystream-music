@@ -16,7 +16,7 @@ export function useLoadMore() {
 
     if(isReset){
       currentPage.value = 1
-      noMore.vaule = false
+      noMore.value = false
       listData.value = []
     }
 

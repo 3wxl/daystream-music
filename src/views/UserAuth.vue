@@ -287,7 +287,6 @@ const handleLogin = async (formEl: FormInstance | undefined) => {
         })
         .catch((error) => {
           console.log(error)
-          ElMessage.error('登录失败，请重试')
           changeCaptcha()
         })
     }
@@ -312,7 +311,6 @@ const changeCaptcha = () => {
     })
     .catch((error) => {
       console.error('获取验证码失败', error)
-      ElMessage.error('加载失败，请点击重试')
     })
     .finally(() => {
       isloading.value = false
@@ -373,7 +371,6 @@ const insertUser = async (formEl: FormInstance | undefined) => {
       })
       .catch((err) => {
         console.log(err)
-        ElMessage.error('网络连接异常，请稍后重试')
       })
   } catch (error) {
     console.log('表单校验未通过', error)
@@ -436,7 +433,6 @@ const handleResetPassword = async (formEl: FormInstance | undefined) => {
         })
         .catch((err) => {
           console.log(err)
-          ElMessage.error('设置新密码失败，请重试')
         })
     } else {
       ElMessage.error('请正确填写数据')
@@ -778,9 +774,14 @@ const handleGetCode = async (formData: EmailForm, formRef: FormInstance | undefi
 
 .btn-group {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  flex-direction: row;
+  gap: 1rem;
   width: 100%;
+
+  .el-button {
+    flex: 1;
+    width: auto;
+  }
 }
 
 .btn-back {

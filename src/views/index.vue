@@ -79,6 +79,8 @@ defineOptions({
   name: 'HomeIndex',
 })
 
+
+
 // recommend模拟数据
 const recommendData =
   // 1. 类型: recommend
@@ -524,8 +526,6 @@ const listData = [
     grid-template-columns: 1fr;
   }
 }
-
-
 </style>
 
 <route lang="yaml">
