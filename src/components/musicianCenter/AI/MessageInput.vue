@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import type { QuickPhrase } from '@/types/lyric-assistant'
+import type { QuickPhrase } from '@/types/lyricAssistant'
 
 interface Props {
   modelValue: string

@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Theme } from '@/types/lyric-assistant'
+import type { Theme } from '@/types/lyricAssistant'
 
 interface Props {
   themes: Theme[]

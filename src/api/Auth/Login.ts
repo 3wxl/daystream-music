@@ -1,17 +1,23 @@
-import type { LoginForm } from "@/types/Auth/login";
-import request  from "@/utils/request";
+import type { LoginForm } from '@/types/Auth/login'
+import request from '@/utils/request'
 
-export function getCaptcha(){
- return request(
-  '/login/getCaptcha',
-  'get'
- )
+export interface CaptchaResult {
+  captchaBase64Image: string
+  captchaUUId: string
 }
 
-export function LoginByemail(data:LoginForm){
-  return request(
+export function getCaptcha() {
+  return request<CaptchaResult>('/login/getCaptcha', 'get', undefined, { noToken: true })
+}
+
+export interface LoginResult {
+  token: string
+}
+
+export function LoginByemail(data: LoginForm) {
+  return request<LoginResult>(
     '/login/loginByemail',
-    'post',
-    data
-  )
+     'post', data as any,
+      { noToken: true }
+    )
 }

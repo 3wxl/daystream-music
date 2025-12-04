@@ -229,8 +229,8 @@
 </template>
 
 <script lang="ts" setup>
-import { setNewpassword } from '@/api/Auth/forgot'
-import { getCaptcha, LoginByemail } from '@/api/Auth/Login'
+import { setNewpassword } from '@/api/Auth/Forgot'
+import { getCaptcha } from '@/api/Auth/Login'
 import { getEmailCaptcha, registerUser } from '@/api/Auth/Register'
 import { useUserStore } from '@/stores/user'
 import { ForgotForm } from '@/types/Auth/forgot'
@@ -278,14 +278,9 @@ const handleLogin = async (formEl: FormInstance | undefined) => {
         ...loginForm,
         captchaUUId: captchaId,
       })
-      userStore.login(LoginData)
-        .then((res) => {
-          if (res.data.success === false) {
-            ElMessage.error('登录失败，请重试')
-            // 登录失败，后端会销毁相关验证码，此时要换一个验证码
-            changeCaptcha()
-            return
-          }
+      userStore
+        .login(LoginData)
+        .then(() => {
           formEl.resetFields()
           ElMessage.success('登录成功')
           router.push('/')
@@ -293,7 +288,6 @@ const handleLogin = async (formEl: FormInstance | undefined) => {
         .catch((error) => {
           console.log(error)
           ElMessage.error('登录失败，请重试')
-          // 登录失败，后端会销毁相关验证码，此时要换一个验证码
           changeCaptcha()
         })
     }
@@ -369,26 +363,19 @@ const registerRules = reactive<FormRules<RegisterForm>>({
 
 const insertUser = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
-  try{
-     await formEl.validate()
-      registerUser(registerForm)
-        .then((res) => {
-          if (res.success === false) {
-            const msg = res.errorMsg || '注册失败，请重试'
-            ElMessage.error(msg)
-            return
-          }
-          // 清空输入框
-          formEl.resetFields()
-          ElMessage.success('注册成功，请登录')
-          currentView.value = 'login'
-        })
-        .catch((err) => {
-          console.log(err)
-          // 失败不要删除表单，用户体验差
-          ElMessage.error('网络连接异常，请稍后重试')
-        })
-  }catch(error) {
+  try {
+    await formEl.validate()
+    registerUser(registerForm)
+      .then(() => {
+        formEl.resetFields()
+        ElMessage.success('注册成功，请登录')
+        currentView.value = 'login'
+      })
+      .catch((err) => {
+        console.log(err)
+        ElMessage.error('网络连接异常，请稍后重试')
+      })
+  } catch (error) {
     console.log('表单校验未通过', error)
     return false
   }
@@ -442,11 +429,7 @@ const handleResetPassword = async (formEl: FormInstance | undefined) => {
   await formEl.validate((valid) => {
     if (valid) {
       setNewpassword(forgotForm)
-        .then((res) => {
-          if (res.data.success == false) {
-            ElMessage.error('设置新密码失败，请重试')
-            return
-          }
+        .then(() => {
           formEl.resetFields()
           ElMessage.success('设置密码成功，请登录')
           currentView.value = 'login'

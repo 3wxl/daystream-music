@@ -3,7 +3,7 @@
     <div class="container mx-auto">
       <div class="max-w-4xl mx-auto text-center">
         <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-on-scroll">
-          <span class="block text-gray-800">音乐发行</span>
+          <span class="block text-gray-800 mb-5">音乐发行</span>
           <span class="gradient-text">全网领先的一站式发行服务</span>
         </h1>
 

@@ -2,239 +2,197 @@
   <div class="min-h-screen bg-gray-900 text-gray-100 font-sans px-4 py-6">
     <main class="max-w-6xl mx-auto space-y-6">
       <!-- 音浪概览 -->
-      <section class="animate-fade-in-up">
-        <div
-          class="bg-gray-800/50 backdrop-blur-md border border-gray-700/50 rounded-2xl p-6 shadow-2xl"
-        >
-          <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-            <!-- 音浪数量 -->
-            <div class="flex items-center gap-4">
-              <div class="coin animate-pulse-glow">
-                <div class="coin-text">
-                  <div>音浪</div>
-                  <div class="text-xs opacity-80">COIN</div>
-                </div>
-              </div>
-              <div>
-                <p class="text-gray-400 text-sm">我的音浪</p>
-                <h2 class="text-3xl font-bold text-white">
-                  {{ currentCoins }} <span class="text-lg text-pink-400">音浪</span>
-                </h2>
-              </div>
-            </div>
-
-            <!-- 签到按钮 -->
-            <div class="flex flex-col items-center gap-2">
-              <div
-                class="checkin-button"
-                :class="{ 'opacity-50 cursor-not-allowed': hasCheckedIn }"
-                @click="checkIn"
-              >
-                <i class="iconfont text-2xl" style="font-size: 35px">&#xe608;</i>
-              </div>
-              <p class="text-sm" :class="hasCheckedIn ? 'text-green-400' : 'text-gray-400'">
-                {{ hasCheckedIn ? '今日已签到' : '点击签到' }}
-              </p>
-            </div>
-
-            <!-- 连续签到 -->
-            <div class="text-center">
-              <p class="text-gray-400 text-sm">连续签到</p>
-              <h3 class="text-2xl font-bold text-white">
-                {{ consecutiveDays }} <span class="text-lg text-pink-400">天</span>
-              </h3>
-              <p class="text-xs text-gray-500">明日可得 {{ nextDayCoins }} 音浪</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <CoinOverview
+        :current-coins="userData.currentWaves"
+        :consecutive-days="userData.continuousDays"
+        :has-checked-in="userData.isCheckedIn"
+        :next-day-coins="userData.tomorrowSignInReward"
+        :loading="loading"
+        @checkin="handleCheckIn"
+      />
 
       <!-- VIP兑换进度 -->
-      <section class="animate-fade-in-up" style="animation-delay: 0.1s">
-        <div
-          class="bg-gray-800/50 backdrop-blur-md border border-gray-700/50 rounded-2xl p-6 shadow-2xl"
-        >
-          <div class="flex items-center justify-between mb-4">
-            <h2
-              class="text-xl font-bold bg-gradient-to-r from-pink-500 to-pink-300 bg-clip-text text-transparent"
-            >
-              VIP兑换进度
-            </h2>
-            <span class="text-sm text-gray-400"
-              >{{ currentCoins }} / {{ vipRequirement }} 音浪</span
-            >
-          </div>
-
-          <!-- 进度条 -->
-          <div class="mb-4">
-            <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
-              <div
-                class="h-full bg-gradient-to-r from-pink-500 to-pink-300 rounded-full transition-all duration-500"
-                :style="{ width: vipProgress + '%' }"
-              ></div>
-            </div>
-            <div class="flex justify-between text-xs text-gray-400 mt-2">
-              <span>还差 {{ remainingCoins }} 音浪</span>
-              <span>{{ vipProgress.toFixed(1) }}%</span>
-            </div>
-          </div>
-
-          <!-- VIP兑换按钮 -->
-          <button
-            class="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-pink-300 text-white font-semibold flex items-center justify-center gap-2 transition-all duration-300 hover:shadow-lg hover:shadow-pink-500/25 mb-4"
-            :class="{ 'opacity-50 cursor-not-allowed': !canRedeemVip }"
-            @click="redeemVip"
-            :disabled="!canRedeemVip"
-          >
-            <i class="iconfont" style="font-size: 22px; margin-top: 1px">&#xe60d;</i>
-            <span>{{ canRedeemVip ? '立即兑换VIP会员' : '音浪不足，无法兑换' }}</span>
-          </button>
-
-          <!-- VIP特权说明 -->
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div class="text-center p-3 rounded-lg bg-pink-500/10">
-              <i class="iconfont text-pink-400 mb-1" style="font-size: 20px">&#xe6e0;</i>
-              <p class="text-xs text-gray-300">无损音质</p>
-            </div>
-            <div class="text-center p-3 rounded-lg bg-pink-500/10">
-              <i class="iconfont text-pink-400 mb-1" style="font-size: 20px">&#xe648;</i>
-              <p class="text-xs text-gray-300">免费下载</p>
-            </div>
-            <div class="text-center p-3 rounded-lg bg-pink-500/10">
-              <i class="iconfont text-pink-400 mb-1" style="font-size: 20px">&#xe617;</i>
-              <p class="text-xs text-gray-300">专属音效</p>
-            </div>
-            <div class="text-center p-3 rounded-lg bg-pink-500/10">
-              <i class="iconfont text-pink-400 mb-1" style="font-size: 20px">&#xe640;</i>
-              <p class="text-xs text-gray-300">专属标识</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <VipProgress
+        :current-coins="userData.currentWaves"
+        :vip-requirement="vipRequirement"
+        :can-redeem-vip="canRedeemVip"
+        :privileges="vipPrivileges"
+        @redeem="handleRedeemVip"
+        @show-privilege="showPrivilegeDetail"
+      />
 
       <!-- 任务中心 -->
-      <section class="animate-fade-in-up" style="animation-delay: 0.2s">
-        <div class="mb-4">
-          <h2
-            class="text-xl font-bold bg-gradient-to-r from-pink-500 to-pink-300 bg-clip-text text-transparent mb-2"
-          >
-            任务中心
-          </h2>
-          <p class="text-gray-400 text-sm">完成任务获取更多音浪</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <!-- 任务卡片 -->
-          <div
-            v-for="task in tasks"
-            :key="task.id"
-            class="bg-gray-800 border border-gray-700 rounded-xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-pink-500/10 relative"
-            :class="{ 'opacity-70': task.completed, 'neon-border': !task.completed }"
-            @click="completeTask(task)"
-          >
-            <div class="flex items-start justify-between mb-4">
-              <div class="flex items-start gap-3 flex-1">
-                <div
-                  class="w-10 h-10 rounded-lg flex items-center justify-center"
-                  :class="
-                    task.completed
-                      ? 'bg-green-500/20 text-green-400'
-                      : 'bg-pink-500/20 text-pink-400'
-                  "
-                >
-                  <i class="iconfont" v-html="task.icon" style="font-size: 20px"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <h3 class="font-semibold text-white text-sm mb-1">{{ task.title }}</h3>
-                  <p class="text-gray-400 text-xs">{{ task.description }}</p>
-                </div>
-              </div>
-
-              <div
-                class="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold"
-                :class="
-                  task.completed ? 'bg-green-500/20 text-green-400' : 'bg-pink-500/20 text-pink-400'
-                "
-              >
-                <span>+{{ task.reward }}</span>
-                <i class="fas fa-music text-xs"></i>
-              </div>
-            </div>
-
-            <button
-              class="w-full py-2 rounded-lg text-sm font-medium transition-all duration-300"
-              :class="
-                task.completed
-                  ? 'bg-gray-700 text-gray-400 cursor-default'
-                  : 'bg-gradient-to-r from-pink-500 to-pink-300 text-white hover:shadow-lg hover:shadow-pink-500/25'
-              "
-              :disabled="task.completed"
-            >
-              {{ task.completed ? '已完成' : '立即完成' }}
-            </button>
-          </div>
-        </div>
-      </section>
+      <TaskCenter :tasks="tasks" @complete-task="handleCompleteTask" />
 
       <!-- 音浪记录 -->
-      <section class="animate-fade-in-up" style="animation-delay: 0.3s">
-        <h2
-          class="text-xl font-bold bg-gradient-to-r from-pink-500 to-pink-300 bg-clip-text text-transparent mb-4"
-        >
-          音浪记录
-        </h2>
+      <CoinRecords :records="coinRecords" @show-record="showRecordDetail" />
+    </main>
 
-        <div
-          class="bg-gray-800/50 backdrop-blur-md border border-gray-700/50 rounded-xl p-4 max-h-80 overflow-y-auto custom-scrollbar"
-        >
+    <!-- VIP特权详情弹窗 -->
+    <el-dialog
+      v-model="showPrivilegeDialog"
+      title="VIP特权详情"
+      width="500px"
+      class="vip-detail-dialog"
+      style="background-color: #101828"
+    >
+      <div v-if="selectedPrivilege" class="p-4 bg-gray-900">
+        <!-- 头部 -->
+        <div class="flex items-center gap-3 mb-6">
           <div
-            v-for="record in coinRecords"
-            :key="record.id"
-            class="flex items-center justify-between py-3 border-b border-gray-700/50 last:border-b-0"
+            class="w-12 h-12 rounded-lg bg-gradient-to-br from-pink-400 to-pink-500 flex items-center justify-center"
           >
-            <div class="flex items-center gap-3">
-              <div
-                class="w-8 h-8 rounded-full flex items-center justify-center"
-                :class="
-                  record.type === 'earn'
-                    ? 'bg-green-500/20 text-green-400'
-                    : 'bg-pink-400/20 text-pink-300'
-                "
+            <i class="iconfont text-2xl text-white" v-html="selectedPrivilege.icon"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-pink-300">{{ selectedPrivilege.title }}</h3>
+            <div class="flex items-center gap-2 mt-1">
+              <span
+                class="text-xs px-2 py-0.5 bg-pink-900/50 text-pink-300 rounded-full border border-pink-700/50"
               >
-                <i class="iconfont" style="font-size: 18px" v-html="record.icon"></i>
-              </div>
-              <div>
-                <h4 class="font-medium text-white text-sm">{{ record.title }}</h4>
-                <p class="text-gray-400 text-xs">{{ record.time }}</p>
-              </div>
-            </div>
-
-            <div
-              class="font-semibold"
-              :class="record.type === 'earn' ? 'text-green-400' : 'text-pink-300'"
-            >
-              {{ record.type === 'earn' ? '+' : '-' }}{{ record.amount }}
-              <i class="iconfont">&#xe6ac;</i>
+                VIP专属
+              </span>
+              <span class="text-xs text-gray-400">特权详情</span>
             </div>
           </div>
         </div>
-      </section>
-    </main>
+
+        <!-- 内容 -->
+        <div class="space-y-4">
+          <!-- 特权介绍 -->
+          <!-- <div class="bg-black/40 p-4 rounded-lg border border-gray-800">
+            <h4 class="text-sm font-semibold text-pink-400 mb-2">特权介绍</h4>
+            <p class="text-gray-300 text-sm leading-relaxed">
+              这里是关于 {{ selectedPrivilege.title }} 的详细介绍，为您提供更优质的音乐体验。
+            </p>
+          </div> -->
+
+          <!-- 特权特点 -->
+          <div class="bg-black/40 p-4 rounded-lg border border-gray-800">
+            <h4 class="text-sm font-semibold text-pink-400 mb-3">特权特点</h4>
+            <ul class="space-y-2">
+              <li
+                v-for="(feature, index) in ['独家音乐资源', '高清音质体验', '专属客服支持']"
+                :key="index"
+                class="flex items-start gap-2"
+              >
+                <i class="iconfont text-pink-500 text-sm mt-0.5">&#xe611;</i>
+                <span class="text-gray-300 text-sm">{{ feature }}</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- 使用说明 -->
+          <div class="bg-black/40 p-4 rounded-lg border border-gray-800">
+            <h4 class="text-sm font-semibold text-pink-400 mb-3">使用说明</h4>
+            <div class="text-gray-300 text-sm space-y-1">
+              <p>· 本特权仅限VIP会员使用</p>
+              <p>· 特权有效期内可无限次使用</p>
+              <p>· 如遇问题请联系客服</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 底部按钮 -->
+        <!-- <div class="mt-6 pt-4 border-t border-gray-800 flex justify-end gap-3">
+          <el-button
+            class="px-4 py-2 text-sm bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-700 hover:border-gray-600"
+            @click="showPrivilegeDialog = false"
+          >
+            关闭
+          </el-button>
+        </div> -->
+      </div>
+    </el-dialog>
+
+    <!-- 音浪记录详情弹窗 -->
+    <el-dialog
+      v-model="showRecordDialog"
+      title="记录详情"
+      width="400px"
+      class="record-detail-dialog"
+    >
+      <div v-if="selectedRecord" class="p-4">
+        <div class="space-y-3">
+          <div>
+            <p class="text-gray-400 text-sm">类型</p>
+            <p class="text-white">{{ selectedRecord.type === 'earn' ? '获得' : '消耗' }}</p>
+          </div>
+          <div>
+            <p class="text-gray-400 text-sm">金额</p>
+            <p :class="selectedRecord.type === 'earn' ? 'text-green-400' : 'text-pink-300'">
+              {{ selectedRecord.type === 'earn' ? '+' : '-' }}{{ selectedRecord.amount }} 音浪
+            </p>
+          </div>
+          <div>
+            <p class="text-gray-400 text-sm">时间</p>
+            <p class="text-white">{{ selectedRecord.time }}</p>
+          </div>
+        </div>
+      </div>
+    </el-dialog>
+
+    <!-- 加载中遮罩 -->
+    <div v-if="loading" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div class="flex flex-col items-center gap-3">
+        <i class="iconfont icon-loading text-3xl text-pink-400 animate-spin"></i>
+        <p class="text-white">加载中...</p>
+      </div>
+    </div>
   </div>
 </template>
 
-<script setup>
-import { ref, computed, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, computed, onMounted, watch } from 'vue'
+import { ElMessage } from 'element-plus'
+import { useCheckInStore } from '@/stores/checkIn'
+import type { Task, CoinRecord, VipPrivilege, Data, BaseResponse } from '@/types/checkIn/index.ts'
+
+// 使用签到 store
+const checkInStore = useCheckInStore()
+
+// 用户数据 - 直接使用 store 中的响应式数据
+const userData = computed(() => ({
+  currentWaves: checkInStore.currentWaves,
+  continuousDays: checkInStore.continuousDays,
+  isCheckedIn: checkInStore.isCheckedIn,
+  tomorrowSignInReward: checkInStore.tomorrowSignInReward,
+  monthCheckInDays: checkInStore.monthCheckInDays,
+}))
 
 // 响应式数据
-const currentCoins = ref(300)
-const consecutiveDays = ref(7)
-const hasCheckedIn = ref(false)
-const nextDayCoins = ref(15)
 const vipRequirement = ref(500)
+const loading = ref(false)
+
+// 弹窗控制
+const showPrivilegeDialog = ref(false)
+const showRecordDialog = ref(false)
+const selectedPrivilege = ref<VipPrivilege | null>(null)
+const selectedRecord = ref<CoinRecord | null>(null)
+
+// 计算属性
+const vipProgress = computed(() => {
+  return (userData.value.currentWaves / vipRequirement.value) * 100
+})
+
+const remainingCoins = computed(() => {
+  return vipRequirement.value - userData.value.currentWaves
+})
+
+const canRedeemVip = computed(() => {
+  return userData.value.currentWaves >= vipRequirement.value
+})
+
+// VIP特权数据
+const vipPrivileges = ref<VipPrivilege[]>([
+  { icon: '&#xe6e0;', title: '无损音质' },
+  { icon: '&#xe648;', title: '免费下载' },
+  { icon: '&#xe617;', title: '专属音效' },
+  { icon: '&#xe640;', title: '专属标识' },
+])
 
 // 任务数据
-const tasks = ref([
+const tasks = ref<Task[]>([
   {
     id: 1,
     title: '完善个人信息',
@@ -285,8 +243,8 @@ const tasks = ref([
   },
 ])
 
-// 音浪记录
-const coinRecords = ref([
+// 音浪记录数据
+const coinRecords = ref<CoinRecord[]>([
   {
     id: 1,
     title: '每日签到',
@@ -329,50 +287,86 @@ const coinRecords = ref([
   },
 ])
 
-// 计算属性
-const vipProgress = computed(() => {
-  return (currentCoins.value / vipRequirement.value) * 100
-})
-
-const remainingCoins = computed(() => {
-  return vipRequirement.value - currentCoins.value
-})
-
-const canRedeemVip = computed(() => {
-  return currentCoins.value >= vipRequirement.value
-})
+// 监听用户数据变化
+watch(
+  () => checkInStore.currentWaves,
+  (newWaves, oldWaves) => {
+    // 当音浪变化时，可以触发一些效果
+    if (newWaves > oldWaves) {
+      // 音浪增加的效果
+      console.log(`音浪增加：${oldWaves} → ${newWaves}`)
+    }
+  },
+)
 
 // 方法
-const checkIn = () => {
-  if (hasCheckedIn.value) return
+const handleCheckIn = async () => {
+  // 这里不需要实际调用，因为子组件已经调用了 store 的方法
+  console.log('父组件收到签到事件')
+}
 
-  // 模拟签到过程
-  hasCheckedIn.value = true
-  currentCoins.value += 10
-  consecutiveDays.value += 1
+// 父组件中
+// 父组件中的事件处理
+const handleCheckInSuccess = (result: BaseResponse<string>) => {
+  console.log('签到成功回调:', result)
 
-  // 添加记录
+  // 添加签到记录到本地列表
   coinRecords.value.unshift({
     id: Date.now(),
     title: '每日签到',
     time: new Date().toLocaleString(),
-    amount: 10,
+    amount: 10, // 这里需要根据实际奖励设置，可以从其他接口获取
     type: 'earn',
-    icon: 'fas fa-calendar-check',
+    icon: '&#xe608;',
   })
 
-  // 模拟API调用
-  console.log('签到成功！获得10音浪')
+  // 显示消息
+  ElMessage.success(result.data || '签到成功！')
+}
+const handleCheckInError = (error: Error) => {
+  console.error('签到失败回调:', error)
+  ElMessage.error(error.message || '签到失败')
 }
 
-const completeTask = (task) => {
+const handleRedeemVip = () => {
+  if (!canRedeemVip.value) {
+    ElMessage.warning('音浪不足，无法兑换VIP')
+    return
+  }
+
+  try {
+    // 模拟VIP兑换逻辑
+    // 注意：这里应该调用 store 的方法来更新音浪
+    // 暂时直接更新，实际应该调用 API
+
+    // 添加兑换记录
+    coinRecords.value.unshift({
+      id: Date.now(),
+      title: 'VIP兑换',
+      time: new Date().toLocaleString(),
+      amount: vipRequirement.value,
+      type: 'spend',
+      icon: '&#xe640;',
+    })
+
+    ElMessage.success('恭喜您成功兑换VIP会员！')
+
+    // 这里可以调用实际的VIP兑换API
+    // await vipExchangeAPI.redeem(vipRequirement.value)
+  } catch (error) {
+    console.error('VIP兑换失败:', error)
+    ElMessage.error('兑换失败，请稍后重试')
+  }
+}
+
+const handleCompleteTask = (task: Task) => {
   if (task.completed) return
 
-  // 模拟完成任务
   task.completed = true
-  currentCoins.value += task.reward
+  // 这里应该调用 API 完成任务并获取奖励
+  // 暂时直接更新音浪
+  checkInStore.currentWaves += task.reward
 
-  // 添加记录
   coinRecords.value.unshift({
     id: Date.now(),
     title: task.title,
@@ -382,42 +376,50 @@ const completeTask = (task) => {
     icon: task.icon,
   })
 
-  // 模拟API调用
-  console.log(`完成任务: ${task.title}，获得${task.reward}音浪`)
+  ElMessage.success(`完成任务: ${task.title}，获得${task.reward}音浪`)
 }
 
-const redeemVip = () => {
-  if (!canRedeemVip.value) return
+const showPrivilegeDetail = (privilege: VipPrivilege) => {
+  selectedPrivilege.value = privilege
+  showPrivilegeDialog.value = true
+}
 
-  // 模拟兑换VIP
-  currentCoins.value -= vipRequirement.value
+const showRecordDetail = (record: CoinRecord) => {
+  selectedRecord.value = record
+  showRecordDialog.value = true
+}
 
-  // 添加记录
-  coinRecords.value.unshift({
-    id: Date.now(),
-    title: 'VIP兑换',
-    time: new Date().toLocaleString(),
-    amount: vipRequirement.value,
-    type: 'spend',
-    icon: 'fas fa-crown',
-  })
-
-  // 模拟API调用
-  console.log('成功兑换VIP会员！')
-
-  // 这里可以添加兑换成功后的逻辑，比如显示成功提示、跳转页面等
-  alert('恭喜您成功兑换VIP会员！')
+// 加载用户签到状态
+const loadUserStatus = async () => {
+  loading.value = true
+  try {
+    await checkInStore.loadCheckInStatus()
+  } catch (error) {
+    console.error('加载用户状态失败:', error)
+    ElMessage.error('加载数据失败，请刷新重试')
+  } finally {
+    loading.value = false
+  }
 }
 
 // 初始化
 onMounted(() => {
-  // 这里可以添加初始化逻辑，比如检查今日是否已签到
-  console.log('音浪签到页面加载完成')
+  // 加载用户状态
+  loadUserStatus()
+
+  // 设置定时检查签到状态（每分钟检查一次）
+  setInterval(() => {
+    const now = new Date()
+    // 如果是新的一天（00:00），刷新签到状态
+    if (now.getHours() === 0 && now.getMinutes() === 0) {
+      checkInStore.loadCheckInStatus()
+    }
+  }, 60000)
 })
 </script>
 
 <style scoped>
-/* 动画效果 */
+/* 全局动画 */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -429,142 +431,102 @@ onMounted(() => {
   }
 }
 
-@keyframes pulse-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 5px rgba(236, 72, 153, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(236, 72, 153, 0.6);
-  }
-}
-
 .animate-fade-in-up {
   animation: fadeInUp 0.6s ease-out forwards;
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 2s infinite;
+/* 弹窗样式 */
+.vip-detail-dialog :deep(.el-dialog) {
+  background: linear-gradient(135deg, #111827, #1f2937);
+  border: 1px solid rgba(236, 72, 153, 0.2);
+  border-radius: 1rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
-/* 音浪硬币样式 */
-.coin {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #000;
-  font-weight: bold;
-  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
-  position: relative;
-}
-
-.coin::before {
-  content: '';
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  right: 5px;
-  bottom: 5px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #fde68a, #fbbf24);
-  z-index: 1;
-}
-
-.coin-text {
-  position: relative;
-  z-index: 2;
-  font-size: 12px;
-  text-align: center;
-  line-height: 1.2;
-}
-
-/* 签到按钮样式 */
-.checkin-button {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #ec4899, #f472b6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.vip-detail-dialog :deep(.el-dialog__header) {
+  border-bottom: 1px solid rgba(236, 72, 153, 0.1);
   color: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 6px 16px rgba(236, 72, 153, 0.4);
-  position: relative;
-  overflow: hidden;
+  padding: 20px 24px;
 }
 
-.checkin-button::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transform: rotate(45deg);
-  transition: all 0.5s ease;
+.vip-detail-dialog :deep(.el-dialog__title) {
+  color: white;
+  font-weight: 600;
 }
 
-.checkin-button:hover:not(.opacity-50) {
-  transform: scale(1.05);
-  box-shadow: 0 8px 20px rgba(236, 72, 153, 0.6);
+.record-detail-dialog :deep(.el-dialog) {
+  background: linear-gradient(135deg, #111827, #1f2937);
+  border: 1px solid rgba(236, 72, 153, 0.2);
+  border-radius: 1rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
-.checkin-button:hover:not(.opacity-50)::before {
-  transform: rotate(45deg) translate(50%, 50%);
+.record-detail-dialog :deep(.el-dialog__header) {
+  border-bottom: 1px solid rgba(236, 72, 153, 0.1);
+  color: white;
+  padding: 20px 24px;
 }
 
-/* 霓虹边框效果 */
-.neon-border {
-  position: relative;
+.record-detail-dialog :deep(.el-dialog__title) {
+  color: white;
+  font-weight: 600;
 }
 
-.neon-border::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 0.75rem;
-  padding: 2px;
-  background: linear-gradient(135deg, #ec4899, #f472b6, #ec4899);
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.neon-border:hover::before {
-  opacity: 1;
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+:deep(.vip-detail-dialog .el-dialog) {
+  background: #111827;
+  border: 1px solid rgba(244, 114, 182, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(244, 114, 182, 0.1);
 }
 
-/* 自定义滚动条 */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+:deep(.vip-detail-dialog .el-dialog__header) {
+  background: linear-gradient(90deg, rgba(17, 24, 39, 0.9) 0%, rgba(45, 0, 35, 0.9) 100%);
+  border-bottom: 1px solid rgba(244, 114, 182, 0.2);
+  padding: 16px 20px;
+  margin: 0;
+  border-radius: 12px 12px 0 0;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-  border-radius: 3px;
+:deep(.vip-detail-dialog .el-dialog__title) {
+  color: #f9a8d4;
+  font-weight: bold;
+  font-size: 16px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(236, 72, 153, 0.3);
-  border-radius: 3px;
-  transition: all 0.3s ease;
+:deep(.vip-detail-dialog .el-dialog__headerbtn) {
+  top: 16px;
+  right: 20px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(236, 72, 153, 0.5);
+:deep(.vip-detail-dialog .el-dialog__headerbtn .el-dialog__close) {
+  color: #f472b6;
+  font-size: 18px;
+}
+
+:deep(.vip-detail-dialog .el-dialog__headerbtn:hover .el-dialog__close) {
+  color: #f9a8d4;
+}
+
+/* 按钮样式覆盖 */
+:deep(.el-button) {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+:deep(.el-button:hover) {
+  transform: translateY(-1px);
 }
 </style>

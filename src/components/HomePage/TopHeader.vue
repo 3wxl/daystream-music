@@ -22,6 +22,13 @@
 
     <!-- 右侧：功能按钮 -->
     <div class="flex items-center space-x-3 ml-4">
+      <router-link to="/VipExchangePage">
+        <button
+          class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors hidden md:block"
+        >
+          商城
+        </button>
+      </router-link>
       <router-link to="/CheckIn">
         <button
           class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors hidden md:block"

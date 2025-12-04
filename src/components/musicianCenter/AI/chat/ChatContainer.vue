@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Message } from '@/types/lyric-assistant'
+import type { Message } from '@/types/lyricAssistant'
 
 interface Props {
   messages: Message[]

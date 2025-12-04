@@ -51,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Theme, QuickPhrase, Message, UserStatus } from '@/types/lyric-assistant'
+import type { Theme, QuickPhrase, Message, UserStatus } from '@/types/lyricAssistant'
 const message = ref<string>('')
 const panelCollapsed = ref<boolean>(false)
 const showSettings = ref<boolean>(false)
@@ -285,3 +285,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped></style>
+<route lang="yaml">
+meta:
+  layout: empty
+</route>
