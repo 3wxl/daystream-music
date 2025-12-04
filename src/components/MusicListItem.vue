@@ -2,18 +2,19 @@
   <div
     v-for="item in items"
     :key="item.id"
+    @click="handleClick(item)"
     class="flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors duration-200 bg-gray-900
            hover:bg-purple-900/40 dark:hover:bg-purple-900/40"
   >
-    <div class="flex items-center flex-grow min-w-0">
-      <img :src="item.imgUrl" alt="Album Cover" class="w-12 h-12 rounded-md object-cover mr-3 flex-shrink-0" />
+    <div class="flex items-center grow min-w-0">
+      <img :src="item.image" alt="Album Cover" class="w-12 h-12 rounded-md object-cover mr-3 shrink-0" />
       <div class="flex flex-col truncate">
-        <span class="text-base font-medium text-gray-100 truncate">{{ item.musicName }}</span>
-        <span class="text-sm text-gray-500 truncate">{{ item.artist }}</span>
+        <span class="text-base font-medium text-gray-100 truncate">{{ item.title }}</span>
+        <span class="text-sm text-gray-500 truncate">{{ item.desc }}</span>
       </div>
     </div>
 
-    <div class="flex items-center space-x-2 flex-shrink-0 ml-4">
+    <div class="flex items-center space-x-2 shrink-0 ml-4">
       <button
         class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-700 text-gray-300
                hover:bg-gray-600 transition-colors duration-200"
@@ -54,11 +55,33 @@
 </template>
 
 <script lang="ts" setup>
-defineProps({
-  items:{
-    type:Object
+
+import type { PropType } from 'vue'
+
+
+export interface MusicItemProp {
+  id: string | number
+  image: string
+  title: string
+  desc: string
+  raw?: any 
+}
+
+const props = defineProps({
+  items: {
+    type: Array as PropType<MusicItemProp[]>,
+    required: true,
+    default: () => []
   }
 })
+
+
+
+const emit = defineEmits(['click-music'])
+
+const handleClick = (item:any) => {
+  emit('click-music',item)
+}
 </script>
 
 <style lang="scss" scoped>

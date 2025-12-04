@@ -15,7 +15,6 @@ export function transformFilterGroups(backendData: any) {
       }))
     }
     filterGroups.push(group)
-
   }
   return filterGroups
 }

@@ -2,7 +2,7 @@
   <div class="h-full flex flex-col bg-gray-800 rounded-lg">
     <header class="shrink-0 p-4 flex items-center justify-between border-b border-purple-900/50">
       <div>
-        <h1 class="text-lg font-semibold text-gray-500">{{ playlist.name || 'EXO神曲' }}</h1>
+        <h1 class="text-lg font-semibold text-gray-500">{{ info.title }}</h1>
       </div>
 
       <div class="flex items-center space-x-3">
@@ -52,27 +52,22 @@
     <div class="flex-grow flex flex-col md:flex-row overflow-hidden">
       <div class="w-full md:w-1/4 flex-shrink-0 overflow-y-auto p-6 space-y-4 music-content">
         <img
-          src="../assets/logo.jpg "
+          :src="info.cover"
           alt="Album Cover"
           class="w-full rounded-lg shadow-lg aspect-square object-cover"
         />
 
         <div class="flex items-center space-x-2">
-          <img :src="playlist.creator.avatar" alt="Creator Avatar" class="w-8 h-8 rounded-full" />
-          <span class="text-sm font-medium text-gray-200">{{
-            playlist.creator.name || '张艺兴'
-          }}</span>
+          <img :src="info.creatorAvatar" alt="Creator Avatar" class="w-8 h-8 rounded-full" />
+          <span class="text-sm font-medium text-gray-200">{{ info.creatorName }}</span>
         </div>
 
         <div class="text-xs text-gray-400">
-          <span>歌曲总数：{{ playlist.musicCount || '1230s首' }}</span>
+          <span>歌曲总数：{{ info.count }}首</span>
         </div>
 
         <p class="text-sm text-gray-300 leading-relaxed">
-          {{
-            playlist.description ||
-            '张艺兴（LAY），1991年10月7日出生于湖南省长沙市，中国内地流行乐男歌手、影视演员、音乐制作人、中国国家话剧院演员，韩国男子演唱组合EXO/EXO-M成员。 2005年参加湖南经视《明星学院》比赛并获得总决赛季军。 2008年成为韩国SM娱乐有限公司旗下练习生。 2012年以EXO团体和其子队EXO-M成员身份正式出道。 2015年加盟励志体验真人秀节目《极限挑战》受到广泛关注。 2016年凭借爱情喜剧片《前任2：备胎反击战》获得第四届中英电影节最佳男配角奖；同年，发行个人首张专辑《LOSE CONTROL》，并凭借该专辑获得音悦V榜年度盛典年度专辑、内地最佳男歌手两项奖项。'
-          }}
+          {{ info.description }}
         </p>
         <p class="text-sm text-gray-300 leading-relaxed">
           这里是更多的简介内容，用于测试滚动条。Lorem ipsum dolor sit amet, consectetur adipiscing
@@ -100,103 +95,24 @@
 
 <script setup lang="ts">
 import MusicListItem from '@/components/MusicListItem.vue'
-import { ref } from 'vue'
+import { computed } from 'vue'
 
-defineProps(['playlist', 'musicList'])
+const props = defineProps(['playlist', 'albumlist', 'musicList'])
 
-// const playlist = ref({
-//   name: '非主流回忆杀 | 曾经火遍大街小巷网络歌曲',
-//   coverImg: 'https://placehold.co/400x400/FF0077/FFFFFF?text=Album+Cover',
-//   creator: {
-//     name: 'OAM聒聒酱',
-//     avatar: 'https://placehold.co/100x100/333/FFF?text=A',
-//   },
-//   songCount: 150,
-//   description:
-//     '回味那些90后非主流歌曲，见证了一代人的成长。也陪伴了他们懵懂青涩的时光。既然有美好的香甜品，也就有有苦涩的苦涩酒。',
-// })
-
-// const musicList = ref([
-//   {
-//     id: '1',
-//     title: '如果爱能早些说',
-//     artist: '苏永康',
-//     cover: 'https://placehold.co/100x100/5A0A20/FFF?text=S',
-//   },
-//   {
-//     id: '2',
-//     title: '可只是个传说',
-//     artist: '陈旭',
-//     cover: 'https://placehold.co/100x100/7A0A30/FFF?text=C',
-//   },
-//   {
-//     id: '3',
-//     title: '爱我就跟我走',
-//     artist: '王鹤铮',
-//     cover: 'https://placehold.co/100x100/9A0A40/FFF?text=W',
-//   },
-//   {
-//     id: '4',
-//     title: '归零',
-//     artist: '九千七',
-//     cover: 'https://placehold.co/100x100/BA0A50/FFF?text=J',
-//   },
-//   {
-//     id: '5',
-//     title: '贝多芬的悲伤',
-//     artist: '萧风',
-//     cover: 'https://placehold.co/100x100/DA0A60/FFF?text=X',
-//   },
-//   {
-//     id: '6',
-//     title: '玫瑰花的葬礼',
-//     artist: '许嵩',
-//     cover: 'https://placehold.co/100x100/F00A70/FFF?text=V',
-//   },
-//   {
-//     id: '7',
-//     title: '不分手的恋爱',
-//     artist: '汪苏泷',
-//     cover: 'https://placehold.co/100x100/FF0077/FFF?text=W',
-//   },
-//   {
-//     id: '8',
-//     title: '客官不可以',
-//     artist: '徐良',
-//     cover: 'https://placehold.co/100x100/FF3399/FFF?text=X',
-//   },
-//   {
-//     id: '9',
-//     title: '犯贱',
-//     artist: '阿悄',
-//     cover: 'https://placehold.co/100x100/FF66AA/FFF?text=A',
-//   },
-//   {
-//     id: '10',
-//     title: '说爱你',
-//     artist: '蔡依林',
-//     cover: 'https://placehold.co/100x100/FF99CC/FFF?text=J',
-//   },
-//   {
-//     id: '11',
-//     title: 'Bad Boy',
-//     artist: '张惠妹',
-//     cover: 'https://placehold.co/100x100/FFCCEE/FFF?text=A',
-//   },
-//   {
-//     id: '12',
-//     title: '坡',
-//     artist: 'C-Block',
-//     cover: 'https://placehold.co/100x100/5A0A20/FFF?text=C',
-//   },
-//   {
-//     id: '13',
-//     title: 'Last Dance',
-//     artist: '伍佰',
-//     cover: 'https://placehold.co/100x100/7A0A30/FFF?text=W',
-//   },
-// ])
+const info = computed(() => {
+  const data = props.playlist || props.albumlist || {}
+  return {
+    title: data.name || data.albumName || '未知标题',
+    cover: data.coverImg || data.coverUrl || data.imgUrl || 'https://placehold.co/400x400/333/FFF?text=No+Cover',
+    creatorName: data.creator?.name || data?.singerName || data.artist || '未知艺术家',
+    creatorAvatar: data.creator?.avatar || data?.artistAvatar || 'https://placehold.co/100x100/333/FFF?text=A',
+    description: data.description || data.introduction || '暂无简介',
+    count: data.musicCount || data.colletCount || 0
+  }
+})
 </script>
+
+
 
 <style lang="scss" scoped>
 .music-content,
