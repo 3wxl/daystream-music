@@ -149,7 +149,7 @@
               class="h-18 w-full bg-[#121212] border-b border-white/10 px-6 py-4 flex justify-between items-center"
             >
               <div class="flex items-center gap-3">
-                <img src="../../assets/logo.jpg" alt="" class="w-10 h-10 rounded-full" />
+                <img src="../../../assets/logo.jpg" alt="" class="w-10 h-10 rounded-full" />
                 <h2 class="text-xl font-semibold text-white">编辑音乐作品</h2>
               </div>
               <button

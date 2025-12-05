@@ -32,7 +32,12 @@
               src="https://i.pixiv.cat/img-original/img/2018/08/20/00/00/00/63450144_p0_square1200.jpg"
               alt="歌曲封面"
               class="w-10 h-10 rounded-lg object-cover border border-pink-400/20 group-hover:border-pink-400 transition-colors cursor-pointer"
-              @click="$emit('toggle-play')"
+              @click="
+                () => {
+                  $emit('toggle-play')
+                  openPlayDetail()
+                }
+              "
             />
             <div
               v-if="isPlaying"
@@ -42,11 +47,13 @@
           <div class="min-w-0">
             <h3
               class="text-sm font-medium text-pink-100 hover:text-pink-400 transition-colors cursor-pointer truncate"
+              @click="openPlayDetail"
             >
               You
             </h3>
             <p
               class="text-xs text-pink-300/80 hover:text-pink-400 transition-colors cursor-pointer truncate"
+              @click="openPlayDetail"
             >
               千坂 / N2V
             </p>
@@ -142,6 +149,7 @@
 </template>
 
 <script setup>
+const router = useRouter()
 defineProps({
   isPlaying: {
     type: Boolean,
@@ -184,7 +192,13 @@ defineProps({
     },
   },
 })
-
+const openPlayDetail = () => {
+  // 跳转到播放详情页，并携带歌曲参数（两种传参方式可选）
+  // 方式1：query 参数（URL可见，适合简单参数）
+  router.push({
+    path: '/MusicPlayer',
+  })
+}
 defineEmits([
   'toggle-play',
   'toggle-like',

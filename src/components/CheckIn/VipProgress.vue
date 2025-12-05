@@ -190,7 +190,7 @@
           </div>
           <button
             v-if="getBestSuggestion().canRedeem"
-            @click="handleRedeemTarget(getBestSuggestion().target)"
+            @click="handleBestSuggestionClick"
             class="ml-2 px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-400 bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-400 text-white hover:shadow-[0_0_15px_rgba(244,114,182,0.4)] hover:scale-105 active:scale-95"
           >
             立即兑换
@@ -257,7 +257,8 @@ const vipTargets: VipTarget[] = [
 const maxWaves = 200
 const currentTargetIndex = computed(() => {
   for (let i = vipTargets.length - 1; i >= 0; i--) {
-    if (props.currentCoins >= vipTargets[i].value) {
+    const target = vipTargets[i]
+    if (target && props.currentCoins >= target.value) {
       return i
     }
   }
@@ -269,17 +270,22 @@ const canRedeemAny = computed(() => {
 })
 
 const getCurrentTarget = () => {
-  if (currentTargetIndex.value >= 0) {
-    return vipTargets[currentTargetIndex.value].value
+  const index = currentTargetIndex.value
+  if (index >= 0 && index < vipTargets.length && vipTargets[index]) {
+    return vipTargets[index].value
   }
-  return vipTargets[0].value
+  return vipTargets[0]?.value ?? 0
 }
 
 const remainingCoins = computed(() => {
-  if (currentTargetIndex.value < vipTargets.length - 1) {
-    const nextTarget = vipTargets[currentTargetIndex.value + 1] || vipTargets[0]
-    return Math.max(0, nextTarget.value - props.currentCoins)
+  const currentIndex = currentTargetIndex.value
+  if (currentIndex >= 0 && currentIndex < vipTargets.length - 1) {
+    const nextTarget = vipTargets[currentIndex + 1]
+    if (nextTarget) {
+      return Math.max(0, nextTarget.value - props.currentCoins)
+    }
   }
+  // 如果已经是最后一个目标或无下一目标，则返回0
   return 0
 })
 
@@ -289,9 +295,16 @@ const vipProgress = computed(() => {
   }
   return (props.currentCoins / maxWaves) * 100
 })
+const handleBestSuggestionClick = () => {
+  const suggestion = getBestSuggestion()
+  if (suggestion.target) {
+    handleRedeemTarget(suggestion.target)
+  }
+}
 const getBestSuggestion = () => {
-  if (currentTargetIndex.value >= 0) {
-    const target = vipTargets[currentTargetIndex.value]
+  const index = currentTargetIndex.value
+  if (index >= 0 && index < vipTargets.length && vipTargets[index]) {
+    const target = vipTargets[index]
     return {
       title: `可兑换${target.duration}`,
       description: `消耗${target.value}音浪，享受${target.duration}特权`,
@@ -299,11 +312,16 @@ const getBestSuggestion = () => {
       target,
     }
   }
+
   const nextTarget = vipTargets[0]
-  const neededCoins = nextTarget.value - props.currentCoins
+  let neededCoins = 0 // 修改为 let 并初始化默认值
+  if (nextTarget) {
+    neededCoins = nextTarget.value - props.currentCoins
+  }
+
   return {
     title: `还差${neededCoins}音浪`,
-    description: `获取${neededCoins}音浪即可兑换${nextTarget.duration}`,
+    description: `获取${neededCoins}音浪即可兑换${nextTarget?.duration || ''}`,
     canRedeem: false,
     target: nextTarget,
   }

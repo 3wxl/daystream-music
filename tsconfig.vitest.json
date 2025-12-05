@@ -3,11 +3,15 @@
   "include": ["src/**/__tests__/*", "src/**/*.spec.ts", "src/**/*.test.ts", "env.d.ts"],
   "compilerOptions": {
     "composite": true,
-    "noEmit": true,
+    "noEmit": false,
+    "emitDeclarationOnly": true, // 仅生成声明文件（解决TS5096/TS6304）
+    "declaration": true,
+    "declarationMap": false,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.vitest.tsbuildinfo",
     "types": ["node", "jsdom"],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "paths": { "@/*": ["./src/*"] },
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "outDir": "./temp/declarations/vitest" // 临时目录存放声明文件
   }
 }

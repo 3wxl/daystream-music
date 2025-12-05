@@ -1,32 +1,19 @@
 {
-  "compilerOptions": {
-    "composite": true,
-    "noEmit": false,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    },
-    "resolveJsonModule": true
-  },
   "files": [],
   "references": [
-    {
-      "path": "./tsconfig.node.json"
-    },
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.vitest.json"
-    }
+    { "path": "./tsconfig.node.json" },
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.vitest.json" }
   ],
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.d.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "src/auto-imports.d.ts",
-    ".eslintrc-auto-import.json",
-    "node_modules/axios/index.d.ts"
-, "src/api/Auth/Register.ts"  ]
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": true, // 主配置不输出任何文件，仅做项目引用
+    "baseUrl": ".",
+    "paths": { "@/*": ["src/*"] },
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [],
+  "exclude": ["node_modules"]
 }
