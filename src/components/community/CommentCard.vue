@@ -27,6 +27,12 @@
       <transition name="el-zoom-in-top">
         <div class="text-white mt-3" v-show="isSpradSonComment">
           <SonCommentCard v-for="sonComment in sonCommentList" :sonComment="sonComment" :key="sonComment.id" @replyComment="commentInputChange(sonComment)"/>
+          <div class="-mt-4" v-if="hasMoreSonComment">
+            <span class="text-[#e5e7eb] text-[14px] hover:text-pink-400 cursor-pointer duration-200" @click="getSonCommentList">展开查看更多子评论</span>
+          </div>
+          <div class="-mt-4" v-if="!hasMoreSonComment">
+            <span class="text-[#e5e7eb] text-[14px]">没有更多子评论了</span>
+          </div>
           <!-- 上面这一部分是子评论区 -->
         </div>
       </transition>
@@ -70,11 +76,12 @@
   let {id,content,userId,username,avatar,createdTime,likeCount,isLike,isSelf,childCount} = toRefs(props.commentObj);
   let isSpradSonComment = ref(false);   // 是否展开子评论
   let isSpradInput = ref(false);        // 是否展开回复输入框
-  let lastId = ref(null)
+  let lastId = ref(null)      // 子评论列表的lastId
   let commentWords = ref(0);    // 你的输入评论字数
   let commentInput = ref(null);   // 你的评论输入框
   let nowCommentData = reactive({})   // 当前回复评论对象的数据,点击一级评论的评论按钮时将该一级评论的数据保存在这里，点击子评论时将子评论的数据保存在这里
   let sonCommentList = reactive([])    // 子评论列表
+  let hasMoreSonComment = ref(false)      // 是否还有更多子评论
   // 方法
   function updateWords(event) {
     commentWords.value = event.target.value.length;
@@ -93,15 +100,16 @@
     if(childCount.value==0)return;      // 如果没有子评论则返回
     let data:{parentId:string;size:number;lastId?:string} = {
       parentId:id.value,
-      size:8
+      size:5
     }
     if(lastId)data.lastId = lastId.value;
     let res = await GetReplyCommentList(data);
-    console.log(res)
     if(res.success){
       if(res.data==='后面没有数据了'){
         Object.assign(sonCommentList,[])
       }else{
+        hasMoreSonComment.value = res.data.hasMore
+        lastId.value = res.data.lastId
         for(let i = 0; i < res.data.dateList.length; i++){
           sonCommentList.push(res.data.dateList[i])
         }

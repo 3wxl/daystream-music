@@ -1,91 +1,93 @@
 <template>
-  <el-container class="bg-gradient-to-b from-gray-900 to-gray-950 w-full min-h-full">
-    <el-header class="border-b-[1px] border-[#1f2d3d] flex items-center">
-      <div class="relative">
-        <input
-            v-model="input"
-            type="text"
-            placeholder="搜索动态或用户"
-            class="w-[200px] px-4 py-[6px] pl-10 bg-gray-700 text-gray-200 placeholder-gray-400 rounded-full border border-gray-600 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:border-transparent transition-all"
-            />
-        <Search @click="searchDynamic" class="cursor-pointer absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-      </div>
-      <div class="ml-1 w-100-200">
-        <el-scrollbar class="w-full">
-          <span v-for="musician in musicians" :key="musician.id"
-            class="cursor-pointer inline-block duration-[0.2s] mx-2 text-[#e5e7eb] text-[14px] py-2 px-4 bg-[rgba(255,255,255,0.1)] rounded-[20px] hover:bg-[rgba(255,255,255,0.15)]"
-            :class="activedId==musician.id?'bg-pink-600 hover:bg-pink-700':''"
-            @click="activedId=musician.id"
-          >
-            {{musician.name}}
-          </span>
-          <span
-            class="cursor-pointer inline-block duration-[0.2s] mx-2 text-[#e5e7eb] text-[14px] py-2 px-4 bg-[rgba(255,255,255,0.1)] rounded-[20px] hover:bg-[rgba(255,255,255,0.15)]">
-            <IconFontSymbol name="sandian"></IconFontSymbol>
-          </span>
-        </el-scrollbar>
-      </div>
-    </el-header>
-    <el-container>
-      <el-main>
-        <div @scroll="handleScroll" class="ml-5 flex relative items-start overflow-y-auto" style="height: calc(100vh - 174px)">
-          <div class="flex-grow-0 shrink-0 basis-[67%]">
-            <community-display v-for="(dynamic, index) in dymamicList" :key="index" :dynamic="dynamic"></community-display>
-            <div class="flex justify-center" v-if="hasMore && !isSearch">
-              <div class="loader">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-              </div>
-            </div>
-            <div class="my-2 text-center text-[#e5e7eb] text-[14px]" v-if="!hasMore && !isSearch && !isSearchNull">
-              没有更多动态了~
-            </div>
-            <div class="w-[250px] mx-auto relative top-30" v-show="isSearch">
-              <DynamicLoading/>
-            </div>
-            <div v-if="isSearchNull" class="w-[300px] mx-auto relative top-30">
-              <DynamicNull :searchContent="searchContentNull"/>
-            </div>
-          </div>
-          <div class="flex-grow-0 shrink-0 basis-[28%] ml-10 duration-[.2s] bg-gray-900/60 rounded-xl border border-gray-800 overflow-hidden shadow-lg backdrop-blur-sm w-100 p-[15px] sticky top-0 self-start">
-            <div class="flex flex-col items-center">
-              <div class="w-30 h-30 md:w-30 md:h-30 rounded-full border-4 border-white/20 overflow-hidden shadow-lg">
-                <img
-                  :src="'http://39.96.214.163:9000/file/70567a01-09d0-443b-9d8a-bab6e5623967.png'"
-                  class="cursor-pointer w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                  @click="router.push('/User/PersonalCenter')"
-                />
-              </div>
-              <p class="text-[#e5e7eb] text-[18px] font-[600] mt-2">蔡徐坤</p>
-              <p class="text-[#bdbdbd] mt-[2px] text-[12px]">坤坤音乐创作者</p>
-              <div class="mt-[10px]">
-                <button @click="router.push('/community/communityCreate')" class="BtnPublish relative text-[#e5e7eb] px-[15px] py-[5px] bg-pink-600 rounded-[10px] cursor-pointer hover:bg-pink-500 active:bg-pink-700 active:scale-95 duration-[0.3s]">
-                  <IconFontSymbol name="dongtai" size="18px"></IconFontSymbol>
-                  发布动态
-                  <div class="BtnPing absolute top-0 left-0 w-full h-full bg-pink-600 -z-1 rounded-[10px] "></div>
-                </button>
-              </div>
-              <div class="flex mt-6 text-[#e5e7eb] mb-10">
-                <span>
-                  <span class="mr-[2px]">111</span>
-                  粉丝
-                </span>
-                <span class="mx-14">
-                  <span class="mr-[2px]">111</span>
-                  点赞
-                </span>
-                <span>
-                  <span class="mr-[2px]">111</span>
-                  关注
-                </span>
-              </div>
-            </div>
-          </div>
+  <keep-alive>
+    <el-container class="bg-gradient-to-b from-gray-900 to-gray-950 w-full min-h-full">
+      <el-header class="border-b-[1px] border-[#1f2d3d] flex items-center">
+        <div class="relative">
+          <input
+              v-model="input"
+              type="text"
+              placeholder="搜索动态或用户"
+              class="w-[200px] px-4 py-[6px] pl-10 bg-gray-700 text-gray-200 placeholder-gray-400 rounded-full border border-gray-600 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:border-transparent transition-all"
+              />
+          <Search @click="searchDynamic" class="cursor-pointer absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
         </div>
-      </el-main>
+        <div class="ml-1 w-100-200">
+          <el-scrollbar class="w-full">
+            <span v-for="musician in musicians" :key="musician.id"
+              class="cursor-pointer inline-block duration-[0.2s] mx-2 text-[#e5e7eb] text-[14px] py-2 px-4 bg-[rgba(255,255,255,0.1)] rounded-[20px] hover:bg-[rgba(255,255,255,0.15)]"
+              :class="activedId==musician.id?'bg-pink-600 hover:bg-pink-700':''"
+              @click="activedId=musician.id"
+            >
+              {{musician.name}}
+            </span>
+            <span
+              class="cursor-pointer inline-block duration-[0.2s] mx-2 text-[#e5e7eb] text-[14px] py-2 px-4 bg-[rgba(255,255,255,0.1)] rounded-[20px] hover:bg-[rgba(255,255,255,0.15)]">
+              <IconFontSymbol name="sandian"></IconFontSymbol>
+            </span>
+          </el-scrollbar>
+        </div>
+      </el-header>
+      <el-container>
+        <el-main>
+          <div @scroll="handleScroll" class="ml-5 flex relative items-start overflow-y-auto" style="height: calc(100vh - 174px)">
+            <div class="flex-grow-0 shrink-0 basis-[67%]">
+              <community-display v-for="(dynamic, index) in dymamicList" :key="index" :dynamic="dynamic"></community-display>
+              <div class="flex justify-center" v-if="hasMore && !isSearch">
+                <div class="loader">
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                </div>
+              </div>
+              <div class="my-2 text-center text-[#e5e7eb] text-[14px]" v-if="!hasMore && !isSearch && !isSearchNull">
+                没有更多动态了~
+              </div>
+              <div class="w-[250px] mx-auto relative top-30" v-show="isSearch">
+                <DynamicLoading/>
+              </div>
+              <div v-if="isSearchNull" class="w-[300px] mx-auto relative top-30">
+                <DynamicNull :searchContent="searchContentNull"/>
+              </div>
+            </div>
+            <div class="flex-grow-0 shrink-0 basis-[28%] ml-10 duration-[.2s] bg-gray-900/60 rounded-xl border border-gray-800 overflow-hidden shadow-lg backdrop-blur-sm w-100 p-[15px] sticky top-0 self-start">
+              <div class="flex flex-col items-center">
+                <div class="w-30 h-30 md:w-30 md:h-30 rounded-full border-4 border-white/20 overflow-hidden shadow-lg">
+                  <img
+                    :src="userInfo.avatar"
+                    class="cursor-pointer w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                    @click="router.push('/User/PersonalCenter')"
+                  />
+                </div>
+                <p class="text-[#e5e7eb] text-[18px] font-[600] mt-2">{{userInfo.username}}</p>
+                <p class="text-[#bdbdbd] mt-[2px] text-[12px]">{{userInfo.introduction?userInfo.introduction:'这个人很懒，还没有填写简介 ε=( o｀ω′)ノ'}}</p>
+                <div class="mt-[10px]">
+                  <button @click="router.push('/community/communityCreate')" class="BtnPublish relative text-[#e5e7eb] px-[15px] py-[5px] bg-pink-600 rounded-[10px] cursor-pointer hover:bg-pink-500 active:bg-pink-700 active:scale-95 duration-[0.3s]">
+                    <IconFontSymbol name="dongtai" size="18px"></IconFontSymbol>
+                    发布动态
+                    <div class="BtnPing absolute top-0 left-0 w-full h-full bg-pink-600 -z-1 rounded-[10px] "></div>
+                  </button>
+                </div>
+                <div class="flex mt-6 text-[#e5e7eb] mb-10">
+                  <span>
+                    <span class="mr-[2px]">111</span>
+                    粉丝
+                  </span>
+                  <span class="mx-14">
+                    <span class="mr-[2px]">111</span>
+                    点赞
+                  </span>
+                  <span>
+                    <span class="mr-[2px]">111</span>
+                    关注
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </el-main>
+      </el-container>
     </el-container>
-  </el-container>
+  </keep-alive>
 </template>
 
 <script setup lang="ts">
@@ -96,6 +98,8 @@
   import {debounce,throttle} from '@/utils/debounceThrottle';     // 节流防抖
   import DynamicLoading from '@/components/community/DynamicLoading.vue'    // 动态加载组件
   import DynamicNull from '@/components/community/DynamicNull.vue'      // 当搜索动态内容为空时展示组件
+
+  // 数据
   let input = ref('')
   let oldInput = ''     // 旧输入,用于比较是否改变
   let musicians = reactive([
@@ -213,6 +217,7 @@
     "pageSize": 10
   })
   let hasMore = ref(true)     // 是否还有更多数据
+  let userInfo = JSON.parse(localStorage.getItem('user')).userInfo
   // 方法
   async function getDynamic() {     // 获取动态列表
     isSearchNull.value = false

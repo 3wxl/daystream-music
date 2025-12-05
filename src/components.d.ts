@@ -116,6 +116,7 @@ declare module 'vue' {
     SongsNumDataCard: typeof import('./components/admin/dataStatistics/SongsNumDataCard.vue')['default']
     SongsTypeAssign: typeof import('./components/admin/dataStatistics/SongsTypeAssign.vue')['default']
     TagBar: typeof import('./components/TagBar.vue')['default']
+    TagBars: typeof import('./components/TagBars.vue')['default']
     TaskCenter: typeof import('./components/CheckIn/TaskCenter.vue')['default']
     ThemeList: typeof import('./components/musicianCenter/AI/sidebar/ThemeList.vue')['default']
     TopHeader: typeof import('./components/HomePage/TopHeader.vue')['default']

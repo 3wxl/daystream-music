@@ -71,6 +71,7 @@
   import {debounce,throttle} from '@/utils/debounceThrottle';     // 节流防抖
   import {Like} from '@/api/community/Like';      // 点赞
 
+  // 数据
   const router = useRouter();
   let props = defineProps({
     dynamic: {
@@ -95,6 +96,8 @@
   let {content} = props.dynamic
   let {userId,postId, avatar, userName, createTime, introduction, title,commentCount,likeCount,isLike,isFollow} = toRefs(props.dynamic);
   createTime.value = formatDateTime(createTime.value);
+
+  // 方法
   function extractImgSrcByReg(html) {     // 这里是获取一个hmtl片段里面的图片的src组成的数组
     if (!html || typeof html !== 'string') return [];
     const imgSrcReg = /<img[^>]+src\s*=\s*["']([^"']*)["'][^>]*>/gi;
