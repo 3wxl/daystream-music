@@ -55,15 +55,15 @@ export const useUserStore = defineStore(
       removeToken()
     }
 
-  return {
-    token,
-    userInfo,
-    login,
-    logout,
-    getUsersInfo,
-  }   
-},
-{
+    return {
+      token,
+      userInfo,
+      login,
+      logout,
+      getUsersInfo,
+    }
+  },
+  {
     persist: true,
   },
 )
