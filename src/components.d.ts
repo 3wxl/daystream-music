@@ -13,8 +13,6 @@ declare module 'vue' {
   export interface GlobalComponents {
     A: typeof import('./components/user/a.vue')['default']
     AdminButton: typeof import('./components/admin/AdminButton.vue')['default']
-    AdminInput: typeof import('./components/admin/AdminInput.vue')['default']
-    AdminSelect: typeof import('./components/admin/AdminSelect.vue')['default']
     AdminConfirm: typeof import('./components/admin/AdminConfirm.vue')['default']
     AdminInput: typeof import('./components/admin/AdminInput.vue')['default']
     AdminMessage: typeof import('./components/admin/AdminMessage.vue')['default']
