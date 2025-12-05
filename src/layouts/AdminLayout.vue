@@ -1,8 +1,8 @@
 <template>
   <!-- 作用：后台的layout -->
-  <el-container class="admin-container">
+  <el-container class="admin-container relative" >
     <el-aside width="220px">
-      <el-scrollbar height="100vh" class="bg-linear-to-tr from-[#58768a] to-[#68537d] shadow-xl/20 shadow-[#A070EE]">
+      <el-scrollbar height="100vh" class="bg-linear-to-tr from-[#2b4c60] to-[#645078] shadow-xl/20 shadow-[#A070EE] fixed top-0">
       <!-- bg-linear-to-tr from-[#58768a] to-[#544464] shadow-xl/20 shadow-[#A070EE] -->
       <!-- bg-linear-to-tr from-[#517185] to-[#8b62b6] shadow-xl/20 shadow-[#A070EE] -->
         <div class="w-full my-4">
@@ -25,11 +25,11 @@
             </template>
             <el-menu-item index="3-1" @click="router.push('/admin/worksManage/songsList')">
               <IconFontSymbol name="bofangqi_shouyegequliebiao_" size="18px"></IconFontSymbol>
-              <span>歌曲列表</span>
+              <span>作品列表</span>
             </el-menu-item>
             <el-menu-item index="3-2" @click="router.push('/admin/worksManage/songsReview')">
               <IconFontSymbol name="file-music" class="mr-1"></IconFontSymbol>
-              <span>歌曲审核</span>
+              <span>作品审核</span>
             </el-menu-item>
             <!-- <el-menu-item index="3-3"  @click="router.push('/admin/worksManage/mvList')">
               <IconFontSymbol name="songbook_mv" size="18px"  class="mr-1"></IconFontSymbol>
@@ -59,13 +59,17 @@
               <IconFontSymbol name="yunyingguanli" class="mr-1"></IconFontSymbol>
               <span>运营管理</span>
             </template>
-            <el-menu-item index="5-1">
+            <el-menu-item index="5-1" @click="router.push('/admin/operationManage/hotList')">
               <IconFontSymbol name="resou" class="mr-1"></IconFontSymbol>
               <span>热搜列表</span>
             </el-menu-item>
-            <el-menu-item index="5-2">
+            <el-menu-item index="5-2" @click="router.push('/admin/operationManage/recommendManage')">
               <IconFontSymbol name="shouyetuijianwei" class="mr-1"></IconFontSymbol>
               <span>首页推荐位</span>
+            </el-menu-item>
+            <el-menu-item index="5-3" @click="router.push('/admin/operationManage/bannerManage')">
+              <IconFontSymbol name="lunbotuguanli" class="mr-1"></IconFontSymbol>
+              <span>首页轮播图</span>
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu index="6">
@@ -86,7 +90,7 @@
               <span>评论管理</span>
             </el-menu-item>
           </el-sub-menu>
-          <el-menu-item index="7">
+          <el-menu-item index="7" @click="logout">
             <IconFontSymbol name="tuichudenglu" class="mr-1"></IconFontSymbol>
             <span>退出登录</span>
           </el-menu-item>
@@ -132,6 +136,11 @@
 <script setup>
   import {useRouter } from 'vue-router'
   let router = useRouter()
+  function logout() {
+    // 退出登录时的一些处理工作，如清除用户信息等
+
+    router.push('/')
+  }
 </script>
 
 <style scoped>

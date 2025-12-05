@@ -1,14 +1,15 @@
-import axios from 'axios'
 import type {
+  AxiosError,
   AxiosRequestConfig,
-  Method,
   AxiosResponse,
   InternalAxiosRequestConfig,
-  AxiosError,
+  Method,
 } from 'axios'
-import { ElLoading, ElMessage } from 'element-plus'
+import axios from 'axios'
 import type { LoadingInstance } from 'element-plus'
+import { ElLoading, ElMessage } from 'element-plus'
 
+let isRelogging = false; 
 const TOKEN_KEY = 'auth_token'
 
 const setToken = (token: string) => {
@@ -25,34 +26,53 @@ const removeToken = () => {
 
 // 响应数据通用类型
 type Data<T = unknown> = {
-  code: string
-  message: string
+  success: boolean
+  errorMsg: string
   data: T
+  total?: number
+  errCode?: number
 }
 
 // Axios 请求配置接口
 interface RequestConfig<T = unknown> extends AxiosRequestConfig {
   interceptors?: {
     requestInterceptor?: (config: AxiosRequestConfig) => AxiosRequestConfig
-    requestInterceptorCatch?: (error: AxiosError) => Promise<AxiosError>
+    requestInterceptorCatch?: (error: AxiosError) => Promise<any>
     responseInterceptor?: (res: AxiosResponse<Data<T>>) => AxiosResponse<Data<T>>
-    responseInterceptorCatch?: (error: AxiosError) => Promise<AxiosError>
+    responseInterceptorCatch?: (error: AxiosError) => Promise<any>
   }
   showLoading?: boolean
+  returnFullResponse?: boolean
+  noToken?: boolean
 }
 
+import JSONBig from 'json-bigint'
+
 const service = axios.create({
-  baseURL: 'http://localhost:3000',
-  timeout: 5000,
+  baseURL: '/api',
+  timeout: 20000,
+  transformResponse: [
+    function (data) {
+      try {
+        // 如果转换成功则返回转换的数据结果
+        return JSONBig.parse(data)
+      } catch (err) {
+        // 如果转换失败，则包装为统一数据格式并返回
+        return {
+          data,
+        }
+      }
+    },
+  ],
 })
 
 // 请求拦截器
 service.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  (config: InternalAxiosRequestConfig & { noToken?: boolean }) => {
     const token = getToken()
-    if (token) {
+    if (token && !config.noToken) {
       config.headers = config.headers || {}
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers.Authorization = `${token}`
     }
     return config
   },
@@ -65,27 +85,73 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   (response: AxiosResponse<Data<unknown>>) => {
+    const headers = response.headers
+    const newToken = headers['authorization'] || headers['Authorization']
+    const isRefreshed = headers['token-refreshed'] || headers['Token-Refreshed']
+    if (newToken && isRefreshed) {
+      setToken(newToken)
+    }
+
+    const res = response.data
+
+    if (res.success === false) {
+      const msg = res.errorMsg || '请求失败'
+      // 为了防止重复弹出，关闭所有消息后再弹出新的
+      ElMessage.closeAll()
+      ElMessage.error(msg)
+      return Promise.reject(new Error(msg))
+    }
     return response // 返回完整响应对象
   },
   (error: AxiosError) => {
     console.error('响应错误：', error)
+    let msg = '网络异常'
 
-    if (error.response?.status === 401) {
-      removeToken()
-      ElMessage.error('登录已过期，请重新登录')
-      window.location.href = '/login'
+    if (error.response) {
+      const status = error.response.status
+      if (status === 401) {
+        if(!isRelogging){
+            isRelogging = true;
+            removeToken()
+            ElMessage.error('登录已过期，请重新登录')
+           setTimeout(() => {
+           window.location.href = '/UserAuth'
+           }, 500);
+          
+        }
+          return Promise.reject(error)
+      }
+      if (status === 404) msg = '接口不存在'
+      if (status === 500) msg = '服务器错误'
+    } else if (error.message.includes('timeout')) {
+      msg = '请求超时'
     }
-
+    ElMessage.error(msg)
     return Promise.reject(error)
   },
 )
+
 // 请求函数
-const request = <T = unknown>(
+async function request<T = unknown>(
+  url: string,
+  method?: Method,
+  submitData?: Record<string, unknown>,
+  config?: RequestConfig<T> & { returnFullResponse?: false },
+): Promise<Data<T>>
+
+async function request<T = unknown>(
+  url: string,
+  method?: Method,
+  submitData?: Record<string, unknown>,
+  config?: RequestConfig<T> & { returnFullResponse: true },
+): Promise<AxiosResponse<Data<T>>>
+
+async function request<T = unknown>(
   url: string,
   method: Method = 'get',
   submitData?: Record<string, unknown> | undefined,
-  config?: RequestConfig<T>,
-) => {
+  config?: RequestConfig<T> & { returnFullResponse?: boolean },
+) {
   let loading: LoadingInstance | undefined
   if (config?.showLoading) {
     loading = ElLoading.service({
@@ -118,6 +184,9 @@ const request = <T = unknown>(
       }
 
       loading?.close()
+      if (config?.returnFullResponse) {
+        return res
+      }
       return res.data
     })
     .catch((err: AxiosError) => {
@@ -132,4 +201,4 @@ const request = <T = unknown>(
 }
 
 export default request
-export { setToken, getToken, removeToken }
+export { getToken, removeToken, setToken }

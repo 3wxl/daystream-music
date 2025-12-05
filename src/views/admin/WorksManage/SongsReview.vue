@@ -4,8 +4,8 @@
       <div class="flex justify-between px-4 items-center">
         <div class="flex items-center h-full">
           <AdminInput class="mr-5" type="text" placeholder="请输入歌曲名:" value="" width="w-[300px]" label="歌名:"></AdminInput>
-          <AdminSelect class="mr-18" :options="[{value:'1',label:'待审核'},{value:'2',label:'已通过'},{value:'3',label:'已驳回'}]" label="状态"></AdminSelect>
-          <AdminSelect class="mr-16" :options="[{value:'1',label:'歌曲'},{value:'2',label:'MV'}]" label="类型" ></AdminSelect>
+          <AdminSelect v-model="typeVal1" class="mr-18" :options="[{value:'1',label:'待审核'},{value:'2',label:'已通过'},{value:'3',label:'已驳回'}]" label="状态"></AdminSelect>
+          <AdminSelect v-model="typeVal2" class="mr-16" :options="[{value:'1',label:'歌曲'},{value:'2',label:'MV'},{value:'3',label:'专辑'}]" label="类型" ></AdminSelect>
           <el-button type="primary">
             <IconFontSymbol name="sousuo" class="mr-1"></IconFontSymbol>
             搜索
@@ -110,6 +110,8 @@
   import AdminSelect from "@/components/admin/AdminSelect.vue";
   import IconFontSymbol from "@/components/IconFontSymbol.vue";
 
+  let typeVal1 = ref('1')
+  let typeVal2 = ref('1')
   let songsList = reactive([
     {
       cover:'awd',

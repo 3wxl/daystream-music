@@ -22,15 +22,11 @@
         v-for="item in menuItems"
         :key="item.path"
         :to="item.path"
-        class="flex items-center gap-3 mb-2 rounded-2xl py-3 text-sm font-medium transition-all duration-200"
-        :class="[
-          $route.path === item.path
-            ? 'bg-pink-500/20 text-pink-200 shadow-lg shadow-pink-500/30 border border-pink-400/60'
-            : 'text-gray-300 hover:bg-white/5 hover:text-white border border-transparent',
-          isCollapse ? 'justify-center px-0' : 'px-4',
-        ]"
+        class="flex items-center gap-3 mb-2 rounded-2xl py-3 text-sm font-medium transition-all duration-200 text-gray-300 hover:bg-white/5 hover:text-white border border-transparent"
+        :class="[isCollapse ? 'justify-center px-0' : 'px-4']"
+        active-class="bg-pink-500/20 text-pink-200 shadow-lg shadow-pink-500/30 border border-pink-400/60"
       >
-        <component :is="item.icon" class="w-5 h-5 flex-shrink-0" />
+        <component :is="item.icon" class="w-5 h-5 shrink-0" />
         <span v-if="!isCollapse" class="whitespace-nowrap">{{ item.title }}</span>
       </router-link>
     </nav>
@@ -46,9 +42,10 @@
             : 'text-gray-300 hover:bg-white/5 hover:text-white border border-transparent',
           isCollapse ? 'justify-center px-0' : 'px-4',
         ]"
+        @click="logout"
       >
-        <Setting class="w-5 h-5 flex-shrink-0" />
-        <span v-if="!isCollapse" class="whitespace-nowrap">设置</span>
+        <Setting class="w-5 h-5 shrink-0" />
+        <span v-if="!isCollapse" class="whitespace-nowrap">退出登录</span>
       </router-link>
     </div>
   </div>
@@ -56,14 +53,18 @@
 
 <script lang="ts" setup>
 import circleUrl from '@/assets/logo.jpg'
+import { useUserStore } from '@/stores/user'
 import {
+  ChatLineSquare,
+  Files,
+  Histogram,
   House,
+  Mic,
   Setting,
   Tickets,
   User,
   View,
-  Histogram,
-  ChatLineSquare,
+  Service,
 } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 
@@ -71,15 +72,24 @@ const isCollapse = ref(false)
 
 const menuItems = [
   { path: '/', title: '首页', icon: House },
-  { path: '/artist', title: '歌手', icon: View },
+  { path: '/mv', title: 'MV', icon: View },
   { path: '/album', title: '专辑', icon: Tickets },
+  { path: '/aritist', title: '歌手', icon: Mic },
+  { path: '/playlist', title: '歌单', icon: Files },
   { path: '/MusicRanking', title: '榜单', icon: Histogram },
-  { path: '/User/PersonalCenter', title: '个人', icon: User },
   { path: '/community/CommunityDisplay', title: '社区', icon: ChatLineSquare },
+  // { path: '/musician/MusicianSettleIn', title: '音乐人', icon: Service },
+  { path: '/User/PersonalCenter', title: '个人中心', icon: User },
 ]
 
 const changeCollapse = () => {
   isCollapse.value = !isCollapse.value
+}
+
+const userStore = useUserStore()
+
+const logout = () => {
+  userStore.logout()
 }
 </script>
 
@@ -88,6 +98,4 @@ const changeCollapse = () => {
 nav a {
   min-height: 44px;
 }
-
-/* 路由激活状态样式已在模板中通过动态类名处理 */
 </style>

@@ -15,12 +15,11 @@
 
 <style>
   html {
-    scrollbar-width: none; /* Firefox 特有：隐藏滚动条，保留功能 */
-    -ms-overflow-style: none; /* IE 和 Edge 特有：隐藏滚动条 */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
-  /* 隐藏 Chrome、Safari 等 WebKit 内核浏览器的滚动条 */
   html::-webkit-scrollbar {
-    display: none; /* 隐藏滚动条轨道和滑块 */
+    display: none;
   }
 </style>
