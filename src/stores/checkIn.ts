@@ -67,6 +67,7 @@ export const useCheckInStore = defineStore('checkIn', () => {
           JSON.stringify({
             lastCheckDate: todayDate.value,
             isCheckedIn: isCheckedIn.value,
+            currentWaves: currentWaves.value,
           }),
         )
       } else {

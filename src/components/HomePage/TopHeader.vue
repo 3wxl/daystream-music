@@ -33,7 +33,7 @@
         <button
           class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors hidden md:block"
         >
-          签到
+          {{ isCheckedIn ? '已签到 ' : '签到' }}
         </button>
       </router-link>
       <router-link to="/musician/MusicianSettleIn">
@@ -43,6 +43,11 @@
           音乐人中心
         </button>
       </router-link>
+      <button
+        class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors hidden md:block"
+      >
+        当前音浪数：{{ currentWaves }}
+      </button>
       <!-- <button
         class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors hidden md:block"
       >
@@ -134,9 +139,10 @@ import { Search } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
-
+import { useCheckInStore } from '@/stores/checkIn'
 const router = useRouter()
-
+const isCheckedIn = ref(window.localStorage.getItem('checkIn_status.isCheckedIn'))
+const currentWaves = ref(window.localStorage.getItem('checkIn_status.currentWaves'))
 const input = ref('')
 
 const userStore = useUserStore()
