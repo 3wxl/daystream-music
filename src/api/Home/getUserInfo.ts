@@ -2,7 +2,7 @@ import request from "@/utils/request";
 
 export const getUserInfo = () => {
   return request(
-    '/user/getUserInfo', 
+    '/userbase/getUserInfo', 
     'get'
   )
 }

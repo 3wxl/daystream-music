@@ -1,7 +1,7 @@
 <template>
   <div class="h-full flex flex-col overflow-hidden">
     <div class="shrink-0 overflow-x-auto overflow-y-hidden tag-bar-container">
-      <TagBar :tags="mvTags" />
+      <TagBars :tags="mvTags" />
     </div>
 
     <div class="flex-1 min-h-0 overflow-y-auto">
@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import TagBar from '@/components/TagBar.vue'
+import TagBars from '@/components/TagBars.vue'
 
 const mvTags = [
   { name: '全部', path: '/mv/MvList' },
