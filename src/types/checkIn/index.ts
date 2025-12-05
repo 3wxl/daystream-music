@@ -29,8 +29,17 @@ export interface VipPrivilege {
 }
 // src/types/checkIn/index.ts
 
+export interface Task {
+  id: number // 改为 number 类型以匹配实际使用
+  title: string
+  description: string
+  icon: string
+  reward: number
+  completed: boolean
+}
+
 export interface CoinRecord {
-  id: string
+  id: number // 同样保持为 number 类型
   title: string
   time: string
   amount: number

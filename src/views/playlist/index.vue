@@ -1,44 +1,89 @@
 <template>
-  <div class="music-card-container">
-    <div class="music-card">
-      <MusicCard
-        v-for="item in listData"
-        :key="item.id"
-        :imgUrl="item.cover"
-        :title="item.name"
-        :to="item.to"
-        variant="album"
-        v-infinite-scroll="handleScrollLoad"
-        :infinite-scroll-disabled="loading || noMore"
-        infinite-scroll-distance="50"
-      >
-        <h2 class="album-title">{{ item.name }}</h2>
-      </MusicCard>
-      <div v-if="loading" class="loading-text">加载中...</div>
-      <div v-if="noMore" class="no-more-text">没有更多了</div>
+  <div class="h-full flex flex-col overflow-hidden">
+    <div class="shrink-0 overflow-x-auto overflow-y-hidden tag-bar-container">
+      <MultiBar v-model="filterValue" :filter-groups="filterGroups" />
+    </div>
+
+    <div
+      class="music-card-container flex-1 min-h-0"
+      v-infinite-scroll="handleScrollLoad"
+      :infinite-scroll-disabled="loading || noMore"
+      infinite-scroll-distance="50"
+    >
+      <div class="music-card">
+        <MusicCard
+          v-for="item in listData"
+          :key="item.id"
+          :imgUrl="item.cover"
+          :title="item.name"
+          :to="{ name: 'playlist-detailPage-id', params: { id: item.id } }"
+          variant="album"
+        >
+          <h2 class="album-title">{{ item.name }}</h2>
+        </MusicCard>
+
+        <div v-if="loading" class="loading-text">加载中...</div>
+        <div v-if="noMore" class="no-more-text">没有更多了</div>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { getAllTags } from '@/api/playlist/AllTag'
+import MultiBar from '@/components/MultiBar.vue'
 import { useLoadMore } from '@/Hooks/LoadMore'
-import { changeGlobalNodesTarget } from 'element-plus/es/utils'
-import { inject, onMounted, ref, watch } from 'vue'
+import { transformFilterGroups } from '@/utils/transformFilterGroups'
+import { ElMessage } from 'element-plus'
+import { onMounted, provide, ref, watch } from 'vue'
+import {useRoute} from 'vue-router'
 
-const activeTags = inject('globalFilterValue', ref({}))
+const filterValue = ref({
+  area: '',
+  type: '',
+  genre: '',
+})
 
-const { loading, noMore, listData, loadData } = useLoadMore()
+const route = useRoute()
+const filterGroups = ref([])
+
+// 提供给 useLoadMore 或其他子组件使用
+provide('globalFilterValue', filterValue)
+
+import { getlistByTags } from '@/api/playlist/ByTags'
+
+const { loading, noMore, listData, loadData } = useLoadMore(getlistByTags)
 
 // 提取标签对象中的有效值组成数组
 const getTagValues = (tags: Record<string, string | number>) => {
-  return Object.values(tags)
-    .filter((val) => val !== '')
-    .map((val) => Number(val))
-    .filter((val) => !isNaN(val))
+  return Object.entries(tags).flatMap(([key,value])=> {
+    if(value !==''){
+      return [Number(value)]
+    }
+    
+    const group =filterGroups.value.find((g:any) => g.key === key)
+    if (group) {
+      return group.options.map((opt: any) => Number(opt.value))
+    }
+    
+    return []
+  })
+}
+
+// 获取标签数据
+const fetchTags = async () => {
+  try {
+    const res = await getAllTags()
+    if (res.data) {
+      filterGroups.value = transformFilterGroups(res.data)
+    }
+  } catch (err: any) {
+    ElMessage.error(err.message || '获取标签失败')
+  }
 }
 
 watch(
-  activeTags,
+  filterValue,
   (newTags) => {
     loadData(getTagValues(newTags), true)
   },
@@ -46,12 +91,31 @@ watch(
 )
 
 const handleScrollLoad = () => {
-  loadData(getTagValues(activeTags.value), false)
+  loadData(getTagValues(filterValue.value), false)
 }
 
 onMounted(() => {
-  loadData(getTagValues(activeTags.value), true)
-  console.log(listData.value.records)
+  fetchTags()
+    .then(() => {
+      
+
+      const tagId = route.query.tagId
+      if(tagId){
+        for(const group of filterGroups.value){
+          const foundTag = group.options.find((tag) => tag.value == tagId)
+          if(foundTag) {
+            filterValue.value[group.key] = foundTag.value
+            break
+          }
+        }
+      }
+
+      // 初始加载列表数据
+      loadData(getTagValues(filterValue.value), true)
+    })
+    .catch((err) => {
+      console.log(err)
+    })
 })
 // const ListData = ref(
 //   Array.from({ length: 50 }, (_, i) => {
@@ -77,6 +141,20 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+.tag-bar-container {
+  display: flex;
+  white-space: nowrap;
+  padding: 12px 20px;
+  background-color: transparent;
+  min-width: min-content;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.tag-bar-container::-webkit-scrollbar {
+  display: none;
+}
+
 .music-card-container {
   height: 100%;
   overflow-y: auto;

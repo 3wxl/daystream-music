@@ -31,7 +31,7 @@
             :packages="vipPackages"
             :selected-package-type="selectedPackageType"
             :selected-package="selectedPackage"
-            :selected-options="selectedOption"
+            :selected-options="selectedWavesOptions"
             @update:selected-package-type="updatePackageType"
             @select-package="selectPackage"
             @select-option="selectOption"
@@ -145,7 +145,6 @@ const {
   selectedCoupon,
   isProcessing,
   openPurchaseDialog,
-  handlePurchase: handlePurchaseHook,
 } = usePurchase()
 
 const { exchangeRecords, addRecord, updateRecordStatus } =
@@ -214,7 +213,7 @@ const handleFlashSale = async (flash: FlashSale): Promise<void> => {
         type: `秒杀${flash.title}`,
         amount: flash.id === 'flash1' ? 365 : 90,
         unit: '天',
-        price: flash.flashPrice,
+        price: `¥${flash.flashPrice}`,
       })
 
       // 更新用户VIP天数
@@ -256,83 +255,91 @@ const handlePurchase = (pkg: VipPackage): void => {
   openPurchaseDialog(pkg, optionType)
 }
 
-const confirmPurchase = async (): Promise<void> => {
-  try {
-    const result: PurchaseResult = await handlePurchaseHook()
+// const confirmPurchase = async (): Promise<void> => {
+//   try {
+// const result: PurchaseResult = await handlePurchase()(selectedVipPackage.value)
 
-    if (result.success) {
-      if (result.type === 'waves' && result.waves) {
-        // 音浪兑换成功
-        updateWaves(-result.waves)
+//     if (result.success) {
+//       if (result.type === 'waves' && result.waves) {
+//         // 音浪兑换成功
+//         updateWaves(-result.waves)
 
-        // 根据套餐类型增加VIP天数
-        let daysToAdd = 0
-        switch (result.package?.type) {
-          case 'month':
-            daysToAdd = result.package.id === 'month2' ? 60 : 30
-            break
-          case 'quarter':
-            daysToAdd = 90
-            break
-          case 'year':
-            daysToAdd = 365
-            break
-        }
+//         // 根据套餐类型增加VIP天数
+//         let daysToAdd = 0
+//         switch (result.package?.type) {
+//           case 'month':
+//             daysToAdd = result.package.id === 'month2' ? 60 : 30
+//             break
+//           case 'quarter':
+//             daysToAdd = 90
+//             break
+//           case 'year':
+//             daysToAdd = 365
+//             break
+//         }
 
-        if (daysToAdd > 0) {
-          updateVipDays(daysToAdd)
+//         if (daysToAdd > 0) {
+//           updateVipDays(daysToAdd)
 
-          // 添加记录
-          addRecord({
-            type: '音浪兑换VIP',
-            amount: daysToAdd,
-            unit: '天',
-            waves: result.waves,
-          })
-        }
+//           // 添加记录
+//           addRecord({
+//             type: '音浪兑换VIP',
+//             amount: daysToAdd,
+//             unit: '天',
+//             waves: result.waves,
+//           })
+//         }
 
-        ElMessage.success('音浪兑换成功！')
-      } else if (result.type === 'money' && result.price) {
-        // 在线支付成功
-        // 根据套餐类型增加VIP天数
-        let daysToAdd = 0
-        switch (result.package?.type) {
-          case 'month':
-            daysToAdd = result.package.id === 'month2' ? 60 : 30
-            break
-          case 'quarter':
-            daysToAdd = 90
-            break
-          case 'year':
-            daysToAdd = 365
-            break
-        }
+//         ElMessage.success('音浪兑换成功！')
+//       } else if (result.type === 'money' && result.price) {
+//         // 在线支付成功
+//         // 根据套餐类型增加VIP天数
+//         let daysToAdd = 0
+//         switch (result.package?.type) {
+//           case 'month':
+//             daysToAdd = result.package.id === 'month2' ? 60 : 30
+//             break
+//           case 'quarter':
+//             daysToAdd = 90
+//             break
+//           case 'year':
+//             daysToAdd = 365
+//             break
+//         }
 
-        if (daysToAdd > 0) {
-          updateVipDays(daysToAdd)
+//         if (daysToAdd > 0) {
+//           updateVipDays(daysToAdd)
 
-          // 添加记录
-          addRecord({
-            type: '购买VIP套餐',
-            amount: daysToAdd,
-            unit: '天',
-            price: result.price,
-          })
-        }
+//           // 添加记录
+//           addRecord({
+//             type: '购买VIP套餐',
+//             amount: daysToAdd,
+//             unit: '天',
+//             price: result.price,
+//           })
+//         }
 
-        ElMessage.success('支付成功！VIP已开通')
-      }
-    }
-  } catch (error) {
-    console.error('购买失败:', error)
-  }
-}
+//         ElMessage.success('支付成功！VIP已开通')
+//       }
+//     }
+//   } catch (error) {
+//     console.error('购买失败:', error)
+//   }
+// }
 
 const handleRecordClick = (record: ExchangeRecord): void => {
   console.log('点击记录:', record)
   ElMessage.info(`查看${record.type}详情`)
 }
-
+const selectedWavesOptions = computed<Record<string, 'waves'>>(() => {
+  const result: Record<string, 'waves'> = {}
+  for (const key in selectedOption.value) {
+    if (selectedOption.value[key] === 'waves') {
+      result[key] = 'waves'
+    }
+  }
+  return result
+})
 const handleQuickAction = (action: QuickAction): void => {
   switch (action.action) {
     case 'signin':

@@ -247,13 +247,13 @@ const nextSong = () => {
 
 // 生命周期
 onMounted(() => {
-  updateLyricHighlight()
-  document.body.style.paddingBottom = '100px'
+  //   updateLyricHighlight()
+  //   document.body.style.paddingBottom = '100px'
 })
 
 onUnmounted(() => {
   stopProgressTimer()
-  document.body.style.paddingBottom = '0'
+  // document.body.style.paddingBottom = '0'
 })
 </script>
 <route lang="yaml">

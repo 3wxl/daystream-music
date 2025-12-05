@@ -7,8 +7,8 @@
             type="text"
             placeholder="搜索动态或用户"
             class="w-[200px] px-4 py-[6px] pl-10 bg-gray-700 text-gray-200 placeholder-gray-400 rounded-full border border-gray-600 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:border-transparent transition-all"
-          />
-        <Search class="cursor-pointer absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            />
+        <Search @click="searchDynamic" class="cursor-pointer absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
       </div>
       <div class="ml-1 w-100-200">
         <el-scrollbar class="w-full">
@@ -28,102 +28,25 @@
     </el-header>
     <el-container>
       <el-main>
-        <div class="ml-5 flex relative items-start overflow-y-auto" style="height: calc(100vh - 174px)">
+        <div @scroll="handleScroll" class="ml-5 flex relative items-start overflow-y-auto" style="height: calc(100vh - 174px)">
           <div class="flex-grow-0 shrink-0 basis-[67%]">
-            <!-- <div class="mb-4 duration-[.2s] bg-gray-900/60 rounded-xl border border-gray-800 overflow-hidden shadow-lg backdrop-blur-sm w-240 p-[15px]">
-              <div class="flex justify-between">
-                <div class="flex">
-                  <div class="w-[60px] h-[60px] rounded-[50%] relative group">
-                    <el-avatar src="../../public/头像.png" :size="60"></el-avatar>
-                    <div class="group-hover:opacity-100 opacity-0 cursor-pointer duration-[.2s] w-full h-full rounded-[50%] bg-[rgba(0,0,0,.1)] absolute top-0 left-0"></div>
-                  </div>
-                  <div class="flex flex-col ml-4">
-                    <span class="font-bold text-[17px] text-white cursor-pointer hover:text-pink-400 mt-1">白昼音流👑</span>
-                    <div class="mt-2 text-[12px] text-[#e5e7eb]">
-                      <span class="mr-2">11-19 17:30</span>
-                      <span>轻音乐领域创作者</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="mt-[10px] mr-4">
-                  <span class="text-[#cfcfcf] text-[14px] border-[1.3px] border-[#e5e7eb] rounded-[16px] hover:bg-[rgba(255,255,255,.1)] px-2 py-1 cursor-pointer">
-                    <IconFontSymbol name="tianjia" size="14px"></IconFontSymbol>
-                    关注
-                  </span>
-                  <span class="text-[#cfcfcf] text-[14px] border-[1.3px] border-[#e5e7eb] rounded-[16px] hover:bg-[rgba(255,255,255,.1)] px-2 py-1 cursor-pointer">
-                    已关注
-                  </span>
-                </div>
-              </div>
-              <div class="pl-[30px] font-[700] text-[24px] mt-[20px] text-white cursor-pointer hover:text-pink-400 duration-[0.2s]" @click="router.push('/community/communityDetail')">
-                我是一个普普通通的标题
-              </div>
-              <div class="mt-[8px] text-white cursor-pointer hover:text-pink-400 duration-[0.2s]" @click="router.push('/community/communityDetail')">
-                <p class="indent-[2em] break-words break-all text-[15px]">
-                  #四个大人喜人第四赛段第一#
-                </p>
-                <p class="indent-[2em] break-words break-all text-[15px]">
-                  感谢大家抬爱啊啊啊啊啊！
-                </p>
-                <p class="indent-[2em] break-words break-all text-[15px]">
-                  [泪][泪][泪][努力][努力][努力]好开心！
-                </p>
-                <p class="indent-[2em] break-words break-all text-[15px]">
-                  我们一定会继续努力的！！
-                </p>
-                <p class="indent-[2em] break-words break-all text-[15px]">
-                  冲啊！！！！！！！！！！！！！！！
-                </p>
-                <p class="indent-[2em] break-words break-all text-[15px]">
-                  #喜人奇妙夜# ​
-                </p>
-                <p class="indent-[2em] break-words break-all text-[15px]">
-                  ......
-                </p>
-              </div>
-              <div class="flex gap-4 px-6 flex-wrap mt-2 mb-3">
-                <div class="w-[16%] h-[16%] rounded-[10px] overflow-hidden">
-                  <img src="../../../public/头像.png" alt="" @click="router.push('/community/communityDetail')" class="cursor-pointer duration-[0.5s] w-full h-full rounded-[10px] hover:scale-[1.1]">
-                </div>
-                <div class="w-[16%] h-[16%] rounded-[10px] overflow-hidden">
-                  <img src="../../../public/头像.png" alt="" @click="router.push('/community/communityDetail')" class="cursor-pointer duration-[0.5s] w-full h-full rounded-[10px] hover:scale-[1.1]">
-                </div>
-                <div class="w-[16%] h-[16%] rounded-[10px] overflow-hidden">
-                  <img src="../../../public/头像.png" alt="" @click="router.push('/community/communityDetail')" class="cursor-pointer duration-[0.5s] w-full h-full rounded-[10px] hover:scale-[1.1]">
-                </div>
-                <div class="w-[16%] h-[16%] rounded-[10px] overflow-hidden">
-                  <img src="../../../public/头像.png" alt="" @click="router.push('/community/communityDetail')" class="cursor-pointer duration-[0.5s] w-full h-full rounded-[10px] hover:scale-[1.1]">
-                </div>
-                <div class="w-[16%] h-[16%] rounded-[10px] overflow-hidden">
-                  <img src="../../../public/头像.png" alt="" @click="router.push('/community/communityDetail')" class="cursor-pointer duration-[0.5s] w-full h-full rounded-[10px] hover:scale-[1.1]">
-                </div>
-              </div>
-              <div class="px-10 pt-3 flex justify-end">
-                <span class="mr-10 cursor-pointer group" @click="router.push('/community/communityDetail')">
-                  <el-tooltip
-                    class="box-item"
-                    effect="dark"
-                    content="评论"
-                    placement="bottom"
-                  >
-                    <IconFontSymbol name="chakantiezihuifu" class="text-white font-[700] group-hover:text-pink-400" size="20px"></IconFontSymbol>
-                  </el-tooltip>
-                  <span class="text-[white] text-[14px] ml-1 group-hover:text-pink-400">11050</span>
-                </span>
-                <span class="cursor-pointer group">
-                  <el-tooltip
-                    class="box-item"
-                    effect="dark"
-                    content="点赞"
-                    placement="bottom"
-                  >
-                    <IconFontSymbol name="icon" class="text-white group-hover:text-pink-400" size="20px"></IconFontSymbol>
-                  </el-tooltip>
-                  <span class="text-[white] text-[14px] ml-1 group-hover:text-pink-400">11050</span>
-                </span>
-              </div>
-            </div> -->
             <community-display v-for="(dynamic, index) in dymamicList" :key="index" :dynamic="dynamic"></community-display>
+            <div class="flex justify-center" v-if="hasMore && !isSearch">
+              <div class="loader">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+              </div>
+            </div>
+            <div class="my-2 text-center text-[#e5e7eb] text-[14px]" v-if="!hasMore && !isSearch && !isSearchNull">
+              没有更多动态了~
+            </div>
+            <div class="w-[250px] mx-auto relative top-30" v-show="isSearch">
+              <DynamicLoading/>
+            </div>
+            <div v-if="isSearchNull" class="w-[300px] mx-auto relative top-30">
+              <DynamicNull :searchContent="searchContentNull"/>
+            </div>
           </div>
           <div class="flex-grow-0 shrink-0 basis-[28%] ml-10 duration-[.2s] bg-gray-900/60 rounded-xl border border-gray-800 overflow-hidden shadow-lg backdrop-blur-sm w-100 p-[15px] sticky top-0 self-start">
             <div class="flex flex-col items-center">
@@ -169,7 +92,12 @@
   import { Search } from '@element-plus/icons-vue';
   import { useRouter } from 'vue-router';
   import communityDisplay from '../../components/community/CommunityDisplay.vue'
+  import {getDynamicList} from '@/api/community/GetDynamicList'
+  import {debounce,throttle} from '@/utils/debounceThrottle';     // 节流防抖
+  import DynamicLoading from '@/components/community/DynamicLoading.vue'    // 动态加载组件
+  import DynamicNull from '@/components/community/DynamicNull.vue'      // 当搜索动态内容为空时展示组件
   let input = ref('')
+  let oldInput = ''     // 旧输入,用于比较是否改变
   let musicians = reactive([
     {
       name:'全部',
@@ -271,120 +199,62 @@
     },
   ])
   let dymamicList = reactive([
-    {
-      authorId:'1',
-      avatar:'../../../public/头像.png',
-      author:'白昼音流👑',
-      time:'11-19 17:30',
-      identity:'轻音乐领域创作者',
-      title:'我是一个普普通通的标题',
-      content:`
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          #四个大人喜人第四赛段第一#
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          感谢大家抬爱啊啊啊啊啊！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          [泪][泪][泪][努力][努力][努力]好开心！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          我们一定会继续努力的！！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          冲啊！！！！！！！！！！！！！！！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          #喜人奇妙夜# ​
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          ......
-        </p>
-        <p>
-          <img src="http://39.96.214.163:9000/file/70567a01-09d0-443b-9d8a-bab6e5623967.png" alt="">
-        </p>
-        <p>
-          <img src="../../../public/头像.png" alt="">
-        </p>
-      `
-    },
-    {
-      authorId:'1',
-      avatar:'../../../public/头像.png',
-      author:'白昼音流👑',
-      time:'11-19 17:30',
-      identity:'轻音乐领域创作者',
-      title:'我是一个普普通通的标题',
-      content:`
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          #四个大人喜人第四赛段第一#
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          感谢大家抬爱啊啊啊啊啊！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          [泪][泪][泪][努力][努力][努力]好开心！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          我们一定会继续努力的！！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          冲啊！！！！！！！！！！！！！！！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          #喜人奇妙夜# ​
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          ......
-        </p>
-        <p>
-          <img src="http://39.96.214.163:9000/file/70567a01-09d0-443b-9d8a-bab6e5623967.png" alt="">
-        </p>
-        <p>
-          <img src="../../../public/头像.png" alt="">
-        </p>
-      `
-    },
-    {
-      authorId:'1',
-      avatar:'../../../public/头像.png',
-      author:'白昼音流👑',
-      time:'11-19 17:30',
-      identity:'轻音乐领域创作者',
-      title:'我是一个普普通通的标题',
-      content:`
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          #四个大人喜人第四赛段第一#
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          感谢大家抬爱啊啊啊啊啊！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          [泪][泪][泪][努力][努力][努力]好开心！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          我们一定会继续努力的！！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          冲啊！！！！！！！！！！！！！！！
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          #喜人奇妙夜# ​
-        </p>
-        <p class="indent-[2em] break-words break-all text-[15px]">
-          ......
-        </p>
-        <p>
-          <img src="http://39.96.214.163:9000/file/70567a01-09d0-443b-9d8a-bab6e5623967.png" alt="">
-        </p>
-        <p>
-          <img src="../../../public/头像.png" alt="">
-        </p>
-      `
-    },
   ])
   let activedId = ref(0)
   let router = useRouter()
+  let isGetMore = ref(false)
+  let isSearch = ref(false)     // 是否搜索
+  let isSearchNull = ref(false)   // 是否当前关键词动态为空
+  let searchContentNull = ref('')   // 当搜索内容不存在时的提示
+  let submitData = reactive({     // 获取动态列表的参数
+    "userId": null,
+    "keyword": input.value.trim(),
+    "lastId": null,
+    "pageSize": 10
+  })
+  let hasMore = ref(true)     // 是否还有更多数据
+  // 方法
+  async function getDynamic() {     // 获取动态列表
+    isSearchNull.value = false
+    if(hasMore){
+      if(input.value.trim()!==oldInput){
+        isSearch.value = true
+        dymamicList.splice(0, dymamicList.length);
+        oldInput = input.value.trim()
+        submitData.lastId = null
+        submitData.keyword = input.value.trim()
+      }
+      let dynamicList = await getDynamicList(submitData)
+      console.log(dynamicList)
+      isSearch.value = false
+      if(dynamicList.data==='未查询到数据'){
+        isSearchNull.value = true      // 搜索无结果
+        searchContentNull.value = input.value.trim()
+      }
+      hasMore.value = dynamicList.data.hasMore
+      submitData.lastId = dynamicList.data.lastId
+      for(let i = 0; i < dynamicList.data.dateList.length; i++){
+        dymamicList.push(dynamicList.data.dateList[i])
+      }
+      isGetMore.value = false
+    }
+  }
+  let handleScroll = throttle(function(e){
+    if(e.target.scrollHeight - 200 <= e.target.scrollTop + e.target.clientHeight){
+      if(!isGetMore.value && hasMore.value){
+        isGetMore.value = true
+        getDynamic()
+      }
+    }
+  },1000)
+  let searchDynamic = debounce(function(){
+    let searchContent = input.value.trim()
+    if(searchContent === oldInput)return
+    getDynamic()
+  },800)
+  onMounted(() => {
+    getDynamic()
+  })
 </script>
 
 <style scoped lang="scss">
@@ -419,4 +289,37 @@
   .layout-scrollbar{
 
   }
+  .loader {
+  display: flex;
+  align-items: center;
+}
+
+.bar {
+  display: inline-block;
+  width: 3px;
+  height: 15px;
+  background-color: rgba(255, 255, 255, .5);
+  border-radius: 10px;
+  animation: scale-up4 1s linear infinite;
+}
+
+.bar:nth-child(2) {
+  height: 28px;
+  margin: 0 5px;
+  animation-delay: .25s;
+}
+
+.bar:nth-child(3) {
+  animation-delay: .5s;
+}
+
+@keyframes scale-up4 {
+  20% {
+    background-color: #ffff;
+    transform: scaleY(1.5);
+  }
+  40% {
+    transform: scaleY(1);
+  }
+}
 </style>

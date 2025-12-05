@@ -7,7 +7,7 @@
     <div class="flex flex-col flex-1 min-h-0 min-w-0">
       <top-header class="shrink-0" />
       <main class="flex-1 min-w-0 overflow-hidden bg-gray-900">
-        <div class="h-full overflow-y-auto custom-scrollbar layout-scrollbar">
+        <div class="h-full overflow-y-auto custom-scrollbar layout-scrollbar pb-20">
           <slot />
         </div>
       </main>
@@ -57,6 +57,7 @@
       </div>
     </div>
   </div>
+  <PlayerControls />
 </template>
 
 <script setup lang="ts">

@@ -36,12 +36,12 @@
           <el-table-column type="selection" width="55" align="center" class="ml-3"/>
           <el-table-column label="标题" width="250" align="center" class="relative">
             <template #default="scope">
-              <span class="line-clamp-1 cursor-pointer text-[15px] hover:text-[#529FFD] duration-300">{{ scope.row.title }}</span>
+              <span class="line-clamp-1 cursor-pointer text-[15px] hover:text-[#529FFD] duration-300" @click="router.push('/admin/communityManage/DynamicReviewDetail')">{{ scope.row.title }}</span>
             </template>
           </el-table-column>
           <el-table-column label="内容" width="220" align="center" class="relative">
             <template #default="scope">
-              <span class="line-clamp-1 cursor-pointer hover:text-[#529FFD] duration-300">{{ scope.row.content }}</span>
+              <span class="line-clamp-1 cursor-pointer hover:text-[#529FFD] duration-300"  @click="router.push('/admin/communityManage/DynamicReviewDetail')">{{ scope.row.content }}</span>
             </template>
           </el-table-column>
           <el-table-column label="作者" width="140" align="center" class="relative">
@@ -91,7 +91,8 @@
   import AdminInput from "@/components/admin/AdminInput.vue";
   import AdminSelect from "@/components/admin/AdminSelect.vue";
   import IconFontSymbol from "@/components/IconFontSymbol.vue";
-
+  import { useRouter } from "vue-router";
+  let router = useRouter()
   let typeVal1 = ref('1')
   let typeVal2 = ref('1')
   let dynamicList = reactive([

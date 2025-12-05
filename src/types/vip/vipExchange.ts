@@ -54,15 +54,15 @@ export interface ExchangeOption {
   waves: number
 }
 
-// 兑换记录类型（仅保留音浪兑换相关）
 export interface ExchangeRecord {
-  id: number
-  type: string // 如"音浪兑换VIP"
-  date: string
+  id?: string
+  date?: string
+  status?: 'success' | 'failed'
+  type: string
   amount: number
-  unit: '天'
-  waves: number // 仅保留音浪字段，移除price可选字段
-  status: 'success' | 'pending' | 'failed'
+  unit: string
+  waves?: number
+  price?: string // ✅ 新增这一行允许 price 字段存在
 }
 
 // 秒杀活动类型（价格统一为音浪）

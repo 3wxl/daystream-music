@@ -36,7 +36,14 @@
           签到
         </button>
       </router-link>
-      <button
+      <router-link to="/musician/MusicianSettleIn">
+        <button
+          class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors hidden md:block"
+        >
+          音乐人中心
+        </button>
+      </router-link>
+      <!-- <button
         class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors hidden md:block"
       >
         下载桌面版
@@ -55,14 +62,54 @@
             ></path>
           </svg>
         </button>
+      </div> -->
+    </div>
+    <div class="flex items-center space-x-4 ml-4">
+      <!-- 身份跳转按钮 -->
+      <template v-if="userStore.userInfo.userRole">
+        <button
+          v-if="userStore.userInfo.userRole.includes('音乐人')"
+          class="px-4 py-1.5 text-xs font-medium text-white bg-linear-to-r from-purple-600 to-pink-600 rounded-full hover:from-purple-500 hover:to-pink-500 transition-all shadow-lg shadow-purple-900/20"
+        >
+          音乐人中心
+        </button>
+        <button
+          v-else-if="userStore.userInfo.userRole.includes('管理员')"
+          @click="goToAdmin"
+          class="px-4 py-1.5 text-xs font-medium text-white bg-gray-700 border border-gray-600 rounded-full hover:bg-gray-600 transition-all"
+        >
+          管理后台
+        </button>
+      </template>
+
+      <!-- 用户信息 -->
+      <div class="flex items-center space-x-3 pl-4 border-l border-gray-700/50">
+        <div class="hidden sm:flex flex-col items-end">
+          <span class="text-sm font-medium text-gray-200">{{
+            userStore.userInfo.username || '未登录'
+          }}</span>
+          <span class="text-xs text-gray-500" v-if="userStore.userInfo.userRole">{{
+            userStore.userInfo.userRole[0]
+          }}</span>
+        </div>
+        <div class="relative group cursor-pointer">
+          <div
+            class="absolute -inset-0.5 bg-linear-to-r from-pink-600 to-purple-600 rounded-full opacity-75 group-hover:opacity-100 blur transition duration-200"
+          ></div>
+          <img
+            :src="userStore.userInfo.avatar || 'https://placehold.co/100x100/333/FFF?text=User'"
+            alt="User Avatar"
+            class="relative w-9 h-9 rounded-full object-cover border-2 border-gray-800"
+          />
+        </div>
       </div>
-      <router-link
+      <!-- <router-link
         to="/UserAuth"
         class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors"
       >
         登录
-      </router-link>
-      <button class="p-2 text-gray-300 hover:text-white transition-colors">
+      </router-link> -->
+      <!-- <button class="p-2 text-gray-300 hover:text-white transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             stroke-linecap="round"
@@ -77,7 +124,7 @@
             d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
           ></path>
         </svg>
-      </button>
+      </button> -->
     </div>
   </header>
 </template>
@@ -85,8 +132,34 @@
 <script lang="ts" setup>
 import { Search } from '@element-plus/icons-vue'
 import { ref } from 'vue'
+import { useUserStore } from '@/stores/user'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const input = ref('')
+
+const userStore = useUserStore()
+
+const goToAdmin = () => {
+  router.push('/admin')
+}
+// 后端接口返回的数据结构
+// const user = ref({
+//   id: null,
+//   username: '',
+//   avatar: '',
+//   gender: '',
+//   introduction: null,
+//   isVip: false,
+//   vipExpireTime: null,
+//   email: '',
+//   phone: null,
+//   totalPoint: 0,
+//   walletBalance: 0,
+//   createdTime: '',
+//   userRole: [] as string[],
+// })
 </script>
 
 <style lang="scss" scoped>

@@ -1,14 +1,14 @@
 <template>
-        <el-carousel :interval="4000" type="card" height="320px" class="custom-carousel">
-        <el-carousel-item v-for="item in 4" :key="item">
-          <div class="carousel-item-content" :class="`carousel-bg-${item}`">
-            <div class="glass-overlay">
-              <h3 class="text-2xl font-bold text-white mb-2">Daydream Music</h3>
-              <p class="text-white/80">探索无限音乐可能</p>
-            </div>
-          </div>
-        </el-carousel-item>
-      </el-carousel>
+  <el-carousel :interval="4000" type="card" height="320px" class="custom-carousel">
+    <el-carousel-item v-for="item in 4" :key="item">
+      <div class="carousel-item-content" :class="`carousel-bg-${item}`">
+        <div class="glass-overlay">
+          <h3 class="text-2xl font-bold text-white mb-2">Daydream Music</h3>
+          <p class="text-white/80">探索无限音乐可能</p>
+        </div>
+      </div>
+    </el-carousel-item>
+  </el-carousel>
 </template>
 
 <style lang="scss" scoped>

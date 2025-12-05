@@ -33,7 +33,7 @@
       <div class="panel tags-panel">
         <div class="panel-header">
           <h2>歌单分类</h2>
-          <router-link to="/list" class="more-link">全部</router-link>
+          <router-link to="/playlist" class="more-link">全部</router-link>
         </div>
         <TagBar :tags="tagsData" />
       </div>
@@ -56,13 +56,13 @@
         <div class="main-cards">
           <MusicCard
             v-for="item in albumData"
-            :key="item.data.id"
-            :imgUrl="item.data.imgUrl"
-            :title="item.data.albumTitle"
-            :to="item.to"
+            :key="item.id"
+            :imgUrl="item.coverUrl"
+            :title="item.albumTitle"
+            :to="{name:'album-detailPage-id',params:{id:item.id}}"
             variant="album"
           >
-            <h2 class="album-title">{{ item.data.albumTitle }}</h2>
+            <h2 class="album-title">{{ item.albumTitle }}</h2>
           </MusicCard>
         </div>
       </div>
@@ -71,12 +71,48 @@
 </template>
 
 <script lang="ts" setup>
+import { getRecommendMusic } from '@/api/Home/getRecommendMusic'
 import MusicCarousel from '@/components/MusicCarousel.vue'
 import MusicListItem from '@/components/MusicListItem.vue'
 import TagBar from '@/components/TagBar.vue'
+import { onMounted,ref } from 'vue'
+import { getAllTags } from '@/api/playlist/AllTag'
+import { getAlbum } from '@/api/album/getAlbum'
 
 defineOptions({
   name: 'HomeIndex',
+})
+
+let rawData = ref([])
+let listData = ref([])
+const tagsData = ref([])
+let albumData = ref([])
+
+onMounted(() => {
+  getRecommendMusic().then((res) => {
+    rawData.value = [...res.data]
+    listData.value = rawData.value.map((item) => {
+      return {
+        id:item.id,
+        title:item.songName,
+        image:item.coverUrl,
+        desc:item.singer,
+      }
+    })
+    console.log(listData.value)
+  })
+
+
+  getAllTags().then((res) => {
+    const flatList = Object.values(res.data).flat();
+    console.log(flatList)
+    tagsData.value = [...flatList]
+  })
+
+  getAlbum(1,30).then((res) => {
+    console.log(res)
+    albumData.value = [...res.data.records]
+  })
 })
 
 // recommend模拟数据
@@ -167,282 +203,282 @@ const musicData = [
 ]
 
 // musicCard模拟数据1
-const albumData = [
-  {
-    type: 'album',
-    to: '/list/album-101',
-    data: {
-      id: 'album-101',
-      imgUrl: 'https://picsum.photos/seed/folklore/400',
-      alt: 'Folklore 专辑封面',
-      albumTitle: 'Folklore',
-    },
-  },
-  {
-    type: 'album',
-    to: '/list/album-102',
-    data: {
-      id: 'album-102',
-      imgUrl: 'https://picsum.photos/seed/afterhours/400',
-      alt: 'After Hours 专辑封面',
-      albumTitle: 'After Hours',
-    },
-  },
-  {
-    type: 'album',
-    to: '/list/album-103',
-    data: {
-      id: 'album-103',
-      imgUrl: 'https://picsum.photos/seed/1989/400',
-      alt: "1989 (Taylor's Version) 专辑封面",
-      albumTitle: "1989 (Taylor's Version)",
-    },
-  },
-  {
-    type: 'album',
-    to: '/list/album-104',
-    data: {
-      id: 'album-104',
-      imgUrl: 'https://picsum.photos/seed/divide/400',
-      alt: '÷ (Divide) 专辑封面',
-      albumTitle: '÷ (Divide)',
-    },
-  },
-  {
-    type: 'album',
-    to: '/list/album-105',
-    data: {
-      id: 'album-105',
-      imgUrl: 'https://picsum.photos/seed/astroworld/400',
-      alt: 'Astroworld 专辑封面',
-      albumTitle: 'Astroworld',
-    },
-  },
-  {
-    type: 'album',
-    to: '/list/album-106',
-    data: {
-      id: 'album-106',
-      imgUrl: 'https://picsum.photos/seed/discovery/400',
-      alt: 'Discovery 专辑封面',
-      albumTitle: 'Discovery',
-    },
-  },
-  {
-    type: 'album',
-    to: '/list/album-107',
-    data: {
-      id: 'album-107',
-      imgUrl: 'https://picsum.photos/seed/fantasy/400',
-      alt: '范特西 专辑封面',
-      albumTitle: '范特西',
-    },
-  },
-  {
-    type: 'album',
-    to: '/list/album-108',
-    data: {
-      id: 'album-108',
-      imgUrl: 'https://picsum.photos/seed/utopia/400',
-      alt: 'Utopia 专辑封面',
-      albumTitle: 'Utopia',
-    },
-  },
-  {
-    type: 'album',
-    to: '/list/album-109',
-    data: {
-      id: 'album-109',
-      imgUrl: 'https://picsum.photos/seed/meteora/400',
-      alt: 'Meteora 专辑封面',
-      albumTitle: 'Meteora',
-    },
-  },
-  {
-    type: 'album',
-    to: '/list/album-110',
-    data: {
-      id: 'album-110',
-      imgUrl: 'https://picsum.photos/seed/parachutes/400',
-      alt: 'Parachutes 专辑封面',
-      albumTitle: 'Parachutes',
-    },
-  },
-  {
-    type: 'album',
-    to: '/list/album-111',
-    data: {
-      id: 'album-111',
-      imgUrl: 'https://picsum.photos/seed/21/400',
-      alt: '21 专辑封面',
-      albumTitle: '21',
-    },
-  },
-  {
-    type: 'album',
-    to: '/list/album-112',
-    data: {
-      id: 'album-112',
-      imgUrl: 'https://picsum.photos/seed/ye/400',
-      alt: 'Ye 专辑封面',
-      albumTitle: 'Ye',
-    },
-  },
-  {
-    type: 'album',
-    to: '/list/album-113',
-    data: {
-      id: 'album-113',
-      imgUrl: 'https://picsum.photos/seed/greatestshowman/400',
-      alt: 'The Greatest Showman 专辑封面',
-      albumTitle: 'The Greatest Showman',
-    },
-  },
-  {
-    type: 'album',
-    to: '/list/album-114',
-    data: {
-      id: 'album-114',
-      imgUrl: 'https://picsum.photos/seed/currents/400',
-      alt: 'Currents 专辑封面',
-      albumTitle: 'Currents',
-    },
-  },
-  {
-    type: 'album',
-    to: '/list/album-115',
-    data: {
-      id: 'album-115',
-      imgUrl: 'https://picsum.photos/seed/xunmi/400',
-      alt: '寻 专辑封面',
-      albumTitle: '寻',
-    },
-  },
-]
+// const albumData = [
+//   {
+//     type: 'album',
+//     to: '/list/album-101',
+//     data: {
+//       id: 'album-101',
+//       imgUrl: 'https://picsum.photos/seed/folklore/400',
+//       alt: 'Folklore 专辑封面',
+//       albumTitle: 'Folklore',
+//     },
+//   },
+//   {
+//     type: 'album',
+//     to: '/list/album-102',
+//     data: {
+//       id: 'album-102',
+//       imgUrl: 'https://picsum.photos/seed/afterhours/400',
+//       alt: 'After Hours 专辑封面',
+//       albumTitle: 'After Hours',
+//     },
+//   },
+//   {
+//     type: 'album',
+//     to: '/list/album-103',
+//     data: {
+//       id: 'album-103',
+//       imgUrl: 'https://picsum.photos/seed/1989/400',
+//       alt: "1989 (Taylor's Version) 专辑封面",
+//       albumTitle: "1989 (Taylor's Version)",
+//     },
+//   },
+//   {
+//     type: 'album',
+//     to: '/list/album-104',
+//     data: {
+//       id: 'album-104',
+//       imgUrl: 'https://picsum.photos/seed/divide/400',
+//       alt: '÷ (Divide) 专辑封面',
+//       albumTitle: '÷ (Divide)',
+//     },
+//   },
+//   {
+//     type: 'album',
+//     to: '/list/album-105',
+//     data: {
+//       id: 'album-105',
+//       imgUrl: 'https://picsum.photos/seed/astroworld/400',
+//       alt: 'Astroworld 专辑封面',
+//       albumTitle: 'Astroworld',
+//     },
+//   },
+//   {
+//     type: 'album',
+//     to: '/list/album-106',
+//     data: {
+//       id: 'album-106',
+//       imgUrl: 'https://picsum.photos/seed/discovery/400',
+//       alt: 'Discovery 专辑封面',
+//       albumTitle: 'Discovery',
+//     },
+//   },
+//   {
+//     type: 'album',
+//     to: '/list/album-107',
+//     data: {
+//       id: 'album-107',
+//       imgUrl: 'https://picsum.photos/seed/fantasy/400',
+//       alt: '范特西 专辑封面',
+//       albumTitle: '范特西',
+//     },
+//   },
+//   {
+//     type: 'album',
+//     to: '/list/album-108',
+//     data: {
+//       id: 'album-108',
+//       imgUrl: 'https://picsum.photos/seed/utopia/400',
+//       alt: 'Utopia 专辑封面',
+//       albumTitle: 'Utopia',
+//     },
+//   },
+//   {
+//     type: 'album',
+//     to: '/list/album-109',
+//     data: {
+//       id: 'album-109',
+//       imgUrl: 'https://picsum.photos/seed/meteora/400',
+//       alt: 'Meteora 专辑封面',
+//       albumTitle: 'Meteora',
+//     },
+//   },
+//   {
+//     type: 'album',
+//     to: '/list/album-110',
+//     data: {
+//       id: 'album-110',
+//       imgUrl: 'https://picsum.photos/seed/parachutes/400',
+//       alt: 'Parachutes 专辑封面',
+//       albumTitle: 'Parachutes',
+//     },
+//   },
+//   {
+//     type: 'album',
+//     to: '/list/album-111',
+//     data: {
+//       id: 'album-111',
+//       imgUrl: 'https://picsum.photos/seed/21/400',
+//       alt: '21 专辑封面',
+//       albumTitle: '21',
+//     },
+//   },
+//   {
+//     type: 'album',
+//     to: '/list/album-112',
+//     data: {
+//       id: 'album-112',
+//       imgUrl: 'https://picsum.photos/seed/ye/400',
+//       alt: 'Ye 专辑封面',
+//       albumTitle: 'Ye',
+//     },
+//   },
+//   {
+//     type: 'album',
+//     to: '/list/album-113',
+//     data: {
+//       id: 'album-113',
+//       imgUrl: 'https://picsum.photos/seed/greatestshowman/400',
+//       alt: 'The Greatest Showman 专辑封面',
+//       albumTitle: 'The Greatest Showman',
+//     },
+//   },
+//   {
+//     type: 'album',
+//     to: '/list/album-114',
+//     data: {
+//       id: 'album-114',
+//       imgUrl: 'https://picsum.photos/seed/currents/400',
+//       alt: 'Currents 专辑封面',
+//       albumTitle: 'Currents',
+//     },
+//   },
+//   {
+//     type: 'album',
+//     to: '/list/album-115',
+//     data: {
+//       id: 'album-115',
+//       imgUrl: 'https://picsum.photos/seed/xunmi/400',
+//       alt: '寻 专辑封面',
+//       albumTitle: '寻',
+//     },
+//   },
+// ]
 
 // tags模拟数据
-const tagsData = [
-  { name: '我的列表', path: '/MyList' },
-  { name: '流行', path: '/tags/pop' },
-  { name: '摇滚', path: '/tags/rock' },
-  { name: '电子', path: '/tags/electronic' },
-  { name: '民谣', path: '/tags/folk' },
-  { name: '嘻哈', path: '/tags/hip-hop' },
-  { name: 'R&B', path: '/tags/rnb' },
-  { name: '爵士', path: '/tags/jazz' },
-  { name: '古典', path: '/tags/classical' },
-  { name: 'K-Pop', path: '/tags/k-pop' },
-  { name: 'J-Pop', path: '/tags/j-pop' },
-  { name: '放松', path: '/moods/relax' },
-  { name: '专注', path: '/moods/focus' },
-  { name: '派对', path: '/moods/party' },
-  { name: '伤感', path: '/moods/sad' },
-  { name: '运动', path: '/moods/workout' },
-  { name: '助眠', path: '/moods/sleep' },
-  { name: '浪漫', path: 'moods/romantic' },
-  { name: '华语', path: '/regions/chinese' },
-  { name: '欧美', path: '/regions/western' },
-  { name: '日语', path: '/regions/japanese' },
-  { name: '韩语', path: '/regions/korean' },
-  { name: '经典', path: '/themes/classic' },
-  { name: '新歌', path: '/themes/new-releases' },
-  { name: '纯音乐', path: '/themes/instrumental' },
-  { name: 'ACG', path: '/themes/acg' },
-  { name: '播客', path: '/categories/podcasts' },
-  { name: '有声书', path: '/categories/audiobooks' },
-  { name: '现场', path: '/themes/live' },
-  { name: '电影原声', path: '/themes/soundtrack' },
-  { name: '周杰伦', path: '/artists/jay-chou' },
-  { name: '林俊杰', path: '/artists/jj-lin' },
-  { name: 'Taylor Swift', path: '/artists/taylor-swift' },
-  { name: 'G.E.M.邓紫棋', path: '/artists/gem' },
-  { name: '陈奕迅', path: '/artists/eason-chan' },
-  { name: '80年代', path: '/decades/80s' },
-  { name: '90年代', path: '/decades/90s' },
-  { name: '00年代', path: '/decades/00s' },
-  { name: '咖啡馆', path: '/scenes/cafe' },
-  { name: '驾驶', path: '/scenes/driving' },
-  { name: '阅读', path: '/scenes/reading' },
-  { name: '冥想', path: '/scenes/meditation' },
-  { name: '轻音乐', path: '/genres/light-music' },
-  { name: '乡村', path: '/genres/country' },
-  { name: '雷鬼', path: '/genres/reggae' },
-  { name: '蓝调', path: '/genres/blues' },
-  { name: '金属', path: '/genres/metal' },
-  { name: '拉丁', path: '/genres/latin' },
-  { name: '独立', path: '/genres/indie' },
-  { name: '游戏', path: '/themes/gaming' },
-]
+// const tagsData = [
+//   { name: '我的列表', path: '/MyList' },
+//   { name: '流行', path: '/tags/pop' },
+//   { name: '摇滚', path: '/tags/rock' },
+//   { name: '电子', path: '/tags/electronic' },
+//   { name: '民谣', path: '/tags/folk' },
+//   { name: '嘻哈', path: '/tags/hip-hop' },
+//   { name: 'R&B', path: '/tags/rnb' },
+//   { name: '爵士', path: '/tags/jazz' },
+//   { name: '古典', path: '/tags/classical' },
+//   { name: 'K-Pop', path: '/tags/k-pop' },
+//   { name: 'J-Pop', path: '/tags/j-pop' },
+//   { name: '放松', path: '/moods/relax' },
+//   { name: '专注', path: '/moods/focus' },
+//   { name: '派对', path: '/moods/party' },
+//   { name: '伤感', path: '/moods/sad' },
+//   { name: '运动', path: '/moods/workout' },
+//   { name: '助眠', path: '/moods/sleep' },
+//   { name: '浪漫', path: 'moods/romantic' },
+//   { name: '华语', path: '/regions/chinese' },
+//   { name: '欧美', path: '/regions/western' },
+//   { name: '日语', path: '/regions/japanese' },
+//   { name: '韩语', path: '/regions/korean' },
+//   { name: '经典', path: '/themes/classic' },
+//   { name: '新歌', path: '/themes/new-releases' },
+//   { name: '纯音乐', path: '/themes/instrumental' },
+//   { name: 'ACG', path: '/themes/acg' },
+//   { name: '播客', path: '/categories/podcasts' },
+//   { name: '有声书', path: '/categories/audiobooks' },
+//   { name: '现场', path: '/themes/live' },
+//   { name: '电影原声', path: '/themes/soundtrack' },
+//   { name: '周杰伦', path: '/artists/jay-chou' },
+//   { name: '林俊杰', path: '/artists/jj-lin' },
+//   { name: 'Taylor Swift', path: '/artists/taylor-swift' },
+//   { name: 'G.E.M.邓紫棋', path: '/artists/gem' },
+//   { name: '陈奕迅', path: '/artists/eason-chan' },
+//   { name: '80年代', path: '/decades/80s' },
+//   { name: '90年代', path: '/decades/90s' },
+//   { name: '00年代', path: '/decades/00s' },
+//   { name: '咖啡馆', path: '/scenes/cafe' },
+//   { name: '驾驶', path: '/scenes/driving' },
+//   { name: '阅读', path: '/scenes/reading' },
+//   { name: '冥想', path: '/scenes/meditation' },
+//   { name: '轻音乐', path: '/genres/light-music' },
+//   { name: '乡村', path: '/genres/country' },
+//   { name: '雷鬼', path: '/genres/reggae' },
+//   { name: '蓝调', path: '/genres/blues' },
+//   { name: '金属', path: '/genres/metal' },
+//   { name: '拉丁', path: '/genres/latin' },
+//   { name: '独立', path: '/genres/indie' },
+//   { name: '游戏', path: '/themes/gaming' },
+// ]
 
 // list模拟数据
-const listData = [
-  {
-    id: 'song-001',
-    title: '七里香',
-    artist: '周杰伦',
-    imgUrl: 'https://picsum.photos/seed/jaychou/200',
-  },
-  {
-    id: 'song-002',
-    title: 'Blinding Lights',
-    artist: 'The Weeknd',
-    imgUrl: 'https://picsum.photos/seed/weeknd/200',
-  },
-  {
-    id: 'song-003',
-    title: '关键词',
-    artist: '林俊杰',
-    imgUrl: 'https://picsum.photos/seed/jjlin/200',
-  },
-  {
-    id: 'song-004',
-    title: 'Lover',
-    artist: 'Taylor Swift',
-    imgUrl: 'https://picsum.photos/seed/taylor/200',
-  },
-  {
-    id: 'song-005',
-    title: '富士山下',
-    artist: '陈奕迅',
-    imgUrl: 'https://picsum.photos/seed/eason/200',
-  },
-  {
-    id: 'song-006',
-    title: '泡沫',
-    artist: 'G.E.M.邓紫棋',
-    imgUrl: 'https://picsum.photos/seed/gem/200',
-  },
-  {
-    id: 'song-007',
-    title: 'As It Was',
-    artist: 'Harry Styles',
-    imgUrl: 'https://picsum.photos/seed/harry/200',
-  },
-  {
-    id: 'song-008',
-    title: 'Viva La Vida',
-    artist: 'Coldplay',
-    imgUrl: 'https://picsum.photos/seed/coldplay/200',
-  },
-  {
-    id: 'song-009',
-    title: 'Rolling in the Deep',
-    artist: 'Adele',
-    imgUrl: 'https://picsum.photos/seed/adele/200',
-  },
-  {
-    id: 'song-010',
-    title: 'Shape of You',
-    artist: 'Ed Sheeran',
-    imgUrl: 'https://picsum.photos/seed/ed/200',
-  },
-  {
-    id: 'song-011',
-    title: 'Bad Guy',
-    artist: 'Billie Eilish',
-    imgUrl: 'https://picsum.photos/seed/billie/200',
-  },
-]
+// const listData = [
+//   {
+//     id: 'song-001',
+//     title: '七里香',
+//     artist: '周杰伦',
+//     imgUrl: 'https://picsum.photos/seed/jaychou/200',
+//   },
+//   {
+//     id: 'song-002',
+//     title: 'Blinding Lights',
+//     artist: 'The Weeknd',
+//     imgUrl: 'https://picsum.photos/seed/weeknd/200',
+//   },
+//   {
+//     id: 'song-003',
+//     title: '关键词',
+//     artist: '林俊杰',
+//     imgUrl: 'https://picsum.photos/seed/jjlin/200',
+//   },
+//   {
+//     id: 'song-004',
+//     title: 'Lover',
+//     artist: 'Taylor Swift',
+//     imgUrl: 'https://picsum.photos/seed/taylor/200',
+//   },
+//   {
+//     id: 'song-005',
+//     title: '富士山下',
+//     artist: '陈奕迅',
+//     imgUrl: 'https://picsum.photos/seed/eason/200',
+//   },
+//   {
+//     id: 'song-006',
+//     title: '泡沫',
+//     artist: 'G.E.M.邓紫棋',
+//     imgUrl: 'https://picsum.photos/seed/gem/200',
+//   },
+//   {
+//     id: 'song-007',
+//     title: 'As It Was',
+//     artist: 'Harry Styles',
+//     imgUrl: 'https://picsum.photos/seed/harry/200',
+//   },
+//   {
+//     id: 'song-008',
+//     title: 'Viva La Vida',
+//     artist: 'Coldplay',
+//     imgUrl: 'https://picsum.photos/seed/coldplay/200',
+//   },
+//   {
+//     id: 'song-009',
+//     title: 'Rolling in the Deep',
+//     artist: 'Adele',
+//     imgUrl: 'https://picsum.photos/seed/adele/200',
+//   },
+//   {
+//     id: 'song-010',
+//     title: 'Shape of You',
+//     artist: 'Ed Sheeran',
+//     imgUrl: 'https://picsum.photos/seed/ed/200',
+//   },
+//   {
+//     id: 'song-011',
+//     title: 'Bad Guy',
+//     artist: 'Billie Eilish',
+//     imgUrl: 'https://picsum.photos/seed/billie/200',
+//   },
+// ]
 </script>
 
 <style lang="scss" scoped>
@@ -524,8 +560,6 @@ const listData = [
     grid-template-columns: 1fr;
   }
 }
-
-
 </style>
 
 <route lang="yaml">

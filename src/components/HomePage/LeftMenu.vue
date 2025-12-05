@@ -42,9 +42,10 @@
             : 'text-gray-300 hover:bg-white/5 hover:text-white border border-transparent',
           isCollapse ? 'justify-center px-0' : 'px-4',
         ]"
+        @click="logout"
       >
         <Setting class="w-5 h-5 shrink-0" />
-        <span v-if="!isCollapse" class="whitespace-nowrap">设置</span>
+        <span v-if="!isCollapse" class="whitespace-nowrap">退出登录</span>
       </router-link>
     </div>
   </div>
@@ -52,16 +53,17 @@
 
 <script lang="ts" setup>
 import circleUrl from '@/assets/logo.jpg'
+import { useUserStore } from '@/stores/user'
 import {
+  ChatLineSquare,
   Files,
+  Histogram,
   House,
   Mic,
   Setting,
   Tickets,
   User,
   View,
-  Histogram,
-  ChatLineSquare,
   Service,
 } from '@element-plus/icons-vue'
 import { ref } from 'vue'
@@ -76,12 +78,18 @@ const menuItems = [
   { path: '/playlist', title: '歌单', icon: Files },
   { path: '/MusicRanking', title: '榜单', icon: Histogram },
   { path: '/community/CommunityDisplay', title: '社区', icon: ChatLineSquare },
-  { path: '/musician/MusicianSettleIn', title: '音乐人', icon: Service },
+  // { path: '/musician/MusicianSettleIn', title: '音乐人', icon: Service },
   { path: '/User/PersonalCenter', title: '个人中心', icon: User },
 ]
 
 const changeCollapse = () => {
   isCollapse.value = !isCollapse.value
+}
+
+const userStore = useUserStore()
+
+const logout = () => {
+  userStore.logout()
 }
 </script>
 

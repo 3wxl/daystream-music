@@ -1,24 +1,21 @@
 <template>
   <!-- to path应该指向MyList -->
-
-    <router-link
-      v-for="tag in tags"
-      :key="tag.name"
-      :to="tag.path"
-      class="tag-item"
-    >{{ tag.name }}
-    </router-link>
-
+  <router-link
+    v-for="tag in tags"
+    :key="tag.id"
+    :to="{ path: '/playlist', query: { tagId: tag.id } }"
+    class="tag-item"
+    >{{ tag.tagName }}
+  </router-link>
 </template>
 
 <script lang="ts" setup>
 defineProps({
-  tags:{
-    type:Object,
-    required:true
+  tags: {
+    type: Object,
+    required: true,
   },
 })
-
 </script>
 
 <style lang="scss" scoped>
@@ -47,5 +44,4 @@ defineProps({
   color: #ffffff;
   font-weight: bold;
 }
-
 </style>
