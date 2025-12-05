@@ -9,6 +9,7 @@ import axios from 'axios'
 import type { LoadingInstance } from 'element-plus'
 import { ElLoading, ElMessage } from 'element-plus'
 
+let isRelogging = false; 
 const TOKEN_KEY = 'auth_token'
 
 const setToken = (token: string) => {
@@ -45,9 +46,24 @@ interface RequestConfig<T = unknown> extends AxiosRequestConfig {
   noToken?: boolean
 }
 
+import JSONBig from 'json-bigint'
+
 const service = axios.create({
   baseURL: '/api',
   timeout: 20000,
+  transformResponse: [
+    function (data) {
+      try {
+        // 如果转换成功则返回转换的数据结果
+        return JSONBig.parse(data)
+      } catch (err) {
+        // 如果转换失败，则包装为统一数据格式并返回
+        return {
+          data,
+        }
+      }
+    },
+  ],
 })
 
 // 请求拦截器
@@ -80,6 +96,8 @@ service.interceptors.response.use(
 
     if (res.success === false) {
       const msg = res.errorMsg || '请求失败'
+      // 为了防止重复弹出，关闭所有消息后再弹出新的
+      ElMessage.closeAll()
       ElMessage.error(msg)
       return Promise.reject(new Error(msg))
     }
@@ -92,10 +110,16 @@ service.interceptors.response.use(
     if (error.response) {
       const status = error.response.status
       if (status === 401) {
-        removeToken()
-        ElMessage.error('登录已过期，请重新登录')
-        window.location.href = '/UserAuth'
-        return Promise.reject(error)
+        if(!isRelogging){
+            isRelogging = true;
+            removeToken()
+            ElMessage.error('登录已过期，请重新登录')
+           setTimeout(() => {
+           window.location.href = '/UserAuth'
+           }, 500);
+          
+        }
+          return Promise.reject(error)
       }
       if (status === 404) msg = '接口不存在'
       if (status === 500) msg = '服务器错误'

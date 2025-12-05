@@ -1,5 +1,5 @@
 <template>
-  <div :to="to" class="cover-card" :class="[`variant-${variant}`]">
+  <router-link :to="to" class="cover-card" :class="[`variant-${variant}`]">
     <div class="image-wrapper">
       <img :src="imgUrl" :alt="title" loading="lazy" />
     </div>
@@ -8,7 +8,7 @@
       <slot></slot>
       <div v-if="showPlayButton" class="play-button"></div>
     </div>
-  </div>
+  </router-link>
 </template>
 
 <script lang="ts" setup>
@@ -60,7 +60,6 @@ withDefaults(defineProps<Props>(), {
       box-sizing: border-box;
       background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.6) 100%);
       color: white;
-
     }
   }
 }
@@ -76,15 +75,13 @@ withDefaults(defineProps<Props>(), {
     object-fit: cover;
     transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* 更高级的缓动 */
   }
-
-
 }
 
-  .card-content {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-  }
+.card-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
 
 /* --- 变体样式控制布局 --- */
 /* 每日推荐：内容从上到下 */

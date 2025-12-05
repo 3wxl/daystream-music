@@ -66,7 +66,6 @@
                 {{ artist.name }}
               </h4>
               <p class="text-gray-500 text-xs mt-1 flex items-center">
-                <Music class="w-3 h-3 mr-1" />
                 {{ artist.songCount }}首作品
               </p>
             </div>
@@ -139,7 +138,6 @@
               </h4>
               <div class="mt-1 flex items-center justify-between">
                 <p class="text-gray-500 text-xs flex items-center">
-                  <Music class="w-3 h-3 mr-1" />
                   {{ fan.likedCount }}个共同喜好
                 </p>
                 <el-button

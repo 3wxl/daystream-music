@@ -12,14 +12,17 @@ import { useRoute } from 'vue-router'
 import MainLayout from './layouts/MainLayout.vue'
 import AuthLayout from './layouts/AuthLayout.vue'
 import AdminLayout from './layouts/AdminLayout.vue'
-
+import MusicianLayout from './layouts/MusicianLayout.vue'
+import EmptyLayout from './layouts/EmptyLayout.vue'
 const route = useRoute()
 
 // 2. 注册布局
 const layouts = {
   main: MainLayout,
   auth: AuthLayout,
-  admin:AdminLayout
+  admin: AdminLayout,
+  musician: MusicianLayout,
+  empty: EmptyLayout,
 }
 
 // 3. 核心逻辑
@@ -37,4 +40,3 @@ const layoutComponent = computed(() => {
   return layouts[layoutName]
 })
 </script>
-

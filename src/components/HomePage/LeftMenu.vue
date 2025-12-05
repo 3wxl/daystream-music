@@ -64,6 +64,7 @@ import {
   Tickets,
   User,
   View,
+  Service,
 } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 
@@ -76,8 +77,9 @@ const menuItems = [
   { path: '/aritist', title: '歌手', icon: Mic },
   { path: '/playlist', title: '歌单', icon: Files },
   { path: '/MusicRanking', title: '榜单', icon: Histogram },
-  { path: '/User/PersonalCenter', title: '个人', icon: User },
   { path: '/community/CommunityDisplay', title: '社区', icon: ChatLineSquare },
+  // { path: '/musician/MusicianSettleIn', title: '音乐人', icon: Service },
+  { path: '/User/PersonalCenter', title: '个人中心', icon: User },
 ]
 
 const changeCollapse = () => {
