@@ -52,13 +52,13 @@
             <div class="flex flex-col items-center">
               <div class="w-30 h-30 md:w-30 md:h-30 rounded-full border-4 border-white/20 overflow-hidden shadow-lg">
                 <img
-                  :src="'http://39.96.214.163:9000/file/70567a01-09d0-443b-9d8a-bab6e5623967.png'"
+                  :src="userInfo.avatar"
                   class="cursor-pointer w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                   @click="router.push('/User/PersonalCenter')"
                 />
               </div>
-              <p class="text-[#e5e7eb] text-[18px] font-[600] mt-2">蔡徐坤</p>
-              <p class="text-[#bdbdbd] mt-[2px] text-[12px]">坤坤音乐创作者</p>
+              <p class="text-[#e5e7eb] text-[18px] font-[600] mt-2">{{userInfo.username}}</p>
+              <p class="text-[#bdbdbd] mt-[2px] text-[12px]">{{userInfo.introduction?userInfo.introduction:'这个人很懒，还没有填写简介 ε=( o｀ω′)ノ'}}</p>
               <div class="mt-[10px]">
                 <button @click="router.push('/community/communityCreate')" class="BtnPublish relative text-[#e5e7eb] px-[15px] py-[5px] bg-pink-600 rounded-[10px] cursor-pointer hover:bg-pink-500 active:bg-pink-700 active:scale-95 duration-[0.3s]">
                   <IconFontSymbol name="dongtai" size="18px"></IconFontSymbol>
@@ -96,6 +96,8 @@
   import {debounce,throttle} from '@/utils/debounceThrottle';     // 节流防抖
   import DynamicLoading from '@/components/community/DynamicLoading.vue'    // 动态加载组件
   import DynamicNull from '@/components/community/DynamicNull.vue'      // 当搜索动态内容为空时展示组件
+
+  // 数据
   let input = ref('')
   let oldInput = ''     // 旧输入,用于比较是否改变
   let musicians = reactive([
@@ -213,6 +215,7 @@
     "pageSize": 10
   })
   let hasMore = ref(true)     // 是否还有更多数据
+  let userInfo = JSON.parse(localStorage.getItem('user')).userInfo
   // 方法
   async function getDynamic() {     // 获取动态列表
     isSearchNull.value = false

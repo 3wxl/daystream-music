@@ -32,7 +32,7 @@ export const useUserStore = defineStore('user', () => {
       console.log('用户信息:', res.data)
       userInfo.value = res.data
     } catch (error) {
-      logout()
+      // logout()
       console.log(error)
     }
   }
@@ -49,7 +49,7 @@ export const useUserStore = defineStore('user', () => {
     login,
     logout,
     getUsersInfo,
-  }   
+  }
 },
 {
     persist: true,
