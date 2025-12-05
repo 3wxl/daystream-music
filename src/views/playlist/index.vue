@@ -36,13 +36,9 @@ import { useLoadMore } from '@/Hooks/LoadMore'
 import { transformFilterGroups } from '@/utils/transformFilterGroups'
 import { ElMessage } from 'element-plus'
 import { onMounted, provide, ref, watch } from 'vue'
-import {useRoute} from 'vue-router'
+import { useRoute } from 'vue-router'
 
-const filterValue = ref({
-  area: '',
-  type: '',
-  genre: '',
-})
+const filterValue = ref<Record<string, string | number>>({})
 
 const route = useRoute()
 const filterGroups = ref([])
@@ -54,18 +50,18 @@ import { getlistByTags } from '@/api/playlist/ByTags'
 
 const { loading, noMore, listData, loadData } = useLoadMore(getlistByTags)
 
-// 提取标签对象中的有效值组成数组
+// 提取标签对象中的有效值组成数组（全部不为空）
 const getTagValues = (tags: Record<string, string | number>) => {
-  return Object.entries(tags).flatMap(([key,value])=> {
-    if(value !==''){
+  return Object.entries(tags).flatMap(([key, value]) => {
+    if (value !== '') {
       return [Number(value)]
     }
-    
-    const group =filterGroups.value.find((g:any) => g.key === key)
+
+    const group = filterGroups.value.find((g: any) => g.key === key)
     if (group) {
       return group.options.map((opt: any) => Number(opt.value))
     }
-    
+
     return []
   })
 }
@@ -76,6 +72,27 @@ const fetchTags = async () => {
     const res = await getAllTags()
     if (res.data) {
       filterGroups.value = transformFilterGroups(res.data)
+
+      // 初始化筛选值
+      const newFilters: Record<string, string | number> = {}
+      filterGroups.value.forEach((g: any) => {
+        newFilters[g.key] = ''
+      })
+
+      // 处理路由参数 tagId
+      const tagId = route.query.tagId
+      if (tagId) {
+        for (const group of filterGroups.value) {
+          const foundTag = (group as any).options.find((tag: any) => tag.value == tagId)
+          if (foundTag) {
+            newFilters[(group as any).key] = foundTag.value
+            break
+          }
+        }
+      }
+
+      // 一次性赋值触发 watch
+      filterValue.value = newFilters
     }
   } catch (err: any) {
     ElMessage.error(err.message || '获取标签失败')
@@ -95,27 +112,9 @@ const handleScrollLoad = () => {
 }
 
 onMounted(() => {
-  fetchTags()
-    .then(() => {
-      
-
-      const tagId = route.query.tagId
-      if(tagId){
-        for(const group of filterGroups.value){
-          const foundTag = group.options.find((tag) => tag.value == tagId)
-          if(foundTag) {
-            filterValue.value[group.key] = foundTag.value
-            break
-          }
-        }
-      }
-
-      // 初始加载列表数据
-      loadData(getTagValues(filterValue.value), true)
-    })
-    .catch((err) => {
-      console.log(err)
-    })
+  fetchTags().catch((err) => {
+    console.log(err)
+  })
 })
 // const ListData = ref(
 //   Array.from({ length: 50 }, (_, i) => {

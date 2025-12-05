@@ -1,17 +1,21 @@
 <template>
-  <div class="h-screen flex overflow-hidden bg-gray-900 relative">
-    <transition name="slide-fade">
-      <left-menu v-show="isSidebarVisible" class="shrink-0" />
-    </transition>
+  <div class="h-screen flex flex-col overflow-hidden bg-gray-900 relative">
+    <div class="flex-1 flex overflow-hidden min-h-0">
+      <transition name="slide-fade">
+        <left-menu v-show="isSidebarVisible" class="shrink-0 !h-full" />
+      </transition>
 
-    <div class="flex flex-col flex-1 min-h-0 min-w-0">
-      <top-header class="shrink-0" />
-      <main class="flex-1 min-w-0 overflow-hidden bg-gray-900">
-        <div class="h-full overflow-y-auto custom-scrollbar layout-scrollbar pb-20">
-          <slot />
-        </div>
-      </main>
+      <div class="flex flex-col flex-1 min-h-0 min-w-0">
+        <top-header class="shrink-0" />
+        <main class="flex-1 min-w-0 overflow-hidden bg-gray-900">
+          <div class="h-full overflow-y-auto custom-scrollbar layout-scrollbar">
+            <slot />
+          </div>
+        </main>
+      </div>
     </div>
+
+    <PlayerControls class="static! w-full! z-40 shrink-0" />
 
     <!-- 悬浮按钮 -->
     <div
@@ -57,7 +61,6 @@
       </div>
     </div>
   </div>
-  <PlayerControls />
 </template>
 
 <script setup lang="ts">

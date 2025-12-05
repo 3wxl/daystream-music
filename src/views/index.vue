@@ -1,5 +1,5 @@
 <template>
-  <div class="home-wrapper bg-[#0b0f1b] text-white flex flex-col h-screen overflow-y-auto">
+  <div class="home-wrapper bg-[#0b0f1b] text-white flex flex-col h-screen">
     <section class="px-10 pt-6 pb-4">
       <MusicCarousel />
     </section>
@@ -33,7 +33,7 @@
       <div class="panel tags-panel">
         <div class="panel-header">
           <h2>歌单分类</h2>
-          <router-link to="/playlist" class="more-link">全部</router-link>
+          <router-link to="{path:'/playlist',id:[1,2,3,4,5,6,7,8,9,10]}" class="more-link">全部</router-link>
         </div>
         <TagBar :tags="tagsData" />
       </div>
