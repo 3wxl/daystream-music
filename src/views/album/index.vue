@@ -11,7 +11,7 @@
         :key="item.id"
         :imgUrl="item.coverUrl"
         :title="item.albumName"
-        :to="{name:'album-detailPage-id',params:{id:item.id}}"
+        :to="{ name: 'album-detailPage-id', params: { id: item.id } }"
         variant="album"
       >
         <h2 class="album-title">{{ item.albumName }}</h2>
@@ -26,7 +26,7 @@
 <script lang="ts" setup>
 import { getAlbum } from '@/api/album/getAlbum'
 import { useLoadMore } from '@/Hooks/LoadMore'
-import {onMounted} from 'vue'
+import { onMounted, type Ref } from 'vue'
 
 // const ListData = ref(
 //   Array.from({ length: 50 }, (_, i) => {
@@ -45,7 +45,18 @@ import {onMounted} from 'vue'
 //   }),
 // )
 
-const { loading, noMore,listData,loadData} = useLoadMore(getAlbum)
+interface AlbumItem {
+  id: string | number
+  coverUrl: string
+  albumName: string
+}
+
+const { loading, noMore, listData, loadData } = useLoadMore(getAlbum) as {
+  loading: Ref<boolean>
+  noMore: Ref<boolean>
+  listData: Ref<AlbumItem[]>
+  loadData: (params?: any, isReset?: boolean) => Promise<void>
+}
 console.log(listData.value)
 
 onMounted(() => {
@@ -53,7 +64,7 @@ onMounted(() => {
 })
 
 const handleScrollLoad = () => {
-  loadData(null,false)
+  loadData(null, false)
 }
 </script>
 
