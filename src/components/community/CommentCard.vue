@@ -62,10 +62,10 @@
 
 <script setup lang="ts">
   import {GetReplyCommentList} from '@/api/community/GetReplyCommentList';    // 获取子评论列表
-  import {ReplyComment} from '@/api/community/ReplyComment';    // 回复评论，即创建子评论
-  import {debounce,throttle} from '@/utils/debounceThrottle';     // 节流防抖
-  import {Like} from '@/api/community/Like';      // 点赞
-  import SonCommentCard from './SonCommentCard.vue';      // 子评论组件
+  import {ReplyComment} from '@/api/community/ReplyComment';                  // 回复评论，即创建子评论
+  import {debounce,throttle} from '@/utils/debounceThrottle';                 // 节流防抖
+  import {Like} from '@/api/community/Like';                                  // 点赞
+  import SonCommentCard from './SonCommentCard.vue';                          // 子评论组件
   // 数据
   let props = defineProps({
     commentObj: {
@@ -76,12 +76,12 @@
   let {id,content,userId,username,avatar,createdTime,likeCount,isLike,isSelf,childCount} = toRefs(props.commentObj);
   let isSpradSonComment = ref(false);   // 是否展开子评论
   let isSpradInput = ref(false);        // 是否展开回复输入框
-  let lastId = ref(null)      // 子评论列表的lastId
-  let commentWords = ref(0);    // 你的输入评论字数
-  let commentInput = ref(null);   // 你的评论输入框
-  let nowCommentData = reactive({})   // 当前回复评论对象的数据,点击一级评论的评论按钮时将该一级评论的数据保存在这里，点击子评论时将子评论的数据保存在这里
-  let sonCommentList = reactive([])    // 子评论列表
-  let hasMoreSonComment = ref(false)      // 是否还有更多子评论
+  let lastId = ref(null)                // 子评论列表的lastId
+  let commentWords = ref(0);            // 你的输入评论字数
+  let commentInput = ref(null);         // 你的评论输入框
+  let nowCommentData = reactive({})     // 当前回复评论对象的数据,点击一级评论的评论按钮时将该一级评论的数据保存在这里，点击子评论时将子评论的数据保存在这里
+  let sonCommentList = reactive([])     // 子评论列表
+  let hasMoreSonComment = ref(false)    // 是否还有更多子评论
   // 方法
   function updateWords(event) {
     commentWords.value = event.target.value.length;

@@ -6,17 +6,7 @@
     <div class="flex items-center flex-1 max-w-2xl">
       <h1 class="text-xl font-bold text-white mr-6 hidden md:block">Daystream Music</h1>
       <div class="flex items-center flex-1">
-        <div class="relative flex-1 max-w-md">
-          <input
-            v-model="input"
-            type="text"
-            placeholder="心动"
-            class="w-full px-4 py-2 pl-10 bg-gray-700 text-gray-200 placeholder-gray-400 rounded-full border border-gray-600 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:border-transparent transition-all"
-          />
-          <Search
-            class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-          />
-        </div>
+       <search-input  v-model="input" />
       </div>
     </div>
 
@@ -42,6 +32,14 @@
         >
           音乐人中心
         </button>
+      </router-link>
+      <router-link to="/message/likeMessage" class="relative">
+        <button
+          class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors hidden md:block"
+        >
+          消息
+        </button>
+        <span class="top-0 -right-1 inline-block min-w-[15px] min-h-[15px] text-center line-clamp-1 rounded-[16px] p-[2px] text-white text-[11px]/[13px] absolute bg-red-600">99+</span>
       </router-link>
       <button
         class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors hidden md:block"
@@ -135,7 +133,6 @@
 </template>
 
 <script lang="ts" setup>
-import { Search } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
