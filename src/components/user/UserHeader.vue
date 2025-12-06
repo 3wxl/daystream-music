@@ -1,5 +1,6 @@
 <template>
   <div class="user-header relative overflow-hidden rounded-xl group">
+    <!-- 背景图区域 -->
     <div class="absolute inset-0 z-0 cursor-pointer" @click="handleBgUpload">
       <img
         :src="userInfo.bgImg || 'https://picsum.photos/1200/300?random=30'"
@@ -8,7 +9,6 @@
       <div
         class="absolute inset-0 bg-gradient-to-t from-black/80 via-rose-900/30 to-transparent"
       ></div>
-
       <div
         class="absolute right-4 top-4 bg-black/50 text-white px-3 py-1.5 rounded-full text-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5"
       >
@@ -17,8 +17,10 @@
       </div>
     </div>
 
+    <!-- 内容区域 -->
     <div class="relative z-10 px-6 py-10 md:py-16">
       <div class="flex flex-col md:flex-row gap-6 items-start md:items-end">
+        <!-- 头像区域 -->
         <div class="relative cursor-pointer group/avatar" @click="handleAvatarUpload">
           <div
             class="w-28 h-28 md:w-36 md:h-36 rounded-full border-4 border-white/20 overflow-hidden shadow-lg"
@@ -31,7 +33,6 @@
               class="w-full h-full object-cover transition-transform duration-500 group-hover/avatar:scale-110"
             />
           </div>
-
           <div
             class="absolute inset-0 rounded-full bg-rose-900/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center"
           >
@@ -41,7 +42,6 @@
               <i class="iconfont opacity-70" style="font-size: 25px">&#xe63b;</i>
             </div>
           </div>
-
           <div class="absolute top-27 left-26 flex items-center gap-1">
             <button
               class="w-7 h-7 rounded-full bg-[#FF2E93] border-4 border-rose-900/50 shadow-md"
@@ -54,9 +54,12 @@
           </div>
         </div>
 
+        <!-- 用户信息 -->
         <div class="flex-1 text-white">
           <div class="flex flex-wrap items-center gap-3 mb-2">
-            <h2 class="text-2xl md:text-3xl font-bold">{{ userInfo.name || '未知用户' }}</h2>
+            <h2 class="text-2xl md:text-3xl font-bold">
+              {{ userInfo.username || '未知用户' }}
+            </h2>
             <el-tag
               v-if="userInfo.isVip"
               class="vip-tag bg-[#ff2e93] border-0 text-white px-3 py-0.5"
@@ -69,11 +72,9 @@
               <i class="iconfont">&#xe640;</i> 会员
             </el-tag>
           </div>
-
           <p class="text-gray-200 text-sm md:text-base mb-4 max-w-2xl">
-            {{ userInfo.signature || '暂无签名' }}
+            {{ userInfo.introduction || '暂无签名' }}
           </p>
-
           <div class="flex flex-wrap items-center gap-3">
             <el-button
               v-if="isOthersPage"
@@ -90,7 +91,6 @@
               <i v-if="isFollowing" class="iconfont mr-1">&#xe62b;</i>
               <span>{{ isFollowing ? '已关注' : '关注' }}</span>
             </el-button>
-
             <el-button
               v-else
               size="default"
@@ -104,6 +104,7 @@
         </div>
       </div>
 
+      <!-- 统计数据 -->
       <div class="grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-6 mt-6 md:mt-10">
         <router-link to="/User/FollowList">
           <div
@@ -150,12 +151,12 @@
       </div>
     </div>
 
+    <!-- 编辑资料弹窗 -->
     <div v-if="showEditDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
         @click="showEditDialog = false"
       ></div>
-
       <div
         class="relative z-50 w-full max-w-2xl bg-[#1E1E1E] rounded-xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-100 max-h-160"
       >
@@ -187,7 +188,6 @@
                   v-model="editForm.name"
                 />
               </div>
-
               <div>
                 <label for="signature" class="block text-sm text-[#8A8A8A] mb-1">签名</label>
                 <textarea
@@ -197,7 +197,6 @@
                   v-model="editForm.signature"
                 ></textarea>
               </div>
-
               <div>
                 <label class="block text-sm text-[#8A8A8A] mb-1">性别</label>
                 <div class="flex gap-6 py-2">
@@ -206,7 +205,7 @@
                       type="radio"
                       name="gender"
                       class="accent-[#FF2E93]"
-                      value="male"
+                      value="男"
                       v-model="editForm.gender"
                     />
                     <span>男</span>
@@ -216,7 +215,7 @@
                       type="radio"
                       name="gender"
                       class="accent-[#FF2E93]"
-                      value="female"
+                      value="女"
                       v-model="editForm.gender"
                     />
                     <span>女</span>
@@ -226,10 +225,10 @@
                       type="radio"
                       name="gender"
                       class="accent-[#FF2E93]"
-                      value="secret"
+                      value="未知"
                       v-model="editForm.gender"
                     />
-                    <span>保密</span>
+                    <span>未知</span>
                   </label>
                 </div>
               </div>
@@ -241,19 +240,18 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label for="wallet_balance" class="block text-sm text-[#8A8A8A] mb-1"
-                      >账户余额 (元)</label
+                      >音浪数量</label
                     >
                     <input
                       type="number"
                       id="wallet_balance"
                       class="w-full bg-[#121212]/50 border border-white/5 rounded-lg px-4 py-2 text-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#FF2E93]/50 transition-all"
-                      value="128.50"
+                      :value="editForm.walletBalance"
                       step="0.01"
                       readonly
                     />
                   </div>
                 </div>
-
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label for="vip_expire_time" class="block text-sm text-[#8A8A8A] mb-1"
@@ -263,7 +261,7 @@
                       type="datetime-local"
                       id="vip_expire_time"
                       class="w-full bg-[#121212]/50 border border-white/5 rounded-lg px-4 py-2 text-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#FF2E93]/50 transition-all"
-                      value="2024-12-31T23:59"
+                      :value="editForm.vipExpireTime"
                       readonly
                     />
                   </div>
@@ -278,7 +276,7 @@
                   <label class="block text-sm text-[#8A8A8A] mb-1">注册时间</label>
                   <input
                     type="text"
-                    value="2023-05-18 14:30:25"
+                    :value="editForm.createdTime"
                     class="w-full bg-[#121212]/50 border border-white/5 rounded-lg px-4 py-2 text-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#FF2E93]/50 transition-all"
                     readonly
                   />
@@ -287,7 +285,7 @@
                   <label class="block text-sm text-[#8A8A8A] mb-1">最后登录时间</label>
                   <input
                     type="text"
-                    value="2023-11-14 09:45:12"
+                    :value="editForm.lastLoginTime"
                     class="w-full bg-[#121212]/50 border border-white/5 rounded-lg px-4 py-2 text-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#FF2E93]/50 transition-all"
                     readonly
                   />
@@ -296,7 +294,7 @@
                   <label class="block text-sm text-[#8A8A8A] mb-1">最后签到时间</label>
                   <input
                     type="text"
-                    value="2023-11-13 20:15:33"
+                    :value="editForm.lastCheckinTime || '暂未签到'"
                     class="w-full bg-[#121212]/50 border border-white/5 rounded-lg px-4 py-2 text-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#FF2E93]/50 transition-all"
                     readonly
                   />
@@ -305,7 +303,7 @@
                   <label class="block text-sm text-[#8A8A8A] mb-1">信息更新时间</label>
                   <input
                     type="text"
-                    value="2023-11-10 16:22:08"
+                    :value="editForm.updatedTime"
                     class="w-full bg-[#121212]/50 border border-white/5 rounded-lg px-4 py-2 text-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#FF2E93]/50 transition-all"
                     readonly
                   />
@@ -332,11 +330,11 @@
             </div>
           </form>
         </div>
-
         <div class="h-1 w-full bg-gradient-to-r from-[#FF2E93] via-[#d46ab5] to-[#b481bc]"></div>
       </div>
     </div>
 
+    <!-- 背景装饰 -->
     <div class="fixed inset-0 -z-10 overflow-hidden">
       <div class="absolute -top-40 -right-40 w-96 h-96 bg-[#FF2E93]/20 rounded-full blur-3xl"></div>
       <div
@@ -344,6 +342,7 @@
       ></div>
     </div>
 
+    <!-- 隐藏的文件上传输入框 -->
     <input
       type="file"
       ref="avatarInput"
@@ -363,52 +362,73 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+import { ElMessage } from 'element-plus'
+import { uploadImage } from '@/api/personalCenter/index'
+import type { UserInfoVO, EditForm } from '@/types/personalCenter/index'
 
-const props = defineProps({
-  userInfo: {
-    type: Object,
-    default: () => ({
-      isVip: true,
-      playCount: 125000,
-      createdCount: 18,
-      bgImg: '',
-      avatar: '',
-      name: '未知用户',
-      signature: '',
-      gender: 'secret',
-    }),
-  },
-  isOthersPage: {
-    type: Boolean,
-    default: false,
-  },
-})
+// 1. 定义Props
+const props = defineProps<{
+  userInfo: UserInfoVO
+  isOthersPage: boolean
+}>()
+console.log(props.userInfo.walletBalance)
+// 2. 定义Emits
+const emit = defineEmits<{
+  'update-user-info': [editForm: EditForm]
+  'upload-avatar': [avatarUrl: string]
+  'upload-bg': [bgUrl: string]
+}>()
 
+// 响应式数据
 const isFollowing = ref(false)
 const showEditDialog = ref(false)
 const isMobile = ref(false)
-const avatarInput = ref<HTMLInputElement>(null)
-const bgInput = ref<HTMLInputElement>(null)
+const avatarInput = ref<HTMLInputElement | null>(null)
+const bgInput = ref<HTMLInputElement | null>(null)
 
-const editForm = ref({
-  name: props.userInfo.name,
-  signature: props.userInfo.signature,
-  gender: props.userInfo.gender,
+// 编辑表单（初始化从props获取）
+const editForm = ref<EditForm>({
+  name: props.userInfo.username || '未知用户',
+  signature: props.userInfo.introduction || '',
+  gender: props.userInfo.gender || 'secret',
+  walletBalance: props.userInfo.walletBalance || 0,
+  lastCheckinTime: props.userInfo.lastCheckinTime?.replace('T', ' ') || '',
+  lastLoginTime: props.userInfo.lastLoginTime?.replace('T', ' ') || '',
+  updatedTime: props.userInfo.updatedTime?.replace('T', ' ') || '',
+  createdTime: props.userInfo.createdTime?.replace('T', ' ') || '',
+  vipExpireTime: props.userInfo.vipExpireTime?.replace('T', ' ') || '',
 })
 
+// 监听props变化，同步表单数据
+watch(
+  () => props.userInfo,
+  (newVal) => {
+    editForm.value = {
+      name: newVal.username || '未知用户',
+      signature: newVal.introduction || '',
+      gender: newVal.gender || '未知',
+      walletBalance: newVal.walletBalance || 0,
+      lastCheckinTime: newVal.lastCheckinTime || '',
+      lastLoginTime: newVal.lastLoginTime || '',
+      updatedTime: newVal.updatedTime || '',
+      createdTime: newVal.createdTime || '',
+      vipExpireTime: newVal.vipExpireTime || '',
+    }
+  },
+  { deep: true },
+)
+
+// 生命周期
 onMounted(() => {
   checkScreenSize()
   window.addEventListener('resize', checkScreenSize)
 
   watch(showEditDialog, (value) => {
-    if (value) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
+    document.body.style.overflow = value ? 'hidden' : ''
   })
 })
 
+// 工具方法
 const checkScreenSize = () => {
   isMobile.value = window.innerWidth < 768
 }
@@ -421,30 +441,42 @@ const handleBgUpload = () => {
   bgInput.value?.click()
 }
 
-const handleFileUpload = (type: 'avatar' | 'bg', e?: Event) => {
+// 核心：文件上传逻辑（适配request的uploadImage接口）
+const handleFileUpload = async (type: 'avatar' | 'bg', e?: Event) => {
   const input = type === 'avatar' ? avatarInput.value : bgInput.value
   if (!input?.files?.length) return
 
   const file = input.files![0]
-  const reader = new FileReader()
-  reader.onload = (event) => {
-    console.log(`上传${type}文件:`, file)
-    if (type === 'avatar') {
-    } else {
+  if (!file) return
+  try {
+    // 调用适配后的uploadImage接口
+    const res = await uploadImage(file, type)
+    if (res.success && res.data?.url) {
+      // 派发事件给父组件
+      if (type === 'avatar') {
+        emit('upload-avatar', res.data.url)
+      } else {
+        emit('upload-bg', res.data.url)
+      }
+      ElMessage.success(`${type === 'avatar' ? '头像' : '背景图'}上传成功`)
     }
+  } catch (error) {
+    console.error(`${type === 'avatar' ? '头像' : '背景图'}上传失败:`, error)
+    // 错误提示已在request拦截器中处理
   }
-  reader.readAsDataURL(file)
 
   input.value = ''
 }
 
-const handleFollow = () => {
-  isFollowing.value = !isFollowing.value
+// 保存编辑逻辑（派发事件给父组件）
+const handleSaveEdit = () => {
+  emit('update-user-info', { ...editForm.value })
+  showEditDialog.value = false
 }
 
-const handleSaveEdit = () => {
-  console.log('保存编辑内容:', editForm.value)
-  showEditDialog.value = false
+// 关注/取消关注
+const handleFollow = () => {
+  isFollowing.value = !isFollowing.value
 }
 </script>
 
@@ -462,11 +494,6 @@ const handleSaveEdit = () => {
   100% {
     box-shadow: 0 0 0 0 rgba(255, 46, 147, 0);
   }
-}
-.edit-dialog {
-  --el-dialog-title-color: #333;
-  --el-input-border-color: #ffcce0;
-  --el-input-focus-border-color: #ff2e93;
 }
 
 .stat-item {
@@ -580,6 +607,7 @@ const handleSaveEdit = () => {
     animation: pulse 3s ease-in-out infinite;
   }
 }
+
 .scrollbar-custom::-webkit-scrollbar {
   width: 8px;
 }
