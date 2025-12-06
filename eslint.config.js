@@ -5,6 +5,13 @@ import pluginVue from 'eslint-plugin-vue'
 import { defineConfig } from 'eslint/config'
 import autoImportGlobals from './eslintrc-auto-import.json' assert { type: 'json' }
 
+import js from '@eslint/js'
+import globals from 'globals'
+import tseslint from 'typescript-eslint'
+import pluginVue from 'eslint-plugin-vue'
+import { defineConfig } from 'eslint/config'
+import autoImportGlobals from './eslintrc-auto-import.json' assert { type: 'json' }
+
 export default defineConfig([
   {
     files: ['**/*.{js,mjs,cjs,ts,mts,cts,vue}'],

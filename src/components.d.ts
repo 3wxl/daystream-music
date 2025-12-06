@@ -110,6 +110,7 @@ declare module 'vue' {
     RightSideBar: typeof import('./components/musicianCenter/AI/sidebar/RightSideBar.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SearchInput: typeof import('./components/HomePage/SearchInput.vue')['default']
     SettingsMenu: typeof import('./components/musicianCenter/AI/SettingsMenu.vue')['default']
     SonCommentCard: typeof import('./components/community/SonCommentCard.vue')['default']
     SongInfoPanel: typeof import('./components/MusicPlayer/SongInfoPanel.vue')['default']
