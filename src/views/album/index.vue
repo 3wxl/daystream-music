@@ -25,7 +25,7 @@
 
 <script lang="ts" setup>
 import { getAlbum } from '@/api/album/getAlbum'
-import { useLoadMore } from '@/Hooks/LoadMore'
+import { useLoadMore } from '@/composables/LoadMore'
 import { onMounted, type Ref } from 'vue'
 
 // const ListData = ref(

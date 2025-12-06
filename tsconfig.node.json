@@ -10,11 +10,15 @@
   ],
   "compilerOptions": {
     "composite": true,
-
+    "noEmit": false,
+    "emitDeclarationOnly": true, // 仅生成声明文件
+    "declaration": true,
+    "declarationMap": false,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "types": ["node"]
+    "types": ["node"],
+    "resolveJsonModule": true,
+    "outDir": "./temp/declarations/node" // 临时目录
   }
 }

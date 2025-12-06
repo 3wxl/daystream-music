@@ -82,35 +82,33 @@
 import VipPackages from '@/components/vip/VipPackages.vue'
 // 导入hooks
 import {
-  useUserData,
   useCountdown,
-  useVipPackages,
-  useWavesExchange,
-  usePurchase,
   useExchangeRecords,
   useFlashSales,
-} from '@/Hooks/useVipExchange'
+  usePurchase,
+  useUserData,
+  useVipPackages,
+  useWavesExchange,
+} from '@/composables/useVipExchange'
 
 // 导入数据
 import {
-  vipPrivileges,
-  flashSales as flashSalesData,
-  vipPackages,
-  exchangeOptions,
-  initialExchangeRecords,
-  quickActions,
   coupons,
+  exchangeOptions,
+  flashSales as flashSalesData,
+  initialExchangeRecords,
+  vipPackages,
+  vipPrivileges,
 } from '@/mock/vip/vipExchangeData'
 
 // 导入类型
 import type {
-  VipPrivilege,
-  FlashSale,
-  VipPackage,
   ExchangeRecord,
-  QuickAction,
   ExchangeResult,
-  PurchaseResult,
+  FlashSale,
+  QuickAction,
+  VipPackage,
+  VipPrivilege,
 } from '@/types/vip/vipExchange'
 
 const router = useRouter()

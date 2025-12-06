@@ -1,55 +1,77 @@
 <template>
+  <!-- 外层容器 - 背景模糊层 -->
   <div
-    class="w-full h-screen bg-gradient-to-br from-[#0f0f15] via-[#1a1a25] to-[#0f0f15] flex flex-col text-white overflow-hidden"
+    class="fixed inset-0 z-50 transition-all duration-800 ease-in-out"
+    :style="{
+      backdropFilter: isShow ? 'blur(10px)' : 'blur(0px)',
+      backgroundColor: isShow ? 'rgba(15, 15, 21, 0.9)' : 'rgba(15, 15, 21, 0)',
+    }"
   >
-    <!-- 动态背景粒子 -->
-    <BackgroundParticles />
-
-    <!-- 顶部返回按钮 -->
-    <BackButton @back="handleBack" />
-
-    <!-- 主内容区 -->
+    <!-- 动画容器 -->
     <div
-      class="relative z-10 flex-1 flex flex-col lg:flex-row items-center justify-center px-4 md:px-6 gap-4 lg:gap-12"
+      class="absolute inset-x-0 bottom-0 w-full transition-all duration-800 ease-in-out"
+      :style="{
+        height: '100vh',
+        transform: isShow ? 'translateY(0%)' : 'translateY(100%)',
+      }"
     >
-      <!-- 左侧：黑胶唱片区域 -->
-      <VinylPlayer :is-playing="isPlaying" @toggle-play="togglePlay" />
+      <!-- 内容容器 - 添加渐变背景 -->
+      <div
+        class="relative w-full h-full bg-gradient-to-br from-[#0f0f15] via-[#1a1a25] to-[#0f0f15] flex flex-col text-white overflow-hidden"
+      >
+        <!-- 背景粒子 -->
+        <BackgroundParticles />
 
-      <!-- 右侧：歌曲信息+标签切换区 -->
-      <SongInfoPanel
-        :active-tab="activeTab"
-        :is-playing="isPlaying"
-        :current-lyric-index="currentLyricIndex"
-        :current-lyric-time="currentLyricTime"
-        :progress="progress"
-        :similar-songs="similarSongs"
-        @update:active-tab="activeTab = $event"
-        @seek-to-lyric="seekToLyric"
-        @play-similar-song="playSimilarSong"
-      />
+        <!-- 内容区域 -->
+        <div class="relative z-10 flex-1 flex flex-col">
+          <!-- 顶部返回按钮 -->
+          <BackButton @back="handleBack" />
+
+          <!-- 主内容区 -->
+          <div
+            class="flex-1 flex flex-col lg:flex-row items-center justify-center px-4 md:px-6 gap-4 lg:gap-12"
+          >
+            <!-- 左侧：黑胶唱片区域 -->
+            <VinylPlayer :is-playing="isPlaying" @toggle-play="togglePlay" />
+
+            <!-- 右侧：歌曲信息+标签切换区 -->
+            <SongInfoPanel
+              :active-tab="activeTab"
+              :is-playing="isPlaying"
+              :current-lyric-index="currentLyricIndex"
+              :current-lyric-time="currentLyricTime"
+              :progress="progress"
+              :similar-songs="similarSongs"
+              @update:active-tab="activeTab = $event"
+              @seek-to-lyric="seekToLyric"
+              @play-similar-song="playSimilarSong"
+            />
+          </div>
+        </div>
+
+        <!-- 底部播放控制栏 -->
+        <PlayerControls
+          :is-playing="isPlaying"
+          :progress="progress"
+          :volume="volume"
+          :shuffle="shuffle"
+          :loop="loop"
+          :muted="muted"
+          :is-liked="isLiked"
+          :progress-percentage="progressPercentage"
+          @toggle-play="togglePlay"
+          @toggle-like="toggleLike"
+          @toggle-shuffle="toggleShuffle"
+          @toggle-loop="toggleLoop"
+          @toggle-mute="toggleMute"
+          @prev-song="prevSong"
+          @next-song="nextSong"
+          @handle-progress-click="handleProgressClick"
+          @handle-volume-click="handleVolumeClick"
+          @format-time="formatTime"
+        />
+      </div>
     </div>
-
-    <!-- 底部播放控制栏 -->
-    <PlayerControls
-      :is-playing="isPlaying"
-      :progress="progress"
-      :volume="volume"
-      :shuffle="shuffle"
-      :loop="loop"
-      :muted="muted"
-      :is-liked="isLiked"
-      :progress-percentage="progressPercentage"
-      @toggle-play="togglePlay"
-      @toggle-like="toggleLike"
-      @toggle-shuffle="toggleShuffle"
-      @toggle-loop="toggleLoop"
-      @toggle-mute="toggleMute"
-      @prev-song="prevSong"
-      @next-song="nextSong"
-      @handle-progress-click="handleProgressClick"
-      @handle-volume-click="handleVolumeClick"
-      @format-time="formatTime"
-    />
   </div>
 </template>
 
@@ -65,7 +87,7 @@ const shuffle = ref(false)
 const loop = ref(false)
 const muted = ref(false)
 const isLiked = ref(false)
-
+const isShow = ref(false)
 // 计算属性
 const progressPercentage = computed(() => (progress.value / 204) * 100)
 
@@ -212,7 +234,14 @@ const playSimilarSong = (song) => {
 
 // 其他交互
 const handleBack = () => {
-  window.history.back()
+  // 先触发退出动画
+  isShow.value = false
+
+  // 等待动画完成后返回
+  setTimeout(() => {
+    window.history.back()
+    // 若用路由跳转：router.push('/原页面路径')
+  }, 600)
 }
 
 const toggleLike = () => {
@@ -247,13 +276,14 @@ const nextSong = () => {
 
 // 生命周期
 onMounted(() => {
-  //   updateLyricHighlight()
-  //   document.body.style.paddingBottom = '100px'
+  // 延迟显示，确保DOM已渲染
+  setTimeout(() => {
+    isShow.value = true
+  }, 50)
 })
 
 onUnmounted(() => {
   stopProgressTimer()
-  // document.body.style.paddingBottom = '0'
 })
 </script>
 <route lang="yaml">

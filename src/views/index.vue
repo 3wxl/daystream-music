@@ -75,7 +75,7 @@ import { getRecommendMusic } from '@/api/Home/getRecommendMusic'
 import MusicCarousel from '@/components/MusicCarousel.vue'
 import MusicListItem from '@/components/MusicListItem.vue'
 import TagBar from '@/components/TagBar.vue'
-import { onMounted,ref } from 'vue'
+// import { onMounted,ref } from 'vue'
 import { getAllTags } from '@/api/playlist/AllTag'
 import { getAlbum } from '@/api/album/getAlbum'
 
