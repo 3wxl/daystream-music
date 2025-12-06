@@ -342,6 +342,16 @@
     let wordCount = getContent2().length + title.value.length
     let isHave = false
     if(title.value.trim() === ''){
+      ElMessage({
+        message: '保存时动态标题不能为空',
+        type: 'warning',
+      })
+      return
+    }else if(content.trim() === ''){
+      ElMessage({
+        message: '保存时动态内容不能为空',
+        type: 'warning',
+      })
       return
     }
     for(let i = 0; i < drafts.length; i++){

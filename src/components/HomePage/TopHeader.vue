@@ -43,6 +43,14 @@
           音乐人中心
         </button>
       </router-link>
+      <router-link to="/message/likeMessage" class="relative">
+        <button
+          class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors hidden md:block"
+        >
+          消息
+        </button>
+        <span class="top-0 -right-1 inline-block min-w-[15px] min-h-[15px] text-center line-clamp-1 rounded-[16px] p-[2px] text-white text-[11px]/[13px] absolute bg-red-600">99+</span>
+      </router-link>
       <button
         class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors hidden md:block"
       >
