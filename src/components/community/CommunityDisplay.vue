@@ -10,7 +10,7 @@
           <span class="font-bold text-[17px] text-white cursor-pointer hover:text-pink-400 mt-1">{{userName}}</span>
           <div class="mt-2 text-[12px] text-[#e5e7eb]">
             <span class="mr-2">{{createTime}}</span>
-            <span>{{introduction}}</span>
+            <!-- <span>{{introduction}}</span> -->
           </div>
         </div>
       </div>
