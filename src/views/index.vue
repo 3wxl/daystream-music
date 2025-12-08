@@ -33,7 +33,9 @@
       <div class="panel tags-panel">
         <div class="panel-header">
           <h2>歌单分类</h2>
-          <router-link to="{path:'/playlist',id:[1,2,3,4,5,6,7,8,9,10]}" class="more-link">全部</router-link>
+          <router-link to="{path:'/playlist',id:[1,2,3,4,5,6,7,8,9,10]}" class="more-link"
+            >全部</router-link
+          >
         </div>
         <TagBar :tags="tagsData" />
       </div>
@@ -59,7 +61,7 @@
             :key="item.id"
             :imgUrl="item.coverUrl"
             :title="item.albumTitle"
-            :to="{name:'album-detailPage-id',params:{id:item.id}}"
+            :to="{ name: 'album-detailPage-id', params: { id: item.id } }"
             variant="album"
           >
             <h2 class="album-title">{{ item.albumTitle }}</h2>
@@ -71,13 +73,13 @@
 </template>
 
 <script lang="ts" setup>
-import { getRecommendMusic } from '@/api/Home/getRecommendMusic'
+import { getRecommendMusic } from '@/api/home/getRecommendMusic'
 import MusicCarousel from '@/components/MusicCarousel.vue'
 import MusicListItem from '@/components/MusicListItem.vue'
 import TagBar from '@/components/TagBar.vue'
 // import { onMounted,ref } from 'vue'
-import { getAllTags } from '@/api/playlist/AllTag'
 import { getAlbum } from '@/api/album/getAlbum'
+import { getAllTags } from '@/api/playlist/AllTag'
 
 defineOptions({
   name: 'HomeIndex',
@@ -93,23 +95,22 @@ onMounted(() => {
     rawData.value = [...res.data]
     listData.value = rawData.value.map((item) => {
       return {
-        id:item.id,
-        title:item.songName,
-        image:item.coverUrl,
-        desc:item.singer,
+        id: item.id,
+        title: item.songName,
+        image: item.coverUrl,
+        desc: item.singer,
       }
     })
     console.log(listData.value)
   })
 
-
   getAllTags().then((res) => {
-    const flatList = Object.values(res.data).flat();
+    const flatList = Object.values(res.data).flat()
     console.log(flatList)
     tagsData.value = [...flatList]
   })
 
-  getAlbum(1,30).then((res) => {
+  getAlbum(1, 30).then((res) => {
     console.log(res)
     albumData.value = [...res.data.records]
   })

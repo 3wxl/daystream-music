@@ -32,7 +32,7 @@
 <script lang="ts" setup>
 import { getAllTags } from '@/api/playlist/AllTag'
 import MultiBar from '@/components/MultiBar.vue'
-import { useLoadMore } from '@/composables/LoadMore'
+import { useLoadMore } from '@/composables/loadMore'
 import { transformFilterGroups } from '@/utils/transformFilterGroups'
 import { ElMessage } from 'element-plus'
 import { onMounted, provide, ref, watch } from 'vue'

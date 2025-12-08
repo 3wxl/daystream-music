@@ -17,9 +17,23 @@
       <IconFontSymbol name="sandian" class="hover:text-pink-500 text-white cursor-pointer duration-300" size="20px"/>
     </div>
   </header>
+  <section class="w-full relative" style="height: calc(100% - 84px)">
+    <ChatContent :id="id"/>
+  </section>
 </template>
 
 <script setup lang="ts">
+  import { useRoute } from 'vue-router'
+  const route = useRoute()
+  let id = ref(route.params.id)
+
+  watch(
+    () => route.params.id,
+    (newId) => {
+      id.value = newId
+      // 更新聊天记录和顶部信息
+    }
+  )
 
 </script>
 

@@ -65,6 +65,18 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
+import { useUserStore } from '@/stores/user'
+import { useChatStore } from '@/stores/chat'
+
+const userStore = useUserStore()
+const chatStore = useChatStore()
+
+onMounted(() => {
+  if (userStore.token) {
+    console.log('已登录，自动连接websoket...')
+    chatStore.connect()
+  }
+})
 
 const isSidebarVisible = ref(true)
 const fabRef = ref<HTMLElement | null>(null)
