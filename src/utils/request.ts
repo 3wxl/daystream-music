@@ -9,7 +9,7 @@ import axios from 'axios'
 import type { LoadingInstance } from 'element-plus'
 import { ElLoading, ElMessage } from 'element-plus'
 
-let isRelogging = false; 
+let isRelogging = false
 const TOKEN_KEY = 'auth_token'
 
 const setToken = (token: string) => {
@@ -114,16 +114,15 @@ service.interceptors.response.use(
     if (error.response) {
       const status = error.response.status
       if (status === 401) {
-        if(!isRelogging){
-            isRelogging = true;
-            removeToken()
-            ElMessage.error('登录已过期，请重新登录')
-           setTimeout(() => {
-           window.location.href = '/UserAuth'
-           }, 500);
-          
+        if (!isRelogging) {
+          isRelogging = true
+          removeToken()
+          ElMessage.error('登录已过期，请重新登录')
+          setTimeout(() => {
+            window.location.href = '/UserAuth'
+          }, 500)
         }
-          return Promise.reject(error)
+        return Promise.reject(error)
       }
       if (status === 404) msg = '接口不存在'
       if (status === 500) msg = '服务器错误'
@@ -135,27 +134,26 @@ service.interceptors.response.use(
   },
 )
 
-// 请求函数
 async function request<T = unknown>(
   url: string,
   method?: Method,
-  submitData?: Record<string, unknown>,
+  submitData?: Record<string, unknown> | FormData,
   config?: RequestConfig<T> & { returnFullResponse?: false },
 ): Promise<Data<T>>
 
 async function request<T = unknown>(
   url: string,
   method?: Method,
-  submitData?: Record<string, unknown>,
+  submitData?: Record<string, unknown> | FormData,
   config?: RequestConfig<T> & { returnFullResponse: true },
 ): Promise<AxiosResponse<Data<T>>>
 
 async function request<T = unknown>(
   url: string,
   method: Method = 'get',
-  submitData?: Record<string, unknown> | undefined,
-  config?: RequestConfig<T> & { returnFullResponse?: boolean },
-) {
+  submitData?: Record<string, unknown> | FormData,
+  config?: RequestConfig<T>,
+): Promise<Data<T> | AxiosResponse<Data<T>>> {
   let loading: LoadingInstance | undefined
   if (config?.showLoading) {
     loading = ElLoading.service({
@@ -165,7 +163,6 @@ async function request<T = unknown>(
     })
   }
 
-  // 构建请求配置对象
   let axiosConfig: AxiosRequestConfig = {
     url,
     method,
@@ -173,7 +170,6 @@ async function request<T = unknown>(
     ...config,
   }
 
-  // 执行单个请求的请求拦截器
   if (config?.interceptors?.requestInterceptor) {
     axiosConfig = config.interceptors.requestInterceptor(axiosConfig)
   }

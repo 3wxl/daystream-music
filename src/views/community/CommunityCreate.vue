@@ -24,13 +24,13 @@
         <div class="flex flex-col items-center">
           <div class="w-30 h-30 md:w-30 md:h-30 rounded-full border-4 border-white/20 overflow-hidden shadow-lg">
             <img
-              :src="'http://39.96.214.163:9000/file/70567a01-09d0-443b-9d8a-bab6e5623967.png'"
+              :src="'userInfo.avatar'"
               class="cursor-pointer w-full h-full object-cover transition-transform duration-500 hover:scale-110"
               @click="router.push('/User/PersonalCenter')"
             />
           </div>
-          <p class="text-[#e5e7eb] text-[18px] font-[600] mt-2">蔡徐坤</p>
-          <p class="text-[#bdbdbd] mt-[2px] text-[12px]">坤坤音乐创作者</p>
+          <p class="text-[#e5e7eb] text-[18px] font-[600] mt-2">{{userInfo.username}}</p>
+          <p class="text-[#bdbdbd] mt-[2px] text-[12px]">{{userInfo.introduction}}</p>
           <div class="flex mt-6 text-[#e5e7eb] mb-2">
             <span>
               <span class="mr-[2px]">111</span>
@@ -110,7 +110,7 @@
   // 双向绑定
   const editorContent = ref('请输入内容（支持图片上传）')
   let title = ref('')
-
+  let userInfo = JSON.parse(localStorage.getItem('user')).userInfo
   const tinyRef = ref(null)
   const uploadedImages = reactive([])      // 上传的图片列表
   let usedImages = reactive([])       // 使用的图片列表
@@ -342,6 +342,16 @@
     let wordCount = getContent2().length + title.value.length
     let isHave = false
     if(title.value.trim() === ''){
+      ElMessage({
+        message: '保存时动态标题不能为空',
+        type: 'warning',
+      })
+      return
+    }else if(content.trim() === ''){
+      ElMessage({
+        message: '保存时动态内容不能为空',
+        type: 'warning',
+      })
       return
     }
     for(let i = 0; i < drafts.length; i++){

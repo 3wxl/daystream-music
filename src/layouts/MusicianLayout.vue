@@ -37,7 +37,7 @@
               关于我们
             </router-link>
             <router-link
-              to="/lab"
+              to="/musician/AiChat"
               class="text-white text-base hover:text-gray-200 transition-colors duration-300 relative"
             >
               创作实验室
