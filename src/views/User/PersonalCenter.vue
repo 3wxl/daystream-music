@@ -92,7 +92,33 @@
       <div
         class="collection-albums-page bg-[#080812] text-white font-['Poppins',sans-serif] overflow-x-hidden rounded-2xl"
       >
-        <!-- 专辑内容不变 -->
+        <main class="container mx-auto px-4 md:px-8 py-8">
+          <div class="mb-8 pb-3">
+            <div class="flex items-center justify-between w-full">
+              <button
+                class="px-6 py-3 rounded-full bg-gradient-to-r text-white text-sm font-medium shadow-xl shadow-[#ec4899]/20 hover:shadow-[#ec4899]/40 transition-all duration-400 transform hover:-translate-y-1 active:scale-95"
+              >
+                我收藏的专辑
+              </button>
+              <router-link to="/User/CollectedAlbums">
+                <button
+                  class="px-4 py-2 rounded-full bg-[#121224] border border-[rgba(236,72,153,0.2)] text-white/80 text-sm hover:bg-[#1a1a36] hover:text-white hover:border-[rgba(236,72,153,0.4)] transition-all duration-400 flex items-center gap-1"
+                >
+                  <span>查看全部</span>
+                  <i class="iconfont text-xs">&#xe696;</i>
+                </button>
+              </router-link>
+            </div>
+          </div>
+          <CollectedAlbum
+            :albums="filteredAlbums.length ? filteredAlbums : albums"
+            @goToAlbumDetail="goToAlbumDetail"
+            @playAlbum="playAlbum"
+            @toggleCollection="toggleCollection"
+            @shareAlbum="shareAlbum"
+            @exploreAlbums="exploreAlbums"
+          />
+        </main>
       </div>
     </div>
   </div>
