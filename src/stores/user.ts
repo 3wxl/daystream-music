@@ -1,7 +1,8 @@
-import { LoginByemail } from '@/api/Auth/Login'
-import { getUserInfo } from '@/api/Home/getUserInfo'
+import { LoginByemail } from '@/api/auth/Login'
+import { getUserInfo } from '@/api/home/getUserInfo'
 import { getToken, removeToken, setToken } from '@/utils/request'
 import { defineStore } from 'pinia'
+import { useChatStore } from './chat'
 
 export const useUserStore = defineStore(
   'user',
@@ -25,6 +26,9 @@ export const useUserStore = defineStore(
         console.error('登录成功但 Token 解析失败', res)
       }
 
+      const chatStore = useChatStore()
+      chatStore.connect()
+
       return res
     }
 
@@ -43,6 +47,8 @@ export const useUserStore = defineStore(
       token.value = ''
       userInfo.value = {}
       removeToken()
+      const chatStore = useChatStore()
+      chatStore.disconnect()
     }
 
     return {
