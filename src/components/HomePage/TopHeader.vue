@@ -6,7 +6,7 @@
     <div class="flex items-center flex-1 max-w-2xl">
       <h1 class="text-xl font-bold text-white mr-6 hidden md:block">Daystream Music</h1>
       <div class="flex items-center flex-1">
-       <search-input  v-model="input" />
+        <search-input v-model="input" />
       </div>
     </div>
 
@@ -71,13 +71,7 @@
       <!-- 身份跳转按钮 -->
       <template v-if="userStore.userInfo.userRole">
         <button
-          v-if="userStore.userInfo.userRole.includes('音乐人')"
-          class="px-4 py-1.5 text-xs font-medium text-white bg-linear-to-r from-purple-600 to-pink-600 rounded-full hover:from-purple-500 hover:to-pink-500 transition-all shadow-lg shadow-purple-900/20"
-        >
-          音乐人中心
-        </button>
-        <button
-          v-else-if="userStore.userInfo.userRole.includes('管理员')"
+          v-if="userStore.userInfo.userRole.includes('管理员')"
           @click="goToAdmin"
           class="px-4 py-1.5 text-xs font-medium text-white bg-gray-700 border border-gray-600 rounded-full hover:bg-gray-600 transition-all"
         >
@@ -92,7 +86,7 @@
             userStore.userInfo.username || '未登录'
           }}</span>
           <span class="text-xs text-gray-500" v-if="userStore.userInfo.userRole">{{
-            userStore.userInfo.userRole[0]
+            userStore.userInfo.userRole.join(' | ')
           }}</span>
         </div>
         <div class="relative group cursor-pointer">
@@ -133,10 +127,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
 import { useUserStore } from '@/stores/user'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useCheckInStore } from '@/stores/checkIn'
 const router = useRouter()
 const isCheckedIn = ref(window.localStorage.getItem('checkIn_status.isCheckedIn'))
 const currentWaves = ref(window.localStorage.getItem('checkIn_status.currentWaves'))
