@@ -69,15 +69,15 @@
                 </div>
                 <div class="flex mt-6 text-[#e5e7eb] mb-10">
                   <span>
-                    <span class="mr-[2px]">111</span>
+                    <span class="mr-[2px]">{{userInfo.fansCount}}</span>
                     粉丝
                   </span>
                   <span class="mx-14">
-                    <span class="mr-[2px]">111</span>
+                    <span class="mr-[2px]">{{userInfo.likeCount}}</span>
                     点赞
                   </span>
                   <span>
-                    <span class="mr-[2px]">111</span>
+                    <span class="mr-[2px]">{{userInfo.followCount}}</span>
                     关注
                   </span>
                 </div>
@@ -94,10 +94,11 @@
   import { Search } from '@element-plus/icons-vue';
   import { useRouter } from 'vue-router';
   import communityDisplay from '../../components/community/CommunityDisplay.vue'
-  import {getDynamicList} from '@/api/community/GetDynamicList'
+  import {getDynamicList} from '@/api/community/Dynamic'
   import {debounce,throttle} from '@/utils/debounceThrottle';     // 节流防抖
   import DynamicLoading from '@/components/community/DynamicLoading.vue'    // 动态加载组件
   import DynamicNull from '@/components/community/DynamicNull.vue'      // 当搜索动态内容为空时展示组件
+  import { getUserInfo } from '@/api/personalCenter/index'
 
   // 数据
   let input = ref('')
@@ -217,8 +218,18 @@
     "pageSize": 10
   })
   let hasMore = ref(true)     // 是否还有更多数据
-  let userInfo = JSON.parse(localStorage.getItem('user')).userInfo
+  let userInfo = ref({})
+
   // 方法
+  async function getUser(){
+    let userInfoRes = await getUserInfo()
+    console.log(userInfoRes)
+    if(userInfoRes.success){
+      userInfo.value = userInfoRes.data
+    }else{
+      console.log('获取用户信息失败')
+    }
+  }
   async function getDynamic() {     // 获取动态列表
     isSearchNull.value = false
     if(hasMore){
@@ -259,6 +270,7 @@
   },800)
   onMounted(() => {
     getDynamic()
+    getUser()
   })
 </script>
 

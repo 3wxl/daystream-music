@@ -116,11 +116,9 @@
 <script setup lang="ts">
   import { on } from 'events';
   import CommentCard from '@/components/community/CommentCard.vue';
-  import {GetDynamicDetail} from '@/api/community/GetDynamicDetail';      // 获取动态详情
-  import {GetDynamicComment} from '@/api/community/GetDynamicComment';      // 获取动态一级评论
-  import {Like} from '@/api/community/Like';      // 点赞
-  import {DynamicCommentRelease} from '@/api/community/DynamicCommentRelease';    // 发布评论
-  import {FollowOther,UnFollowOther} from '@/api/community/FollowOther';    // 关注和取消关注
+  import {GetDynamicDetail} from '@/api/community/Dynamic';      // 获取动态详情
+  import {GetDynamicComment,DynamicCommentRelease} from '@/api/community/Comment';      // 获取动态一级评论 ,发布评论
+  import {Like,FollowOther,UnFollowOther} from '@/api/community/DynamicOperate';      // 点赞 关注和取消关注
   import { ElMessage } from 'element-plus'
   import {debounce,throttle} from '@/utils/debounceThrottle';     // 节流防抖
 
