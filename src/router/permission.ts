@@ -1,5 +1,5 @@
 import { useUserStore } from '@/stores/user'
-import { getToken } from '@/utils/request' 
+import { getToken } from '@/utils/request'
 import router from './index'
 
 const whiteList = ['UserAuth']

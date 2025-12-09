@@ -1,12 +1,12 @@
 <template>
   <el-container class="songs-container">
     <el-aside width="260px" class="shadow-md border-[#e4e7ed] bg-white rounded-[10px] p-[10px] overflow-hidden">
-      <el-scrollbar height="87vh" class="relative" always>
-        <AdminInput type="text" placeholder="请输入歌手名" value="" width="w-[220px]" lable="" rightIcon="sousuo"  class="flex ml-2 absolute top-0"></AdminInput>
+      <el-scrollbar height="87vh" class="relative">
+        <AdminInput type="text" placeholder="请输入歌手名" v-model="musicianSearch" width="w-[220px]" lable="" rightIcon="sousuo"  class="flex ml-2 absolute top-0"></AdminInput>
         <ul class="mt-[50px] flex flex-col items-center">
           <li @click="activeId = musicianObj.id"
             :class="activeId===musicianObj.id?'bg-[#529FFD] text-[white]':'hover:bg-[#d1e5fa]'"
-            class="min-w-[215px] px-[10px] py-[6px] my-0.5 rounded-[6px] cursor-pointer z-10" v-for="musicianObj in musicianList"
+            class="min-w-[215px] px-[10px] py-[6px] my-0.5 rounded-[6px] cursor-pointer z-7 duration-300" v-for="musicianObj in musicianList"
             :key="musicianObj.id">
             <IconFontSymbol name="yinleren" size="16px" class="ml-2 mr-3" :color="activeId===musicianObj.id?'white':'#666'"></IconFontSymbol>
             <span>{{musicianObj.name}}</span>
@@ -17,13 +17,14 @@
     </el-aside>
     <el-main style="padding:0 10px 0px 8px">
       <div class="shadow-md border-[#e4e7ed] bg-white rounded-[10px] p-[15px] flex items-center">
-        <AdminInput class="ml-4 mr-4" type="text" placeholder="请输入歌曲名" value="" width="w-[220px]" label="歌名:"></AdminInput>
+        <AdminInput v-model="songsSearch" class="ml-4 mr-4" type="text" placeholder="请输入歌曲名" width="w-[220px]" label="歌名:"></AdminInput>
         <AdminSelect v-model="typeVal1" class="mr-15" :options="[{value:'1',label:'全部'},{value:'2',label:'指定歌手'}]" label="歌手" ></AdminSelect>
         <AdminSelect v-model="typeVal2" class="mr-15" :options="[{value:'1',label:'歌曲'},{value:'2',label:'MV'},{value:'3',label:'专辑'}]" label="类型" ></AdminSelect>
-        <el-button type="primary" class="ml-4">
-          <IconFontSymbol name="sousuo" class="mr-1"></IconFontSymbol>
-          搜索
-        </el-button>
+        <AdminButton
+          text="搜索"
+          class="ml-4 text-[15px]!"
+          @click="handleSearch"
+        />
       </div>
       <div class="mt-2 shadow-md border-[#e4e7ed] bg-white rounded-[10px] p-[15px]">
         <div class="flex justify-between">
@@ -120,6 +121,7 @@
 <script setup lang="ts">
   let typeVal1 = ref('1')
   let typeVal2 = ref('1')
+  let songsSearch = ref('')      // 搜索歌曲
   let musicianList = reactive([
     {
       name: '张杰',
@@ -285,6 +287,11 @@
       createTime:'2022-05-05'
     },
   ])
+  let musicianSearch = ref('')
+
+  function handleSearch(){
+    console.log(musicianSearch.value)
+  }
 </script>
 
 <style scoped>

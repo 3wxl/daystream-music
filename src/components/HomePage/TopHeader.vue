@@ -86,7 +86,7 @@
             userStore.userInfo.username || '未登录'
           }}</span>
           <span class="text-xs text-gray-500" v-if="userStore.userInfo.userRole">{{
-            userStore.userInfo.userRole.join(' | ')
+            userStore.userInfo.userRole
           }}</span>
         </div>
         <div class="relative group cursor-pointer">
