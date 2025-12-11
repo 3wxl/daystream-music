@@ -53,15 +53,18 @@ const service = axios.create({
   timeout: 20000,
   transformResponse: [
     function (data) {
-      try {
-        // 如果转换成功则返回转换的数据结果
-        return JSONBig.parse(data)
-      } catch (err) {
-        // 如果转换失败，则包装为统一数据格式并返回
-        return {
-          data,
+      if (typeof data === 'string') {
+        try {
+          // 如果转换成功则返回转换的数据结果
+          return JSONBig.parse(data)
+        } catch (err) {
+          // 如果转换失败，则包装为统一数据格式并返回
+          return {
+            data,
+          }
         }
       }
+      return data
     },
   ],
 })
@@ -89,11 +92,11 @@ service.interceptors.response.use(
     const newToken = headers['authorization'] || headers['Authorization']
     const isRefreshed = headers['token-refreshed'] || headers['Token-Refreshed']
     if (newToken && isRefreshed) {
-     const oldToken = getToken()
-     if (newToken !== oldToken) {
-       console.log('检测到 Token 自动续期，已更新')
-       setToken(newToken)
-     }
+      const oldToken = getToken()
+      if (newToken !== oldToken) {
+        console.log('检测到 Token 自动续期，已更新')
+        setToken(newToken)
+      }
     }
 
     const res = response.data

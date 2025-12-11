@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getCaptcha } from '@/api/auth/Login'
+import { getCaptcha } from '@/api/auth'
 import { useUserStore } from '@/stores/user'
 import type { LoginForm } from '@/types/Auth'
 import { useAuthRules } from '@/utils/rules/auth'
@@ -123,7 +123,7 @@ const changeCaptcha = () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/auth.scss';
+@use '@/styles/auth.scss';
 
 .captcha-group {
   align-items: flex-start;

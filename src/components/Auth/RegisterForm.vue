@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import { registerUser } from '@/api/auth/Register'
+import { registerUser } from '@/api/auth'
 import { countdown, handleGetCode } from '@/composables/useCountDown'
 import type { RegisterForm } from '@/types/Auth'
 import { useAuthRules } from '@/utils/rules/auth'
@@ -94,7 +94,7 @@ const insertUser = async (formEl: FormInstance | undefined) => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/auth.scss';
+@use '@/styles/auth.scss';
 
 .captcha-group {
   align-items: flex-start;

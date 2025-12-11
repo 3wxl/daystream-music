@@ -1,4 +1,4 @@
-import {getEmailCaptcha} from '@/api/auth/Register'
+import {getEmailCaptcha} from '@/api/auth'
 import type { FormInstance } from 'element-plus'
 
 // 验证码逻辑

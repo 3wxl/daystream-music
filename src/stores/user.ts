@@ -1,4 +1,4 @@
-import { LoginByemail } from '@/api/auth/Login'
+import { LoginByemail } from '@/api/auth'
 import { getUserInfo } from '@/api/home/getUserInfo'
 import { getToken, removeToken, setToken } from '@/utils/request'
 import { defineStore } from 'pinia'

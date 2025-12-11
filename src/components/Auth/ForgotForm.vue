@@ -51,7 +51,7 @@
 </template>
 
 <script lang="ts" setup>
-import { setNewpassword } from '@/api/auth/Forgot'
+import { setNewpassword } from '@/api/auth'
 import { countdown, handleGetCode } from '@/composables/useCountDown'
 import type { ForgotForm } from '@/types/Auth'
 import { useAuthRules } from '@/utils/rules/auth'
@@ -94,7 +94,7 @@ const handleResetPassword = async (formEl: FormInstance | undefined) => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/auth.scss';
+@use '@/styles/auth.scss';
 .captcha-group {
   align-items: flex-start;
 }
