@@ -1,8 +1,8 @@
 <template>
   <!-- 作用：后台的layout -->
-  <el-container class="admin-container relative" >
-    <el-aside width="220px">
-      <el-scrollbar height="100vh" class="bg-linear-to-tr from-[#2b4c60] to-[#645078] shadow-xl/20 shadow-[#A070EE] fixed top-0">
+  <el-container class="admin-container relative">
+    <el-aside width="220px" class="fixed top-0">
+      <el-scrollbar height="100vh" class="bg-linear-to-tr from-[#2b4c60] to-[#645078] shadow-xl/20 shadow-[#A070EE]">
       <!-- bg-linear-to-tr from-[#58768a] to-[#544464] shadow-xl/20 shadow-[#A070EE] -->
       <!-- bg-linear-to-tr from-[#517185] to-[#8b62b6] shadow-xl/20 shadow-[#A070EE] -->
         <div class="w-full my-4">
@@ -45,24 +45,24 @@
               <IconFontSymbol name="yinleren" class="mr-1"></IconFontSymbol>
               <span>音乐人管理</span>
             </template>
-            <el-menu-item index="4-1">
+            <el-menu-item index="4-1" @click="router.push('/admin/musicianManage/musicianList')">
               <IconFontSymbol name="liebiao" size="15px" class="mr-1"></IconFontSymbol>
               <span>音乐人列表</span>
             </el-menu-item>
-            <el-menu-item index="4-2">
+            <!-- <el-menu-item index="4-2">
               <IconFontSymbol name="shenhe" class="mr-1"></IconFontSymbol>
               <span>音乐人审核</span>
-            </el-menu-item>
+            </el-menu-item> -->
           </el-sub-menu>
           <el-sub-menu index="5">
             <template #title>
               <IconFontSymbol name="yunyingguanli" class="mr-1"></IconFontSymbol>
               <span>运营管理</span>
             </template>
-            <el-menu-item index="5-1" @click="router.push('/admin/operationManage/hotList')">
+            <!-- <el-menu-item index="5-1" @click="router.push('/admin/operationManage/hotList')">
               <IconFontSymbol name="resou" class="mr-1"></IconFontSymbol>
               <span>热搜列表</span>
-            </el-menu-item>
+            </el-menu-item> -->
             <el-menu-item index="5-2" @click="router.push('/admin/operationManage/recommendManage')">
               <IconFontSymbol name="shouyetuijianwei" class="mr-1"></IconFontSymbol>
               <span>首页推荐位</span>
@@ -97,12 +97,12 @@
         </el-menu>
       </el-scrollbar>
     </el-aside>
-    <el-container>
+    <el-container class="relative left-[220px]">
       <el-header>
         <div class="h-[60px] bg-white">
           <el-row class="h-full w-full">
             <el-col :span="4" :offset="10">
-              <p class="text-[15px]/[60px] line-clamp-1">您好<span class="text-[13px] text-[#529FFD]">admin</span>,欢迎登录！</p>
+              <p class="text-[15px]/[60px] line-clamp-1">您好<span class="text-[13px] text-[#529FFD]">{{ user.username }}</span>,欢迎登录！</p>
             </el-col>
             <el-col :span="4" :offset="6">
               <el-row class="h-full w-full text-base/[60px]">
@@ -114,8 +114,8 @@
                 </el-col>
                 <el-col :span="16">
                   <div class="h-full flex gap-[10px] text-[15px]/[60px] cursor-pointer">
-                    <el-avatar src="../../public/头像.png" :size="36" class="my-[12px]"/>
-                    <span class="inline-block h-[60px] max-w-[60px] text-ellipsis line-clamp-1">admin</span>
+                    <el-avatar :src="user.avatar" :size="36" class="my-[12px]"/>
+                    <span class="inline-block h-[60px] max-w-[60px] text-ellipsis line-clamp-1">{{ user.username }}</span>
                   </div>
                 </el-col>
               </el-row>
@@ -135,12 +135,25 @@
 
 <script setup>
   import {useRouter } from 'vue-router'
+  import {getUserInfo} from '@/api/home/getUserInfo'
+
+  // 数据
   let router = useRouter()
+  let user = ref({})
+
   function logout() {
     // 退出登录时的一些处理工作，如清除用户信息等
 
     router.push('/')
   }
+  async function UserInfo(){
+    let userInfo = await getUserInfo()
+    if(userInfo.success){
+      user.value = userInfo.data
+      localStorage.setItem('user',JSON.stringify(user.value))
+    }
+  }
+  UserInfo()
 </script>
 
 <style scoped>
@@ -174,6 +187,9 @@
 
   .el-tooltip__trigger:focus-visible {    /** 去除 focus 样式 */
     outline: none;
+  }
+  .el-container{
+    width: calc(100% - 220px);
   }
 </style>
 

@@ -3,13 +3,14 @@
     <div class="shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px]">
       <div class="flex justify-between px-4 items-center">
         <div class="flex items-center h-full">
-          <AdminInput class="mr-5" type="text" placeholder="请输入动态标题" value="" width="w-[300px]" label="动态："></AdminInput>
+          <AdminInput v-model="dynamicSearch" class="mr-5" type="text" placeholder="请输入动态标题" width="w-[300px]" label="动态："></AdminInput>
           <AdminSelect v-model="typeVal1" class="mr-18" :options="[{value:'1',label:'待审核'},{value:'2',label:'已通过'},{value:'3',label:'已驳回'}]" label="状态"></AdminSelect>
           <AdminSelect v-model="typeVal2" class="mr-16" :options="[{value:'1',label:'全部'},{value:'2',label:'普通用户'},{value:'3',label:'音乐人'}]" label="类型" ></AdminSelect>
-          <el-button type="primary">
-            <IconFontSymbol name="sousuo" class="mr-1"></IconFontSymbol>
-            搜索
-          </el-button>
+          <AdminButton
+            text="搜索"
+            class="ml-4 text-[15px]!"
+            @click="handleSearch"
+          />
         </div>
       </div>
     </div>
@@ -88,13 +89,14 @@
 </template>
 
 <script setup lang="ts">
-  import AdminInput from "@/components/admin/AdminInput.vue";
-  import AdminSelect from "@/components/admin/AdminSelect.vue";
+  import AdminInput from "@/components/Admin/AdminInput.vue";
+  import AdminSelect from "@/components/Admin/AdminSelect.vue";
   import IconFontSymbol from "@/components/IconFontSymbol.vue";
   import { useRouter } from "vue-router";
   let router = useRouter()
   let typeVal1 = ref('1')
   let typeVal2 = ref('1')
+  let dynamicSearch = ref('')
   let dynamicList = reactive([
     {
       title: '动态标题1',
@@ -161,6 +163,10 @@
       date: '2024-01-15 10:30:00',
     },
   ])
+
+  function handleSearch() {
+    console.log(dynamicSearch.value)
+  }
 </script>
 
 <style scoped>

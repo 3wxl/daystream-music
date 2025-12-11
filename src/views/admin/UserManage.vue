@@ -1,42 +1,145 @@
 <template>
-  <div>
-    <div class="shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px]">
-      <div class="flex justify-between px-4 items-center">
-        <div class="flex items-center h-full">
-          <AdminInput v-model="userNameVal" class="mr-5" type="text" placeholder="请输入用户名:" value="" width="w-[300px]" label="用户名:"></AdminInput>
-          <AdminSelect v-model="typeVal" class="mr-18" :options="[{value:'1',label:'全部'},{value:'2',label:'启用'},{value:'3',label:'禁用'}]" label="状态"></AdminSelect>
-          <el-button type="primary">
-            <IconFontSymbol name="sousuo" class="mr-1"></IconFontSymbol>
-            搜索
-          </el-button>
+  <transition name="admin-container" appear>
+    <div>
+      <div class="shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px]">
+        <div class="flex justify-between px-4 items-center">
+          <div class="flex items-center h-full">
+            <AdminInput v-model="userNameVal" class="mr-5" type="text" placeholder="请输入用户名:" value="" width="w-[300px]" label="用户名:"></AdminInput>
+            <AdminSelect v-model="typeVal" class="mr-18" :options="[{value:'1',label:'全部'},{value:'2',label:'启用'},{value:'3',label:'禁用'}]" label="状态"></AdminSelect>
+            <AdminButton
+              text="搜索"
+              class="ml-2 text-[15px]!"
+              @click="handleSearch"
+            />
+          </div>
         </div>
       </div>
-    </div>
-    <div class="shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px] mt-3">
-      <div class="flex justify-between">
-        <span class="text-[18px] font-700 ml-2">用户管理</span>
-        <div class="flex mr-4">
-          <el-button type="primary" class="mr-4" @click="addUser">
-            <IconFontSymbol name="tianjia" class="mr-1"></IconFontSymbol>
-            添加用户
-          </el-button>
+      <div class="shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px] mt-3">
+        <div class="flex justify-between">
+          <span class="text-[18px] font-700 ml-2">用户管理</span>
+          <div class="flex mr-4">
+            <el-button type="primary" class="mr-4" @click="addUser">
+              <IconFontSymbol name="tianjia" class="mr-1"></IconFontSymbol>
+              添加用户
+            </el-button>
+            <AdminConfirm
+              v-model="isAddUser"
+              width="700px"
+              iconName="yonghushuliang"
+              iconColor="#76B0FD"
+              title="添加用户"
+              :isCustom="true"
+            >
+              <div class="px-2">
+                <div class="flex mb-6 mt-2">
+                  <IconFontSymbol name="xiaohuatuijianxuanzhong" color="red" size="18px"></IconFontSymbol>
+                  <AdminInput class="ml-2 mr-5" type="text" placeholder="新用户昵称" value="" width="w-[230px]" label="昵称:"></AdminInput>
+                  <AdminInput class="ml-2" type="text" placeholder="密码" value="Aa12345!" width="w-[230px]" label="密码:"></AdminInput>
+                </div>
+                <div class="flex mb-6 items-center">
+                  <IconFontSymbol name="xiaohuatuijianxuanzhong" color="red" size="18px"></IconFontSymbol>
+                  <AdminInput class="ml-2 mr-5" type="text" placeholder="新用户邮箱" value="" width="w-[230px]" label="邮箱:"></AdminInput>
+                  <span class="mr-3 text-[16px] text-[#666] ml-2">状态:</span>
+                  <el-switch
+                    v-model="addStatus"
+                    class="ml-2"
+                    style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
+                  />
+                </div>
+                <div class="flex items-start mb-2 mt-4">
+                  <label for="jj" class="mr-1 ml-[22px] text-[#666]">简介：</label>
+                  <textarea name="" id="jj" placeholder="新用户简介" class="h-25 custom-scrollbar resize-none w-100 z-11 outline-none border-[#666] bg-[#E9F0FE] hover:bg-[#e4ecfd] focus:bg-[#dee9ff] rounded-[8px] px-[15px] py-[8px] text-[15px] text-[#666]"></textarea>
+                </div>
+                <div class="flex justify-end gap-3 mt-8 mb-3">
+                  <el-button type="primary" class="w-[85px]">
+                    <IconFontSymbol name="tianjia" class="mr-1"></IconFontSymbol>
+                    添加
+                  </el-button>
+                  <el-button type="default" class="mr-5 w-[80px]" @click="isAddUser = false">取消</el-button>
+                </div>
+              </div>
+            </AdminConfirm>
+            <el-tooltip content="删除所选用户">
+              <IconFontSymbol name="shanchu" class="font-700 relative top-[3px] cursor-pointer hover:text-red-700 mr-4"></IconFontSymbol>
+            </el-tooltip>
+            <el-tooltip content="刷新">
+              <IconFontSymbol name="refresh" class="font-700 relative top-[3px] cursor-pointer hover:text-[#529FFD] mr-2"></IconFontSymbol>
+            </el-tooltip>
+          </div>
+        </div>
+        <div class="user-table w-full mt-4">
+          <el-table :data="data" stripe >
+            <el-table-column type="selection" width="55" align="center" class="ml-3"/>
+            <el-table-column label="头像" width="130" align="center">
+              <template #default="scope">
+                <!-- <img :src="scope.row.avatar" alt="用户头像"> -->
+                <div class="flex justify-center">
+                  <img src="../../../public/头像.png" alt="头像" class="m-1 w-[45px] h-[45px] rounded-[40px] outline-1.5 outline-offset-1 outline-solid outline-[#619ca4]">
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="昵称" align="center">
+              <template #default="scope">
+                <span class="line-clamp-1 text-[16px] text-black">{{ scope.row.name }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="邮箱" width="200" align="center">
+              <template #default="scope">
+                <span class="line-clamp-1 text-[15px] text-black">{{ scope.row.emil }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="状态" align="center" width="120">
+              <template #default="scope">
+                <el-switch
+                  v-model="scope.row.status"
+                  class="ml-2"
+                  style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="创建时间" align="center">
+              <template #default="scope">
+                <span class="line-clamp-1">{{ scope.row.createTime }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作"  align="center">
+              <template #default="scope">
+                <el-button type="primary" class="mr-3" @click="updateUser">
+                  <IconFontSymbol name="xiugai" size="18px" class="mr-1"></IconFontSymbol>
+                  修改
+                </el-button>
+                <el-button type="danger" @click="deleteUser">
+                  <IconFontSymbol name="shanchu" class="mr-1"></IconFontSymbol>
+                  删除
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
           <AdminConfirm
-            v-model="isAddUser"
+            v-model="isShowDel"
+            width="470px"
+            iconName="gongzuotai-dongtaishenhe"
+            iconColor="#F72A33"
+            title="操作确认"
+            :content="`是否删除该用户？操作执行后将无法撤销。`"
+          ></AdminConfirm>
+          <AdminConfirm
+            v-model="isShowUpdate"
             width="700px"
             iconName="yonghushuliang"
             iconColor="#76B0FD"
-            title="添加用户"
+            title="修改信息"
             :isCustom="true"
           >
             <div class="px-2">
               <div class="flex mb-6 mt-2">
                 <IconFontSymbol name="xiaohuatuijianxuanzhong" color="red" size="18px"></IconFontSymbol>
-                <AdminInput class="ml-2 mr-5" type="text" placeholder="新用户昵称" value="" width="w-[230px]" label="昵称:"></AdminInput>
+                <AdminInput class="ml-2 mr-5" type="text" placeholder="用户昵称" value="" width="w-[230px]" label="昵称:"></AdminInput>
                 <AdminInput class="ml-2" type="text" placeholder="密码" value="Aa12345!" width="w-[230px]" label="密码:"></AdminInput>
               </div>
               <div class="flex mb-6 items-center">
                 <IconFontSymbol name="xiaohuatuijianxuanzhong" color="red" size="18px"></IconFontSymbol>
-                <AdminInput class="ml-2 mr-5" type="text" placeholder="新用户邮箱" value="" width="w-[230px]" label="邮箱:"></AdminInput>
+                <AdminInput class="ml-2 mr-5" type="text" placeholder="用户邮箱" value="" width="w-[230px]" label="邮箱:"></AdminInput>
                 <span class="mr-3 text-[16px] text-[#666] ml-2">状态:</span>
                 <el-switch
                   v-model="addStatus"
@@ -46,7 +149,7 @@
               </div>
               <div class="flex items-start mb-2 mt-4">
                 <label for="jj" class="mr-1 ml-[22px] text-[#666]">简介：</label>
-                <textarea name="" id="jj" placeholder="新用户简介" class="h-25 custom-scrollbar resize-none w-100 z-11 outline-none border-[#666] bg-[#E9F0FE] hover:bg-[#e4ecfd] focus:bg-[#dee9ff] rounded-[8px] px-[15px] py-[8px] text-[15px] text-[#666]"></textarea>
+                <textarea name="" id="jj" placeholder="用户简介" class="h-25 custom-scrollbar resize-none w-100 z-11 outline-none border-[#666] bg-[#E9F0FE] hover:bg-[#e4ecfd] focus:bg-[#dee9ff] rounded-[8px] px-[15px] py-[8px] text-[15px] text-[#666]"></textarea>
               </div>
               <div class="flex justify-end gap-3 mt-8 mb-3">
                 <el-button type="primary" class="w-[85px]">
@@ -57,126 +160,27 @@
               </div>
             </div>
           </AdminConfirm>
-          <el-tooltip content="删除所选用户">
-            <IconFontSymbol name="shanchu" class="font-700 relative top-[3px] cursor-pointer hover:text-red-700 mr-4"></IconFontSymbol>
-          </el-tooltip>
-          <el-tooltip content="刷新">
-            <IconFontSymbol name="refresh" class="font-700 relative top-[3px] cursor-pointer hover:text-[#529FFD] mr-2"></IconFontSymbol>
-          </el-tooltip>
-        </div>
-      </div>
-      <div class="user-table w-full mt-4">
-        <el-table :data="data" stripe >
-          <el-table-column type="selection" width="55" align="center" class="ml-3"/>
-          <el-table-column label="头像" width="130" align="center">
-            <template #default="scope">
-              <!-- <img :src="scope.row.avatar" alt="用户头像"> -->
-              <div class="flex justify-center">
-                <img src="../../../public/头像.png" alt="头像" class="m-1 w-[45px] h-[45px] rounded-[40px] outline-1.5 outline-offset-1 outline-solid outline-[#619ca4]">
-              </div>
-            </template>
-          </el-table-column>
-          <el-table-column label="昵称" align="center">
-            <template #default="scope">
-              <span class="line-clamp-1 text-[16px] text-black">{{ scope.row.name }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="邮箱" width="200" align="center">
-            <template #default="scope">
-              <span class="line-clamp-1 text-[15px] text-black">{{ scope.row.emil }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="状态" align="center" width="120">
-            <template #default="scope">
-              <el-switch
-                v-model="scope.row.status"
-                class="ml-2"
-                style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
-              />
-            </template>
-          </el-table-column>
-          <el-table-column label="创建时间" align="center">
-            <template #default="scope">
-              <span class="line-clamp-1">{{ scope.row.createTime }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作"  align="center">
-            <template #default="scope">
-              <el-button type="primary" class="mr-3" @click="updateUser">
-                <IconFontSymbol name="xiugai" size="18px" class="mr-1"></IconFontSymbol>
-                修改
-              </el-button>
-              <el-button type="danger" @click="deleteUser">
-                <IconFontSymbol name="shanchu" class="mr-1"></IconFontSymbol>
-                删除
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        <AdminConfirm
-          v-model="isShowDel"
-          width="470px"
-          iconName="gongzuotai-dongtaishenhe"
-          iconColor="#F72A33"
-          title="操作确认"
-          :content="`是否删除该用户？操作执行后将无法撤销。`"
-        ></AdminConfirm>
-        <AdminConfirm
-          v-model="isShowUpdate"
-          width="700px"
-          iconName="yonghushuliang"
-          iconColor="#76B0FD"
-          title="修改信息"
-          :isCustom="true"
-        >
-          <div class="px-2">
-            <div class="flex mb-6 mt-2">
-              <IconFontSymbol name="xiaohuatuijianxuanzhong" color="red" size="18px"></IconFontSymbol>
-              <AdminInput class="ml-2 mr-5" type="text" placeholder="用户昵称" value="" width="w-[230px]" label="昵称:"></AdminInput>
-              <AdminInput class="ml-2" type="text" placeholder="密码" value="Aa12345!" width="w-[230px]" label="密码:"></AdminInput>
-            </div>
-            <div class="flex mb-6 items-center">
-              <IconFontSymbol name="xiaohuatuijianxuanzhong" color="red" size="18px"></IconFontSymbol>
-              <AdminInput class="ml-2 mr-5" type="text" placeholder="用户邮箱" value="" width="w-[230px]" label="邮箱:"></AdminInput>
-              <span class="mr-3 text-[16px] text-[#666] ml-2">状态:</span>
-              <el-switch
-                v-model="addStatus"
-                class="ml-2"
-                style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
-              />
-            </div>
-            <div class="flex items-start mb-2 mt-4">
-              <label for="jj" class="mr-1 ml-[22px] text-[#666]">简介：</label>
-              <textarea name="" id="jj" placeholder="用户简介" class="h-25 custom-scrollbar resize-none w-100 z-11 outline-none border-[#666] bg-[#E9F0FE] hover:bg-[#e4ecfd] focus:bg-[#dee9ff] rounded-[8px] px-[15px] py-[8px] text-[15px] text-[#666]"></textarea>
-            </div>
-            <div class="flex justify-end gap-3 mt-8 mb-3">
-              <el-button type="primary" class="w-[85px]">
-                <IconFontSymbol name="tianjia" class="mr-1"></IconFontSymbol>
-                添加
-              </el-button>
-              <el-button type="default" class="mr-5 w-[80px]" @click="isAddUser = false">取消</el-button>
-            </div>
+          <div class="admin-page mt-8 mb-4 flex justify-end mr-12">
+            <el-pagination
+              background
+              layout="prev, pager, next ,jumper"
+              :total="100"
+              :default-page-size="8"
+            />
           </div>
-        </AdminConfirm>
-        <div class="admin-page mt-8 mb-4 flex justify-end mr-12">
-          <el-pagination
-            background
-            layout="prev, pager, next ,jumper"
-            :total="100"
-            :default-page-size="8"
-          />
         </div>
       </div>
     </div>
-  </div>
+  </transition>
 </template>
 
 <script setup lang="ts">
-  import AdminInput from "@/components/admin/AdminInput.vue";
-  import AdminSelect from "@/components/admin/AdminSelect.vue";
+  import AdminInput from "@/components/Admin/AdminInput.vue";
+  import AdminSelect from "@/components/Admin/AdminSelect.vue";
   import IconFontSymbol from "@/components/IconFontSymbol.vue";
-  import AdminConfirm from "@/components/admin/AdminConfirm.vue";
+  import AdminConfirm from "@/components/Admin/AdminConfirm.vue";
 
+  let userNameVal = ref('')
   let typeVal = ref('1')
   let data = reactive([
     {
@@ -236,7 +240,10 @@
       createTime: "2021-01-01 12:00:00"
     }
   ])
-
+  // 搜索
+  function handleSearch(){
+    console.log()
+  }
   // 添加用户
   let isAddUser = ref(false)
   let addStatus = ref(true)
@@ -253,6 +260,7 @@
   function updateUser(){
     isShowUpdate.value = true
   }
+
 </script>
 
 <style scoped>
@@ -352,5 +360,23 @@
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
   }
-
+  .admin-container-enter-from{
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  .admin-container-enter-to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .admin-container-leave-from{
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .admin-container-leave-to{
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  .admin-container-enter-active, .admin-container-leave-active {
+    transition: all 0.5s ease;
+  }
 </style>

@@ -67,9 +67,8 @@
 
 <script setup lang="ts">
   import {useRouter} from "vue-router";
-  import {FollowOther,UnFollowOther} from '@/api/community/FollowOther';    // 关注和取消关注
+  import {FollowOther,UnFollowOther,Like} from '@/api/community/DynamicOperate';    // 关注和取消关注,点赞
   import {debounce,throttle} from '@/utils/debounceThrottle';     // 节流防抖
-  import {Like} from '@/api/community/Like';      // 点赞
 
   // 数据
   const router = useRouter();

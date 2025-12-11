@@ -7,9 +7,9 @@
       :placeholder="placeholder"
       v-model="value"
       :class="`w-[${width}]`"
-      class="z-11 outline-none border-[#666] bg-[#E9F0FE] hover:bg-[#e4ecfd] focus:bg-[#dee9ff] rounded-[8px] px-[15px] py-[8px] text-[15px] text-[#666] "
+      class="z-8 outline-none border-[#666] bg-[#E9F0FE] hover:bg-[#e4ecfd] focus:bg-[#dee9ff] rounded-[8px] px-[15px] py-[8px] text-[15px] text-[#666] "
     >
-    <IconFontSymbol class="z-11 relative right-[30px] top-[6px] cursor-pointer" v-if="rightIcon" :name="rightIcon" :size="rIconSize?rIconSize:'1rem'" :rIconColor="rIconColor?rIconColor:'#000000'"></IconFontSymbol>
+    <IconFontSymbol class="z-11 relative right-[30px] top-[6px] cursor-pointer" @click="search" v-if="rightIcon" :name="rightIcon" :size="rIconSize?rIconSize:'1rem'" :rIconColor="rIconColor?rIconColor:'#000000'"></IconFontSymbol>
   </div>
 </template>
 
@@ -26,5 +26,9 @@
     rIconColor?: string
   }>()
   let value = defineModel<string>({required: true})
+  let emit = defineEmits(['search'])
+  function search(){
+    emit('search')
+  }
 </script>
 

@@ -1,61 +1,66 @@
 <!-- /admin的页面 -->
 <template>
-  <div class="w-full">
-    <div class="flex gap-8 flex-wrap max-[1600px]:gap-6">
-      <UserNumDataCard></UserNumDataCard>
-      <MusicianNumDataCard></MusicianNumDataCard>
-      <SongsNumDataCard></SongsNumDataCard>
-      <PlayListNumDataCard></PlayListNumDataCard>
-    </div>
-  </div>
-  <div class="w-full mt-6 flex gap-8 max-[1600px]:gap-6">   <!-- flex-wrap关闭 -->
-    <div class="flex-1">
-      <SongsTypeAssign></SongsTypeAssign>
-    </div>
-    <div class="flex-1">
-      <div class="flex flex-col gap-3">
-        <div class="shadow-md hover:-translate-y-[2px] duration-[0.3s] border-[#e4e7ed] bg-white rounded-[10px] p-[15px]">
-          <div class="flex w-full">
-            <div class="flex flex-col text-center ml-6">
-              <div>
-                <el-avatar src="../../../public/头像.png" :size="70"/>
-              </div>
-              <span class="text-[15px]">admin</span>
-              <p class="text-[12px] text-[#666] whitespace-nowrap">上次登录时间：<span>2025-11-04</span></p>
-            </div>
-            <div class="ml-8 min-w-[170px]">
-              <p class="text-15px text-[#888] font-[600]">
-                代办事项：
-              </p>
-              <div class="ml-5 mt-2 text-[14px] text-[#525252]">
-                <p>
-                  <span class="inline-block px-[8px] py-[2px] rounded-[8px] text-white bg-[#3DD288]">1</span> 待审核歌曲:
-                  <span class="ml-3" v-num-transform="210">0</span>
-                </p>
-                <p class=" my-3">
-                  <span class="inline-block px-[8px] py-[2px] rounded-[8px] text-white bg-[#FAA184]">2</span> 待审核音乐人:
-                  <span class="ml-3" v-num-transform="51">0</span>
-                </p>
-                <p>
-                  <span class="inline-block px-[8px] py-[2px] rounded-[8px] text-white bg-[#72E0E0]">3</span> 待审核动态:
-                  <span class="ml-3" v-num-transform="241">0</span>
-                </p>
-              </div>
-            </div>
-            <div class="ml-10 flex-1">
-              <MyRecord></MyRecord>
-            </div>
-          </div>
+  <transition appear name="admin-container">
+    <div class="full">
+      <div class="w-full">
+        <div class="flex gap-8 flex-wrap max-[1600px]:gap-6">
+          <UserNumDataCard></UserNumDataCard>
+          <MusicianNumDataCard></MusicianNumDataCard>
+          <SongsNumDataCard></SongsNumDataCard>
+          <PlayListNumDataCard></PlayListNumDataCard>
         </div>
-        <div class="shadow-md hover:-translate-y-[2px] duration-[0.3s] border-[#e4e7ed] bg-white rounded-[10px] p-[15px]">
-          <p class="text-[14px] font-[600] text-[#868686]">日活曲线</p>
-          <div class="mt-2 w-full h-[400px]">
-            <DailyLife></DailyLife>
+      </div>
+      <div class="w-full mt-6 flex gap-8 max-[1600px]:gap-6">   <!-- flex-wrap关闭 -->
+        <div style="width: calc(50% - 16px);">
+          <SongsTypeAssign></SongsTypeAssign>
+        </div>
+        <div style="width: calc(50% - 16px);">
+          <div class="flex flex-col gap-3">
+            <div class="shadow-md hover:-translate-y-[2px] duration-[0.3s] border-[#e4e7ed] bg-white rounded-[10px] p-[15px]">
+              <div class="flex w-full">
+                <div class="flex flex-col text-center ml-6">
+                  <div>
+                    <el-avatar :src="userInfo.avatar" :size="70"/>
+                  </div>
+                  <span class="text-[15px]">{{userInfo.username}}</span>
+                  <p class="text-[12px] text-[#666] whitespace-nowrap">上次登录时间：<span>2025-11-04</span></p>
+                </div>
+                <div class="ml-8 min-w-[170px]">
+                  <p class="text-15px text-[#888] font-[600]">
+                    代办事项：
+                  </p>
+                  <div class="ml-5 mt-2 text-[14px] text-[#525252]">
+                    <p>
+                      <span class="inline-block px-[8px] py-[2px] rounded-[8px] text-white bg-[#3DD288]">1</span> 待审核歌曲:
+                      <span class="ml-3" v-num-transform="210">0</span>
+                    </p>
+                    <p class=" my-3">
+                      <span class="inline-block px-[8px] py-[2px] rounded-[8px] text-white bg-[#FAA184]">2</span> 待审核音乐人:
+                      <span class="ml-3" v-num-transform="51">0</span>
+                    </p>
+                    <p>
+                      <span class="inline-block px-[8px] py-[2px] rounded-[8px] text-white bg-[#72E0E0]">3</span> 待审核动态:
+                      <span class="ml-3" v-num-transform="241">0</span>
+                    </p>
+                  </div>
+                </div>
+                <div class="ml-10 flex-1">
+                  <MyRecord></MyRecord>
+                </div>
+              </div>
+            </div>
+            <div class="shadow-md hover:-translate-y-[2px] duration-[0.3s] border-[#e4e7ed] bg-white rounded-[10px] p-[15px]">
+              <p class="text-[14px] font-[600] text-[#868686]">日活曲线</p>
+              <div class="mt-2 w-full h-[400px]">
+                <DailyLife></DailyLife>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </transition>
+
 </template>
 
 <script setup>
@@ -66,6 +71,10 @@
   import SongsTypeAssign from '@/components/admin/DataStatistics/SongsTypeAssign.vue'
   import MyRecord from '@/components/admin/DataStatistics/MyRecord.vue'
   import DailyLife from '@/components/admin/DataStatistics/DailyLife.vue'
+
+  // 数据
+  let userInfo = JSON.parse(localStorage.getItem('user'))
+
   function NumAutoPlusAnimation(targetEle, options) {
         options = options || {};
         let $this = targetEle,
@@ -101,7 +110,25 @@
 </script>
 
 <style scoped>
-
+  .admin-container-enter-from{
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  .admin-container-enter-to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .admin-container-leave-from{
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .admin-container-leave-to{
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  .admin-container-enter-active, .admin-container-leave-active {
+    transition: all 0.5s ease;
+  }
 </style>
 
 
