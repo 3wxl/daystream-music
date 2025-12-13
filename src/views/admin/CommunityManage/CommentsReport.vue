@@ -2,84 +2,42 @@
   <transition name="admin-container" appear>
     <div>
       <div class="shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px]">
-        <UserManageHeader
-          @search="search"
-        ></UserManageHeader>
+        <CommnetsReportHeader></CommnetsReportHeader>
       </div>
       <div class="shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px] mt-3">
-        <UserManageContainer
+        <CommnetsReportContainer
           :userData="userData"
-        ></UserManageContainer>
+        ></CommnetsReportContainer>
       </div>
     </div>
   </transition>
 </template>
 
 <script setup lang="ts">
-  import {GetUserList} from '@/api/Admin/userManage'        // 获取用户列表数据的
-  // 数据
-  let userData = reactive([      // 用户数据
+  import CommnetsReportHeader from '@/components/Admin/Community/CommunityCommentReport/CommnetsReportHeader.vue'
+  import CommnetsReportContainer from '@/components/Admin/Community/CommunityCommentReport/CommnetsReportContainer.vue'
+  let userData = reactive([
     {
-      avatar:'awdaw',
-      name: "张三",
-      emil: "2450488888@qq.com",
-      status: true,
-      createTime: "2021-01-01 12:00:00"
-    },
-    {
-      avatar:'wad',
-      name: "爱吃糖葫芦的小猫",
-      emil: "88451545@qq.com",
-      status: false,
-      createTime: "2021-01-01 12:00:00"
-    },
-    {
-      avatar:'wad',
-      name: "荆芥",
-      emil: "48949684@qq.com",
-      status: true,
-      createTime: "2021-01-01 12:00:00"
-    },
-    {
-      avatar:'wad',
-      name: "荆芥",
-      emil: "48949684@qq.com",
-      status: false,
-      createTime: "2021-01-01 12:00:00"
-    },
-    {
-      avatar:'wad',
-      name: "荆芥",
-      emil: "48949684@qq.com",
-      status: true,
-      createTime: "2021-01-01 12:00:00"
-    },
-    {
-      avatar:'wad',
-      name: "荆芥",
-      emil: "48949684@qq.com",
-      status: true,
-      createTime: "2021-01-01 12:00:00"
-    },
-    {
-      avatar:'wad',
-      name: "荆芥",
-      emil: "48949684@qq.com",
-      status: true,
-      createTime: "2021-01-01 12:00:00"
-    },
-    {
-      avatar:'wad',
-      name: "荆芥",
-      emil: "48949684@qq.com",
-      status: true,
-      createTime: "2021-01-01 12:00:00"
+      id:1,            // 举报评论id
+      commentId:1,     // 评论id
+      reportTime:'2022-03-01 12:00:00',     // 举报时间
+      reportReason:'垃圾评论',     // 举报理由
+      reportType:'1',
+      reportStatus:'1',       // 举报状态，1表示待处理
+      reportComment:'垃圾评论',  // 被举报的评论内容
+      reportFrom:{
+        type:1,       // 来源：1动态 2歌曲 3歌单
+        id:1,           // 动态id、歌单id、歌曲id
+        title:'歌单标题/动态标题/歌曲标题',
+        cover:'https://picsum.photos/200/300?random=1',
+        author:{
+          id:1,
+          nickName:'用户昵称',
+          avatar:'https://picsum.photos/200/300?random=1'
+        }
+      }
     }
   ])
-  // 方法
-  function search(searchData:{userSearchKeyword:string,userType:string}){     // 接收暴漏的数据，并搜索
-    console.log(searchData)
-  }
 </script>
 
 <style scoped>

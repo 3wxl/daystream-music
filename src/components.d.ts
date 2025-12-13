@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AddUser: typeof import('./components/Admin/UserManage/AddUser.vue')['default']
     AdminButton: typeof import('./components/Admin/AdminButton.vue')['default']
     AdminConfirm: typeof import('./components/Admin/AdminConfirm.vue')['default']
     AdminInput: typeof import('./components/Admin/AdminInput.vue')['default']
@@ -41,13 +42,18 @@ declare module 'vue' {
     ChatContentCard: typeof import('./components/Message/PrivateLetter/ChatContentCard.vue')['default']
     ChatPartnerCard: typeof import('./components/Message/PrivateLetter/ChatPartnerCard.vue')['default']
     CheckInButton: typeof import('./components/CheckIn/CheckInButton.vue')['default']
+    ClassifyListContainer: typeof import('./components/Admin/WorksManage/ClassifyManage/ClassifyListContainer.vue')['default']
+    ClassifyListHeader: typeof import('./components/Admin/WorksManage/ClassifyManage/ClassifyListHeader.vue')['default']
     CoinOverview: typeof import('./components/CheckIn/CoinOverview.vue')['default']
     CoinRecords: typeof import('./components/CheckIn/CoinRecords.vue')['default']
     CollectedAlbum: typeof import('./components/User/CollectedAlbum.vue')['default']
     CollectorsList: typeof import('./components/User/CollectorsList.vue')['default']
     CommentCard: typeof import('./components/Community/CommentCard.vue')['default']
     CommentMessageCard: typeof import('./components/Message/CommentMessage/CommentMessageCard.vue')['default']
+    CommentReportDetail: typeof import('./components/Admin/Community/CommunityCommentReport/CommentReportDetail.vue')['default']
     CommentSection: typeof import('./components/User/CommentSection.vue')['default']
+    CommnetsReportContainer: typeof import('./components/Admin/Community/CommunityCommentReport/CommnetsReportContainer.vue')['default']
+    CommnetsReportHeader: typeof import('./components/Admin/Community/CommunityCommentReport/CommnetsReportHeader.vue')['default']
     CommunityDisplay: typeof import('./components/Community/CommunityDisplay.vue')['default']
     DailyLife: typeof import('./components/Admin/DataStatistics/DailyLife.vue')['default']
     DynamicLoading: typeof import('./components/Community/DynamicLoading.vue')['default']
@@ -154,7 +160,10 @@ declare module 'vue' {
     TaskCenter: typeof import('./components/CheckIn/TaskCenter.vue')['default']
     ThemeList: typeof import('./components/MusicianCenter/AI/sidebar/ThemeList.vue')['default']
     TopHeader: typeof import('./components/HomePage/TopHeader.vue')['default']
+    UpdateUserData: typeof import('./components/Admin/UserManage/UpdateUserData.vue')['default']
     UserHeader: typeof import('./components/User/UserHeader.vue')['default']
+    UserManageContainer: typeof import('./components/Admin/UserManage/UserManageContainer.vue')['default']
+    UserManageHeader: typeof import('./components/Admin/UserManage/UserManageHeader.vue')['default']
     UserMessage: typeof import('./components/MusicianCenter/AI/chat/UserMessage.vue')['default']
     UserNumDataCard: typeof import('./components/Admin/DataStatistics/UserNumDataCard.vue')['default']
     ValueSection: typeof import('./components/MusicianCenter/ValueSection.vue')['default']
@@ -164,5 +173,8 @@ declare module 'vue' {
     VipProgress: typeof import('./components/CheckIn/VipProgress.vue')['default']
     WavesExchage: typeof import('./components/Vip/WavesExchage.vue')['default']
     WelcomeMessage: typeof import('./components/MusicianCenter/AI/chat/WelcomeMessage.vue')['default']
+  }
+  export interface GlobalDirectives {
+    vInfiniteScroll: typeof import('element-plus/es')['ElInfiniteScroll']
   }
 }

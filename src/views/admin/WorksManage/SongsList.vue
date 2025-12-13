@@ -30,10 +30,10 @@
         <div class="flex justify-between">
           <span class="text-[18px] font-700 ml-2">歌曲管理</span>
           <div class="flex mr-4">
-            <el-button type="primary" class="mr-4">
-              <IconFontSymbol name="tianjia" class="mr-1"></IconFontSymbol>
-              添加歌曲
-            </el-button>
+            <button class="Btn" @click=" ">
+              <div class="sign">+</div>
+              <div class="text">添加</div>
+            </button>
             <el-tooltip content="删除所选歌曲">
               <IconFontSymbol name="shanchu" class="font-700 relative top-[3px] cursor-pointer hover:text-red-700 mr-4"></IconFontSymbol>
             </el-tooltip>
@@ -91,12 +91,18 @@
                       <IconFontSymbol name="bofang" size="18px" color="white"></IconFontSymbol>
                     </el-tooltip>
                   </span> -->
-                  <span class="text-[#529FFD] cursor-pointer">
-                    <IconFontSymbol name="xiugai" size="17px"></IconFontSymbol>
+                  <span
+                    class="active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#bfdcff] inline-block bg-[#e0eeff] text-[#529FFD] py-[3px] rounded-[20px] px-[12px] cursor-pointer text-[14px]"
+                    @click=""
+                  >
+                    <IconFontSymbol name="xiugai" size="18px"></IconFontSymbol>
                     修改
                   </span>
-                  <span class="text-red-700 cursor-pointer">
-                    <IconFontSymbol name="shanchu"></IconFontSymbol>
+                  <span
+                    class="active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#ffbfbf] inline-block bg-[#ffe0e0] text-[#fd5252] py-[3px] rounded-[20px] px-[12px] cursor-pointer text-[14px]"
+                    @click=""
+                  >
+                    <IconFontSymbol name="bohui" size="15px"></IconFontSymbol>
                     删除
                   </span>
                 </div>
@@ -295,6 +301,69 @@
 </script>
 
 <style scoped>
+  /* From Uiverse.io by Yaya12085 */
+.Btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 38px;
+  height: 36px;
+  border-radius: calc(45px/2);
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition-duration: .3s;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.199);
+  background: linear-gradient(144deg,#529FFD,#529FFD 50%,#417FCA);
+  margin-right: 20px;
+}
+
+/* plus sign */
+.sign {
+  width: 100%;
+  font-size: 1.5em;
+  color: white;
+  transition-duration: .3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  bottom: 2px;
+}
+/* text */
+.text {
+  position: absolute;
+  right: 0%;
+  width: 0%;
+  opacity: 0;
+  color: white;
+  font-size: 15px;
+  font-weight: 500;
+  transition-duration: .3s;
+}
+/* hover effect on button width */
+.Btn:hover {
+  width: 115px;
+  transition-duration: .3s;
+}
+
+.Btn:hover .sign {
+  width: 30%;
+  transition-duration: .3s;
+  padding-left: 15px;
+}
+/* hover effect button's text */
+.Btn:hover .text {
+  opacity: 1;
+  width: 70%;
+  transition-duration: .3s;
+  padding-right: 15px;
+}
+/* button click effect*/
+.Btn:active {
+  transform: translate(2px ,2px);
+}
   .el-button--primary{
     transition: all 0.2s;
   }

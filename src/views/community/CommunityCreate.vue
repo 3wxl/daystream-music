@@ -7,7 +7,16 @@
           <input v-model="title" ref="titleInput" type="text" class="text-[#e5e7eb] font-bold text-[26px] py-[5px] focus:outline-none w-[90%]" placeholder="请输入标题">
           <p class="text-[#e5e7eb] text-[15px] w-[10%] text-center">{{titleNum}}/100</p>
         </div>
-        <div class="h-[700px] mt-2">
+        <div class="h-[700px] mt-2 relative">
+          <div class="w-[250px] mx-auto relative top-30" v-show="loadingEl">
+            <div class="flex justify-center" v-if="loadingEl">
+              <div class="loader">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+              </div>
+            </div>
+          </div>
           <Editor
           ref="tinyRef"
           api-key="684qkcdrtr33aypozz8tuhzvsq7k4og17ner8tl30gu4away"
@@ -114,6 +123,8 @@
   const tinyRef = ref(null)
   const uploadedImages = reactive([])      // 上传的图片列表
   let usedImages = reactive([])       // 使用的图片列表
+  let loadingEl = ref(true)             // loading
+
   const editorInit = {
     skin: 'oxide-dark',
     height: '100%',
@@ -232,7 +243,10 @@
         background-color: #f9fafb;
         font-weight: 600;
       }
-    `
+    `,
+    init_instance_callback: function () {
+      loadingEl.value = true; // 隐藏加载动画
+    },
   }
   const getContent = () => {      // 获取编辑器内容
     return editorContent.value
@@ -240,7 +254,7 @@
   const getContent2 = () => {     // 获取编辑器内容，并去除html标签
     return editorContent.value.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
   }
-  function extractImgSrcByReg(html) {     // 这里是获取一个hmtl片段里面的图片的src组成的数组
+  function extractImgSrcByReg(html:string) {     // 这里是获取一个hmtl片段里面的图片的src组成的数组
     if (!html || typeof html !== 'string') return [];
     const imgSrcReg = /<img[^>]+src\s*=\s*["']([^"']*)["'][^>]*>/gi;
     const srcList = [];
@@ -498,7 +512,39 @@
   opacity: 1 !important;
 }
 
+  .loader {
+  display: flex;
+  align-items: center;
+}
 
+.bar {
+  display: inline-block;
+  width: 3px;
+  height: 15px;
+  background-color: rgba(255, 255, 255, .5);
+  border-radius: 10px;
+  animation: scale-up4 1s linear infinite;
+}
+
+.bar:nth-child(2) {
+  height: 28px;
+  margin: 0 5px;
+  animation-delay: .25s;
+}
+
+.bar:nth-child(3) {
+  animation-delay: .5s;
+}
+
+@keyframes scale-up4 {
+  20% {
+    background-color: #ffff;
+    transform: scaleY(1.5);
+  }
+  40% {
+    transform: scaleY(1);
+  }
+}
 </style>
 
 
