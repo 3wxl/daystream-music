@@ -123,7 +123,7 @@ const changeCaptcha = () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/auth.scss';
+@use '@/styles/auth.scss';
 
 .captcha-group {
   align-items: flex-start;

@@ -39,7 +39,10 @@
         >
           消息
         </button>
-        <span class="top-0 -right-1 inline-block min-w-[15px] min-h-[15px] text-center line-clamp-1 rounded-[16px] p-[2px] text-white text-[11px]/[13px] absolute bg-red-600">99+</span>
+        <span
+          class="top-0 -right-1 inline-block min-w-[15px] min-h-[15px] text-center line-clamp-1 rounded-[16px] p-[2px] text-white text-[11px]/[13px] absolute bg-red-600"
+          >99+</span
+        >
       </router-link>
       <button
         class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors hidden md:block"
@@ -86,7 +89,7 @@
             userStore.userInfo.username || '未登录'
           }}</span>
           <span class="text-xs text-gray-500" v-if="userStore.userInfo.userRole">{{
-            userStore.userInfo.userRole.join(' | ')
+            userStore.userInfo.userRole
           }}</span>
         </div>
         <div class="relative group cursor-pointer">

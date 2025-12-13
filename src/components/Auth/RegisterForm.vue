@@ -94,7 +94,7 @@ const insertUser = async (formEl: FormInstance | undefined) => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/auth.scss';
+@use '@/styles/auth.scss';
 
 .captcha-group {
   align-items: flex-start;

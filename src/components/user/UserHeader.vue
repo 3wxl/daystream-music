@@ -1,29 +1,35 @@
 <template>
   <div class="user-header relative overflow-hidden rounded-xl group">
     <!-- 背景图区域 -->
-    <div class="absolute inset-0 z-0 cursor-pointer" @click="handleBgUpload">
+    <div class="absolute inset-0 z-0 cursor-pointer" style="pointer-events: none">
       <img
-        :src="userInfo.bgImg || 'https://picsum.photos/1200/300?random=30'"
+        :src="bgPreview || userInfo.backgroundImage || 'https://picsum.photos/1200/300?random=30'"
         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
       />
       <div
         class="absolute inset-0 bg-gradient-to-t from-black/80 via-rose-900/30 to-transparent"
       ></div>
-      <div
-        class="absolute right-4 top-4 bg-black/50 text-white px-3 py-1.5 rounded-full text-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5"
-      >
-        <i class="iconfont" style="font-size: 1.725rem">&#xe601;</i>
-        <span>更换封面</span>
-      </div>
     </div>
 
     <!-- 内容区域 -->
     <div class="relative z-10 px-6 py-10 md:py-16">
+      <!-- 更换封面按钮 -->
+      <div
+        class="absolute right-4 top-4 bg-black/50 text-white px-3 py-1.5 rounded-full text-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 cursor-pointer hover:bg-black/70 z-30"
+        @click="handleBgUpload"
+      >
+        <i class="iconfont" style="font-size: 1.725rem">&#xe601;</i>
+        <span>更换封面</span>
+      </div>
+
       <div class="flex flex-col md:flex-row gap-6 items-start md:items-end">
         <!-- 头像区域 -->
         <div class="relative cursor-pointer group/avatar" @click="handleAvatarUpload">
           <div
-            class="w-28 h-28 md:w-36 md:h-36 rounded-full border-4 border-white/20 overflow-hidden shadow-lg"
+            class="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden shadow-lg"
+            :class="[
+              userInfo.onlineStatus ? 'online-avatar-container' : 'offline-avatar-container',
+            ]"
           >
             <img
               :src="
@@ -31,25 +37,47 @@
                 'http://39.96.214.163:9000/file/70567a01-09d0-443b-9d8a-bab6e5623967.png'
               "
               class="w-full h-full object-cover transition-transform duration-500 group-hover/avatar:scale-110"
+              :class="[!userInfo.onlineStatus ? 'grayscale-30 opacity-90' : '']"
             />
           </div>
+
+          <!-- 头像悬停遮罩 -->
           <div
-            class="absolute inset-0 rounded-full bg-rose-900/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center"
+            class="absolute inset-0 rounded-full opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center"
+            :class="[userInfo.onlineStatus ? 'bg-[#FF2E93]/40' : 'bg-gray-500/40']"
           >
             <div
-              class="w-13 h-13 bg-white/20 backdrop-blur-sm p-2.5 rounded-full flex items-center justify-center"
+              class="w-13 h-13 backdrop-blur-sm p-2.5 rounded-full flex items-center justify-center"
+              :class="[userInfo.onlineStatus ? 'bg-white/20' : 'bg-gray-300/20']"
             >
-              <i class="iconfont opacity-70" style="font-size: 25px">&#xe63b;</i>
+              <i
+                class="iconfont transition-opacity"
+                style="font-size: 25px"
+                :class="[userInfo.onlineStatus ? 'opacity-70' : 'opacity-50']"
+                >&#xe63b;</i
+              >
             </div>
           </div>
+
+          <!-- 在线状态指示器 -->
           <div class="absolute top-27 left-26 flex items-center gap-1">
-            <button
-              class="w-7 h-7 rounded-full bg-[#FF2E93] border-4 border-rose-900/50 shadow-md"
-            ></button>
+            <div
+              class="w-7 h-7 rounded-full border-4 shadow-md"
+              :class="[
+                userInfo.onlineStatus
+                  ? ['bg-[#FF2E93]', 'border-rose-900/50', 'animate-pulse']
+                  : ['bg-gray-400', 'border-gray-600/50', 'pulse-offline'],
+              ]"
+            ></div>
             <span
-              class="opacity-0 group-hover/avatar:opacity-100 transition-opacity text-white text-sm font-medium bg-black/60 px-2 py-0.5 rounded whitespace-nowrap"
+              class="opacity-0 group-hover/avatar:opacity-100 transition-opacity text-sm font-medium px-2 py-0.5 rounded whitespace-nowrap"
+              :class="[
+                userInfo.onlineStatus
+                  ? 'text-white bg-[#FF2E93]/70'
+                  : 'text-gray-300 bg-gray-700/70',
+              ]"
             >
-              在线
+              {{ userInfo.onlineStatus ? '在线' : '离线' }}
             </span>
           </div>
         </div>
@@ -94,7 +122,7 @@
             <el-button
               v-else
               size="default"
-              @click="showEditDialog = true"
+              @click="openEditDialog"
               class="bg-[#FF2E93]/20 hover:bg-[#FF2E93]/30 text-[#FF2E93] border-0 transition-all duration-300 hover:shadow-lg hover:shadow-[#FF2E93]/20"
             >
               <i class="iconfont mr-1">&#xe7e5;</i>
@@ -127,20 +155,23 @@
           </div>
         </router-link>
         <div
+          v-if="userInfo.userRole === '音乐人'"
           class="stat-item text-center p-2 hover:scale-105 transition-all duration-300 hover:text-[#FFD1DC] cursor-pointer"
         >
           <div class="text-2xl md:text-3xl font-bold text-white">
-            {{ userInfo.likedCount || 0 }}
+            {{ userInfo.likeCount || 0 }}
           </div>
           <div class="text-gray-300 text-xs md:text-sm mt-1">获赞</div>
         </div>
         <div
+          v-if="userInfo.userRole === '音乐人'"
           class="stat-item text-center p-2 hover:scale-105 transition-all duration-300 hover:text-[#FFD1DC] cursor-pointer hidden md:block"
         >
           <div class="text-2xl md:text-3xl font-bold text-white">{{ userInfo.playCount || 0 }}</div>
           <div class="text-gray-300 text-xs md:text-sm mt-1">播放量</div>
         </div>
         <div
+          v-if="userInfo.userRole === '音乐人'"
           class="stat-item text-center p-2 hover:scale-105 transition-all duration-300 hover:text-[#FFD1DC] cursor-pointer hidden md:block"
         >
           <div class="text-2xl md:text-3xl font-bold text-white">
@@ -153,10 +184,7 @@
 
     <!-- 编辑资料弹窗 -->
     <div v-if="showEditDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
-        @click="showEditDialog = false"
-      ></div>
+      <div class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40" @click="closeEditDialog"></div>
       <div
         class="relative z-50 w-full max-w-2xl bg-[#1E1E1E] rounded-xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-100 max-h-160"
       >
@@ -170,33 +198,48 @@
             </div>
             <button
               class="text-[#8A8A8A] hover:text-white transition-colors"
-              @click="showEditDialog = false"
+              @click="closeEditDialog"
             >
               <i class="iconfont">&#xe69e;</i>
             </button>
           </div>
         </div>
         <div class="p-6 overflow-y-auto overflow-y-auto max-h-[calc(85vh-4.5rem)] scrollbar-custom">
-          <form class="space-y-6">
+          <!-- 核心修改：添加 el-form 容器，绑定规则和 ref -->
+          <el-form
+            ref="editFormRef"
+            :model="editForm"
+            :rules="userInfoRules"
+            label-width="80px"
+            class="space-y-6"
+          >
             <div class="space-y-4">
-              <div>
-                <label for="nickname" class="block text-sm text-[#8A8A8A] mb-1">昵称 *</label>
+              <el-form-item label="昵称 " prop="name" style="margin-bottom: 25px">
                 <input
                   type="text"
                   id="nickname"
                   class="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#FF2E93] transition-all"
                   v-model="editForm.name"
                 />
-              </div>
-              <div>
-                <label for="signature" class="block text-sm text-[#8A8A8A] mb-1">签名</label>
+              </el-form-item>
+              <el-form-item label="签名" prop="signature" style="margin-bottom: 25px">
                 <textarea
                   id="signature"
                   rows="3"
                   class="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#FF2E93] transition-all"
                   v-model="editForm.signature"
+                  placeholder="选填，最多30个字"
                 ></textarea>
-              </div>
+              </el-form-item>
+              <el-form-item label="手机号码" prop="phone" style="margin-bottom: 25px">
+                <input
+                  type="text"
+                  id="phone"
+                  class="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#FF2E93] transition-all"
+                  v-model="editForm.phone"
+                  placeholder="选填，11位有效手机号"
+                />
+              </el-form-item>
               <div>
                 <label class="block text-sm text-[#8A8A8A] mb-1">性别</label>
                 <div class="flex gap-6 py-2">
@@ -315,7 +358,7 @@
               <button
                 type="button"
                 class="px-6 py-2 border border-white/10 rounded-lg text-white hover:bg-white/10 transition-colors"
-                @click="showEditDialog = false"
+                @click="closeEditDialog"
               >
                 取消
               </button>
@@ -328,7 +371,7 @@
                 <i class="fa fa-check"></i>
               </button>
             </div>
-          </form>
+          </el-form>
         </div>
         <div class="h-1 w-full bg-gradient-to-r from-[#FF2E93] via-[#d46ab5] to-[#b481bc]"></div>
       </div>
@@ -346,93 +389,138 @@
     <input
       type="file"
       ref="avatarInput"
-      class="hidden"
-      accept="image/*"
-      @change="handleFileUpload('avatar')"
+      style="position: absolute; top: -9999px; left: -9999px; opacity: 0"
+      accept="image/jpeg,image/png"
+      @change="handleFileUpload('avatar', $event)"
     />
     <input
       type="file"
       ref="bgInput"
-      class="hidden"
-      accept="image/*"
-      @change="handleFileUpload('bg')"
+      style="position: absolute; top: -9999px; left: -9999px; opacity: 0"
+      accept="image/jpeg,image/png"
+      @change="handleFileUpload('bg', $event)"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import { ElMessage } from 'element-plus'
-import { uploadImage } from '@/api/personalCenter/index'
+// 1. 导入必要依赖
+import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ElForm, ElMessage } from 'element-plus'
 import type { UserInfoVO, EditForm } from '@/types/personalCenter/index'
+import { useUserInfoRules } from '@/utils/rules/updateInfo'
 
-// 1. 定义Props
+// 2. 定义Props
 const props = defineProps<{
   userInfo: UserInfoVO
   isOthersPage: boolean
 }>()
-console.log(props.userInfo.walletBalance)
-// 2. 定义Emits
+
+// 3. 定义Emits
 const emit = defineEmits<{
   'update-user-info': [editForm: EditForm]
-  'upload-avatar': [avatarUrl: string]
-  'upload-bg': [bgUrl: string]
+  'upload-avatar': [file: File]
+  'upload-bg': [file: File]
 }>()
 
-// 响应式数据
+// 4. 响应式数据
 const isFollowing = ref(false)
 const showEditDialog = ref(false)
-const isMobile = ref(false)
 const avatarInput = ref<HTMLInputElement | null>(null)
 const bgInput = ref<HTMLInputElement | null>(null)
+const avatarPreview = ref<string | null>(null)
+const bgPreview = ref<string | null>(null)
 
-// 编辑表单（初始化从props获取）
-const editForm = ref<EditForm>({
-  name: props.userInfo.username || '未知用户',
-  signature: props.userInfo.introduction || '',
-  gender: props.userInfo.gender || 'secret',
-  walletBalance: props.userInfo.walletBalance || 0,
-  lastCheckinTime: props.userInfo.lastCheckinTime?.replace('T', ' ') || '',
-  lastLoginTime: props.userInfo.lastLoginTime?.replace('T', ' ') || '',
-  updatedTime: props.userInfo.updatedTime?.replace('T', ' ') || '',
-  createdTime: props.userInfo.createdTime?.replace('T', ' ') || '',
-  vipExpireTime: props.userInfo.vipExpireTime?.replace('T', ' ') || '',
-})
+// 5. 表单相关
+const editFormRef = ref<InstanceType<typeof ElForm> | null>(null)
+// 初始化表单（仅做声明，实际值在打开弹窗时赋值）
+const editForm = ref<EditForm>({} as EditForm)
+// 缓存原始数据（关键：用于关闭弹窗时重置）
+let originFormData: EditForm = {} as EditForm
 
-// 监听props变化，同步表单数据
+// 6. 获取表单校验规则
+const { userInfoRules } = useUserInfoRules(editForm.value)
+
+// 7. 打开弹窗方法（关键：缓存原始数据 + 初始化表单）
+const openEditDialog = () => {
+  // 缓存当前最新的用户信息作为原始数据
+  originFormData = {
+    name: props.userInfo.username || '未知用户',
+    signature: props.userInfo.introduction || '',
+    gender: props.userInfo.gender || '未知',
+    phone: props.userInfo.phone || '',
+    walletBalance: props.userInfo.walletBalance || 0,
+    lastCheckinTime: props.userInfo.lastCheckinTime?.replace('T', ' ') || '',
+    lastLoginTime: props.userInfo.lastLoginTime?.replace('T', ' ') || '',
+    updatedTime: props.userInfo.updatedTime?.replace('T', ' ') || '',
+    createdTime: props.userInfo.createdTime?.replace('T', ' ') || '',
+    vipExpireTime: props.userInfo.vipExpireTime?.replace('T', ' ') || '',
+  }
+  // 初始化表单为原始数据
+  editForm.value = { ...originFormData }
+  // 打开弹窗
+  showEditDialog.value = true
+}
+
+// 8. 关闭弹窗方法（关键：重置表单 + 关闭弹窗）
+const closeEditDialog = () => {
+  // 重置表单为原始数据
+  editForm.value = { ...originFormData }
+  // 清空表单校验提示（可选）
+  if (editFormRef.value) {
+    editFormRef.value.clearValidate()
+  }
+  // 关闭弹窗
+  showEditDialog.value = false
+}
+
+// 9. 表单保存（带校验）
+const handleSaveEdit = async () => {
+  if (!editFormRef.value) return
+
+  try {
+    // 触发表单校验
+    await editFormRef.value.validate()
+    // 校验通过，派发事件
+    emit('update-user-info', { ...editForm.value })
+    // 保存成功后，更新原始数据（下次打开弹窗时用最新的已保存数据）
+    originFormData = { ...editForm.value }
+    closeEditDialog() // 保存成功后关闭弹窗
+    ElMessage.success('资料修改成功')
+  } catch (error) {
+    // 校验失败，提示错误
+    ElMessage.error('表单填写有误，请检查昵称/手机号/签名格式')
+    console.error('表单校验失败:', error)
+  }
+}
+
+// 10. 监听用户信息变化（父组件数据更新时，同步原始数据）
 watch(
   () => props.userInfo,
   (newVal) => {
-    editForm.value = {
-      name: newVal.username || '未知用户',
-      signature: newVal.introduction || '',
-      gender: newVal.gender || '未知',
-      walletBalance: newVal.walletBalance || 0,
-      lastCheckinTime: newVal.lastCheckinTime || '',
-      lastLoginTime: newVal.lastLoginTime || '',
-      updatedTime: newVal.updatedTime || '',
-      createdTime: newVal.createdTime || '',
-      vipExpireTime: newVal.vipExpireTime || '',
+    // 如果弹窗未打开，更新原始数据；如果弹窗已打开，不修改（避免干扰用户编辑）
+    if (!showEditDialog.value) {
+      originFormData = {
+        name: newVal.username || '未知用户',
+        signature: newVal.introduction || '',
+        gender: newVal.gender || '未知',
+        phone: newVal.phone || '',
+        walletBalance: newVal.walletBalance || 0,
+        lastCheckinTime: newVal.lastCheckinTime?.replace('T', ' ') || '',
+        lastLoginTime: newVal.lastLoginTime?.replace('T', ' ') || '',
+        updatedTime: newVal.updatedTime?.replace('T', ' ') || '',
+        createdTime: newVal.createdTime?.replace('T', ' ') || '',
+        vipExpireTime: newVal.vipExpireTime?.replace('T', ' ') || '',
+      }
     }
+    // 预览图同步（非核心）
+    avatarPreview.value = null
+    bgPreview.value = null
   },
-  { deep: true },
+  { deep: true, immediate: true }, // immediate: true 确保初始化时执行
 )
 
-// 生命周期
-onMounted(() => {
-  checkScreenSize()
-  window.addEventListener('resize', checkScreenSize)
-
-  watch(showEditDialog, (value) => {
-    document.body.style.overflow = value ? 'hidden' : ''
-  })
-})
-
-// 工具方法
-const checkScreenSize = () => {
-  isMobile.value = window.innerWidth < 768
-}
-
+// 11. 上传相关方法
 const handleAvatarUpload = () => {
   avatarInput.value?.click()
 }
@@ -441,50 +529,82 @@ const handleBgUpload = () => {
   bgInput.value?.click()
 }
 
-// 核心：文件上传逻辑（适配request的uploadImage接口）
-const handleFileUpload = async (type: 'avatar' | 'bg', e?: Event) => {
+const handleFileUpload = (type: 'avatar' | 'bg', e: Event) => {
   const input = type === 'avatar' ? avatarInput.value : bgInput.value
   if (!input?.files?.length) return
 
   const file = input.files![0]
   if (!file) return
-  try {
-    // 调用适配后的uploadImage接口
-    const res = await uploadImage(file, type)
-    if (res.success && res.data?.url) {
-      // 派发事件给父组件
-      if (type === 'avatar') {
-        emit('upload-avatar', res.data.url)
-      } else {
-        emit('upload-bg', res.data.url)
-      }
-      ElMessage.success(`${type === 'avatar' ? '头像' : '背景图'}上传成功`)
-    }
-  } catch (error) {
-    console.error(`${type === 'avatar' ? '头像' : '背景图'}上传失败:`, error)
-    // 错误提示已在request拦截器中处理
+
+  // 文件格式校验
+  const isImage = ['image/jpeg', 'image/png', 'image/gif'].includes(file.type)
+  if (!isImage) {
+    ElMessage.error('仅支持JPG、PNG、GIF格式的图片')
+    return
   }
 
+  // 生成本地预览
+  if (type === 'avatar') {
+    if (avatarPreview.value) URL.revokeObjectURL(avatarPreview.value)
+    avatarPreview.value = URL.createObjectURL(file)
+  } else {
+    if (bgPreview.value) URL.revokeObjectURL(bgPreview.value)
+    bgPreview.value = URL.createObjectURL(file)
+  }
+
+  // 派发上传事件
+  if (type === 'avatar') {
+    emit('upload-avatar', file)
+  } else {
+    emit('upload-bg', file)
+  }
+  // 清空input，支持重复选择
   input.value = ''
 }
 
-// 保存编辑逻辑（派发事件给父组件）
-const handleSaveEdit = () => {
-  emit('update-user-info', { ...editForm.value })
-  showEditDialog.value = false
-}
-
-// 关注/取消关注
+// 12. 关注/取消关注
 const handleFollow = () => {
   isFollowing.value = !isFollowing.value
 }
+
+// 13. 生命周期
+onMounted(() => {
+  // 监听弹窗显示/隐藏，控制body滚动
+  watch(showEditDialog, (value) => {
+    document.body.style.overflow = value ? 'hidden' : ''
+  })
+})
+
+onUnmounted(() => {
+  // 释放预览URL，避免内存泄漏
+  if (avatarPreview.value) URL.revokeObjectURL(avatarPreview.value)
+  if (bgPreview.value) URL.revokeObjectURL(bgPreview.value)
+})
 </script>
 
 <style lang="scss" scoped>
-.user-header .rounded-full:not(.vip-tag) {
-  animation: pulse1 3s infinite;
+// 在线状态头像容器
+.online-avatar-container {
+  border: 4px solid rgba(255, 46, 147, 0.5);
+  animation: pulse-online 3s infinite;
+
+  &:hover {
+    border-color: rgba(255, 46, 147, 0.8);
+  }
 }
-@keyframes pulse1 {
+
+// 离线状态头像容器
+.offline-avatar-container {
+  border: 4px solid rgba(156, 163, 175, 0.5);
+  animation: pulse-offline 3s infinite;
+
+  &:hover {
+    border-color: rgba(156, 163, 175, 0.8);
+  }
+}
+
+// 在线状态呼吸动画
+@keyframes pulse-online {
   0% {
     box-shadow: 0 0 0 0 rgba(255, 46, 147, 0.4);
   }
@@ -493,6 +613,39 @@ const handleFollow = () => {
   }
   100% {
     box-shadow: 0 0 0 0 rgba(255, 46, 147, 0);
+  }
+}
+
+// 离线状态呼吸动画
+@keyframes pulse-offline {
+  0% {
+    box-shadow: 0 0 0 0 rgba(156, 163, 175, 0.3);
+    transform: scale(0.98);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(156, 163, 175, 0.1);
+    transform: scale(1);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(156, 163, 175, 0);
+    transform: scale(0.98);
+  }
+}
+
+// 离线状态指示灯动画
+.pulse-offline {
+  animation: pulse-offline-light 2s ease-in-out infinite;
+}
+
+@keyframes pulse-offline-light {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
   }
 }
 
@@ -539,6 +692,19 @@ const handleFollow = () => {
   background-color: #e5e7eb !important;
 }
 
+// 表单错误提示样式（可选）
+::v-deep .el-form-item__error {
+  color: #ff2e93;
+  font-size: 12px;
+  margin-top: 6px;
+  margin-left: 4px;
+}
+
+::v-deep .el-form-item--error .el-input__inner {
+  border-color: #ff2e93;
+  box-shadow: 0 0 0 1px #ff2e93;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -583,7 +749,7 @@ const handleFollow = () => {
   }
 
   .input-focus:focus {
-    border-color: #ff2e93; /* primary */
+    border-color: #ff2e93;
     box-shadow: 0 0 0 1px #ff2e93;
   }
   @keyframes rotate {

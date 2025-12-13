@@ -24,28 +24,35 @@
           </div>
           <router-link to="/User/LikedSongsList">
             <div v-if="likedSongs.length > 0" class="shrink-0 w-[100px] flex justify-end">
-              <el-button size="small" class="text-[#00f0ff] hover:text-white"> 查看全部 </el-button>
+              <el-button type="text" size="small" class="text-[#00f0ff] hover:text-white">
+                查看全部
+              </el-button>
             </div>
           </router-link>
         </div>
-        <div v-if="loading" class="py-12 text-center">
-          <el-skeleton loading animation="wave" :rows="4" />
-        </div>
+        <div v-if="loading" class="py-12 text-center"></div>
         <div v-else-if="likedSongs.length === 0" class="py-12 text-center">
           <el-empty description="暂无喜欢的歌曲" class="text-gray-500" />
         </div>
-        <LikedSongs v-else :likedSongs="likedSongs" />
+        <LikedSongs v-if="!loading && likedSongs.length > 0" :likedSongs="likedSongs" />
       </div>
+
       <!-- 其他原有代码（收藏歌单/创建歌单/收藏专辑） -->
       <div class="flex flex-col md:flex-row gap-20">
         <div class="flex-[3] min-w-[200px]">
-          <MusicStatistics />
+          <!-- 传递标签占比数据给子组件 -->
+          <MusicStatistics
+            :daily-listen-duration="dailyListenDuration"
+            :daily-listen-seconds="dailyListenSeconds"
+            :music-tag-ratio="musicTagRatio"
+            :loading="listenCountLoading || tagRatioLoading"
+          />
         </div>
         <div class="flex-[6]">
           <!-- 收藏歌单 -->
           <div class="space-y-6">
             <div>
-              <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center">
                   <img src="../../assets/turntable-13463_256.gif" alt="" class="w-13" />
                   <h3 class="text-white font-semibold text-lg">我收藏的歌单</h3>
@@ -56,47 +63,74 @@
                   </el-button>
                 </router-link>
               </div>
-              <PlaylistSection />
+
+              <!-- 收藏歌单列表 -->
+              <div v-if="collectPlaylistLoading" class="py-12 text-center"></div>
+              <div v-else-if="collectPlaylists.length > 0">
+                <CollectSection
+                  :playlists="collectPlaylists"
+                  action-type="collect"
+                  :show-action-button="true"
+                  @collect-change="handleCollectChange"
+                  @update-success="handleUpdateSuccess"
+                />
+              </div>
+              <div v-else class="py-4 text-center bg-gray-900/30 rounded-lg">
+                <el-empty description="暂无收藏歌单" class="text-gray-500" :image-size="60" />
+              </div>
             </div>
+
             <!-- 创建歌单 -->
             <div>
-              <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center">
                   <img src="../../assets/speaker-16876_256.gif" alt="" class="w-15" />
                   <h3 class="text-white font-semibold text-lg">我创建的歌单</h3>
                 </div>
-                <el-button
-                  type="text"
-                  size="small"
-                  class="text-[#00f0ff] hover:text-white"
-                  @click="isCreateDialogOpen = true"
-                >
-                  新建歌单
-                </el-button>
+                <div class="flex items-center gap-2">
+                  <router-link to="/User/CollectedSongsList">
+                    <el-button type="text" size="small" class="text-[#00f0ff] hover:text-white">
+                      查看全部
+                    </el-button>
+                  </router-link>
+                  <el-button
+                    @click="openCreateDialog"
+                    type="text"
+                    size="small"
+                    class="text-[#00f0ff] hover:text-white"
+                  >
+                    新建歌单
+                  </el-button>
+                </div>
+              </div>
+
+              <!-- 创建歌单列表 -->
+              <div v-if="createPlaylistLoading" class="py-12 text-center"></div>
+              <div v-else-if="createPlaylists.length > 0">
+                <CollectSection
+                  :playlists="createPlaylists"
+                  action-type="delete"
+                  :show-action-button="true"
+                  @delete-change="handleDeleteChange"
+                  @update-success="handleUpdateSuccess"
+                />
+              </div>
+              <div v-else class="py-4 text-center bg-gray-900/30 rounded-lg">
+                <el-empty description="暂无创建歌单" class="text-gray-500" :image-size="60" />
               </div>
             </div>
           </div>
-          <PlaylistSection />
-
-          <!-- 创建歌单弹窗（原有代码） -->
-          <div
-            v-if="isCreateDialogOpen"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4"
-          >
-            <!-- 弹窗内容不变 -->
-          </div>
         </div>
       </div>
+      <!-- 这里添加了缺失的闭合div -->
 
       <!-- 收藏专辑 -->
-      <div
-        class="collection-albums-page bg-[#080812] text-white font-['Poppins',sans-serif] overflow-x-hidden rounded-2xl"
-      >
+      <div class="collection-albums-page bg-[#080812] text-white overflow-x-hidden rounded-2xl">
         <main class="container mx-auto px-4 md:px-8 py-8">
           <div class="mb-8 pb-3">
             <div class="flex items-center justify-between w-full">
               <button
-                class="px-6 py-3 rounded-full bg-gradient-to-r text-white text-sm font-medium shadow-xl shadow-[#ec4899]/20 hover:shadow-[#ec4899]/40 transition-all duration-400 transform hover:-translate-y-1 active:scale-95"
+                class="px-6 py-3 rounded-full bg-gradient-to-r from-[#ec4899] to-[#f472b6] text-white text-sm font-medium shadow-xl shadow-[#ec4899]/20 hover:shadow-[#ec4899]/40 transition-all duration-400 transform hover:-translate-y-1 active:scale-95"
               >
                 我收藏的专辑
               </button>
@@ -110,303 +144,608 @@
               </router-link>
             </div>
           </div>
-          <CollectedAlbum
-            :albums="filteredAlbums.length ? filteredAlbums : albums"
-            @goToAlbumDetail="goToAlbumDetail"
-            @playAlbum="playAlbum"
-            @toggleCollection="toggleCollection"
-            @shareAlbum="shareAlbum"
-            @exploreAlbums="exploreAlbums"
-          />
+
+          <!-- 专辑列表 -->
+          <div v-if="albumLoading" class="py-12 text-center"></div>
+          <div v-else-if="albums.length > 0">
+            <CollectedAlbum
+              :albums="filteredAlbums.length ? filteredAlbums : albums"
+              @goToAlbumDetail="goToAlbumDetail"
+              @playAlbum="playAlbum"
+              @toggleCollection="toggleCollection"
+              @shareAlbum="shareAlbum"
+              @exploreAlbums="exploreAlbums"
+            />
+          </div>
+          <div v-else class="py-6 text-center">
+            <el-empty description="暂无收藏的专辑" class="text-gray-500" />
+            <p class="text-gray-400 text-sm mt-2">去发现更多精彩的专辑吧</p>
+            <router-link to="/album">
+              <el-button type="text" class="text-[#00f0ff] hover:text-white mt-4">
+                发现专辑
+              </el-button>
+            </router-link>
+          </div>
         </main>
       </div>
     </div>
+
+    <!-- 创建歌单弹窗组件 -->
+    <UpdatePlayList
+      v-if="isCreateDialogOpen"
+      v-model:isDialogOpen="isCreateDialogOpen"
+      :isEditMode="false"
+      @create-success="handleCreateSuccess"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { getUserInfo, updateUserInfo } from '@/api/personalCenter/index'
+// 原有导入代码...
+import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import {
+  getUserInfo,
+  updateUserInfo,
+  getMyLikeSongs,
+  getCollectPlaylists,
+  getCreatePlaylists,
+  createPlaylistApi,
+  getWeeklyDailyListenCount,
+  getWeeklyTagRatio, // 新增导入
+  getMyCollectAlbums,
+  collectAlbum, // 新增：导入取消收藏专辑接口
+} from '@/api/personalCenter/index'
 import type {
   MusicVO,
   UserInfoVO,
   UpdateUserInfoParams,
   EditForm,
+  CollectPlaylistReq,
+  CreatePlaylistReq,
+  PlaylistVO,
+  CollectPlaylistResp,
+  CreatePlaylistResp,
+  CreatePlaylistParams,
+  DailyListenDataVO, // 新增导入
+  MusicTagRatioVO, // 新增导入
+  CollectAlbumResp,
+  AlbumVO,
+  AlbumCardVO,
 } from '@/types/personalCenter/index'
+
+// 原有变量定义...
+const router = useRouter()
 const loading = ref(false)
 const pagination = reactive({
   pageNum: 1,
   pageSize: 4,
 })
+const collectPlaylistLoading = ref(false)
+const createPlaylistLoading = ref(false)
+const isCreatingPlaylist = ref(false)
 
-// 2. 歌曲列表（类型适配）
-// const likedSongs = ref<MusicVO[]>([])
-// 原有静态数据
-const likedSongs = ref([
-  {
-    id: 1,
-    name: '夏日晚风',
-    artist: 'Daystream Music',
-    album: '晚风集',
-    cover: 'https://picsum.photos/80/80?random=1',
-    duration: 237,
-    tags: ['超清母带', 'MV'],
-    isLiked: true,
-  },
-  {
-    id: 2,
-    name: '星光坠落时',
-    artist: 'Daystream Music',
-    album: '星光合集',
-    cover: 'https://picsum.photos/80/80?random=2',
-    duration: 198,
-    tags: ['VIP', '无损'],
-    isLiked: false,
-  },
-  {
-    id: 3,
-    name: '城市浪漫',
-    artist: 'Daystream Music',
-    album: '城市之声',
-    cover: 'https://picsum.photos/80/80?random=3',
-    duration: 215,
-    tags: ['超清母带'],
-    isLiked: true,
-  },
-  {
-    id: 4,
-    name: '深海回响',
-    artist: 'Daystream Music',
-    album: '深海秘境',
-    cover: 'https://picsum.photos/80/80?random=4',
-    duration: 242,
-    tags: [],
-    isLiked: false,
-  },
-])
+const collectPlaylists = ref<PlaylistVO[]>([])
+const createPlaylists = ref<PlaylistVO[]>([])
 
-const albums = ref([
-  {
-    id: 1,
-    name: '孤独的海',
-    artist: '深海鱼子酱',
-    cover: 'https://picsum.photos/300/300?random=41',
-    songCount: 12,
-    playCount: '128万',
-    collectTime: '2025-05-20',
-  },
-  {
-    id: 2,
-    name: '晚风告白',
-    artist: '小田音乐社',
-    cover: 'https://picsum.photos/300/300?random=42',
-    songCount: 10,
-    playCount: '89万',
-    collectTime: '2025-04-12',
-  },
-  {
-    id: 3,
-    name: '星河入海',
-    artist: '尹昔眠',
-    cover: 'https://picsum.photos/300/300?random=43',
-    songCount: 14,
-    playCount: '205万',
-    collectTime: '2025-05-05',
-  },
-  {
-    id: 4,
-    name: '雾里',
-    artist: '姚六一',
-    cover: 'https://picsum.photos/300/300?random=44',
-    songCount: 8,
-    playCount: '312万',
-    collectTime: '2025-03-18',
-  },
-  {
-    id: 5,
-    name: '人间白首',
-    artist: '叶洛洛',
-    cover: 'https://picsum.photos/300/300?random=45',
-    songCount: 11,
-    playCount: '76万',
-    collectTime: '2025-04-28',
-  },
-  {
-    id: 6,
-    name: '难生恨',
-    artist: 'DAWN',
-    cover: 'https://picsum.photos/300/300?random=46',
-    songCount: 9,
-    playCount: '158万',
-    collectTime: '2025-05-10',
-  },
-])
+const collectPagination = reactive<CollectPlaylistReq>({
+  pageNum: 1,
+  pageSize: 3,
+})
+const createPagination = reactive<CreatePlaylistReq>({
+  pageNum: 1,
+  pageSize: 3,
+})
 
-const likedPlaylists = ref([
-  { id: 1, name: '治愈系民谣', cover: 'https://picsum.photos/200/200?random=3', songCount: 24 },
-  { id: 2, name: '深夜电子', cover: 'https://picsum.photos/200/200?random=4', songCount: 18 },
-  { id: 3, name: '雨天BGM', cover: 'https://picsum.photos/200/200?random=5', songCount: 32 },
-])
+// 替换原有 albums 相关变量
+const albumLoading = ref(false) // 专辑加载状态
+const albums = ref<AlbumCardVO[]>([]) // 收藏专辑列表（格式化后）
+const filteredAlbums = ref<AlbumCardVO[]>([]) // 筛选后的专辑
+const albumPagination = reactive({
+  // 专辑分页参数
+  pageNum: 1,
+  pageSize: 6, // 首页显示6张专辑
+})
+const totalAlbums = ref(0) // 总专辑数
+// 新增：加载收藏的专辑
+// 原函数中的 API 调用部分
+const loadCollectAlbums = async () => {
+  try {
+    albumLoading.value = true
+    const res: CollectAlbumResp = await getMyCollectAlbums({
+      pageNum: albumPagination.pageNum,
+      pageSize: albumPagination.pageSize,
+    })
 
-const createdPlaylists = ref([
-  { id: 101, name: '我的私藏列表', cover: 'https://picsum.photos/200/200?random=6', songCount: 32 },
-  { id: 102, name: '健身BGM', cover: 'https://picsum.photos/200/200?random=7', songCount: 15 },
-  { id: 103, name: '通勤必备', cover: 'https://picsum.photos/200/200?random=8', songCount: 42 },
-])
+    console.log('收藏专辑接口原始返回：', res)
 
-// 搜索相关
+    // ========== 关键修复1：严格校验数据有效性 ==========
+    if (res.success && res.data) {
+      // 1. 过滤无效数据：剔除 records 中的空对象/无id的对象
+      const rawAlbums = (res.data.records || []).filter((album) => {
+        // 必须包含核心字段 id，否则视为无效数据
+        return album && album.id !== undefined && album.id !== null
+      })
+
+      totalAlbums.value = res.data.total || 0
+      console.log('过滤后的原始专辑数据：', rawAlbums)
+
+      // 2. 只有有效数据>0时才转换，否则直接置空
+      if (rawAlbums.length > 0) {
+        albums.value = rawAlbums.map((album: AlbumVO) => ({
+          id: album.id,
+          name: album.albumName || '未知专辑', // 兜底默认值
+          artist: album.musicianName || '未知歌手', // 兜底默认值
+          cover: album.coverUrl || 'https://picsum.photos/300/300?random=41', // 兜底封面
+          songCount: album.musicCount || 0,
+          playCount: `${album.collectCount || 0}次收藏`,
+          collectTime: '2025-05-20',
+        }))
+      } else {
+        // 无有效数据时强制置空
+        albums.value = []
+      }
+
+      filteredAlbums.value = [...albums.value]
+    } else {
+      // 接口返回失败/无data时置空
+      ElMessage.warning(res.errorMsg || '暂无收藏的专辑')
+      albums.value = []
+      filteredAlbums.value = []
+    }
+  } catch (error) {
+    console.error('加载收藏专辑失败:', error)
+    ElMessage.error('加载收藏专辑失败，请稍后重试')
+    albums.value = []
+    filteredAlbums.value = []
+  } finally {
+    albumLoading.value = false
+  }
+}
+const likedSongs = ref<MusicVO[]>([])
 const searchKeyword = ref('')
 const showSearchSuggestions = ref(false)
 const searchHistory = ref<string[]>(['周杰伦', '孤独的海', '小幸运'])
-const filteredAlbums = ref([])
-const totalAlbums = ref(0)
-const notificationRef = ref<HTMLDivElement | null>(null)
 
-// 创建歌单相关
 const isCreateDialogOpen = ref(false)
-const newPlaylistName = ref('')
-const newPlaylistDesc = ref('')
-const playlistPrivacy = ref('public')
-const newPlaylistCover = ref('')
-const isUploading = ref(false)
 
-// 核心：用户信息（从接口加载）
 const userInfo = ref<UserInfoVO>({
   isVip: false,
   playCount: 0,
   createdCount: 0,
   followCount: 0,
   fansCount: 0,
-  likedCount: 0,
+  likeCount: 0,
+  onlineStatus: 0,
+  userRole: '普通用户',
 })
 
-// 初始化加载用户信息
-onMounted(async () => {
+const listenCountLoading = ref(false) // 加载状态
+const tagRatioLoading = ref(false) // 标签占比加载状态
+const musicTagRatio = ref<MusicTagRatioVO[]>([]) // 标签占比数据
+
+// 修改：每日听歌数据类型（适配接口返回的对象数组）
+const dailyListenDuration = ref<number[]>([0, 0, 0, 0, 0, 0, 0])
+
+// 原有变量定义（loading/collectPlaylists等）保持不变...
+
+const loadWeeklyTagRatio = async () => {
   try {
-    // 调用适配后的getUserInfo接口
+    tagRatioLoading.value = true
+    const res = await getWeeklyTagRatio()
+    console.log('本周标签')
+    console.log(res)
+    if (res.success && res.data) {
+      // 使用类型断言解决类型错误
+      // 第288行修改为：
+      musicTagRatio.value = (res.data as unknown as MusicTagRatioVO[]) || []
+      console.log('本周标签占比数据：', musicTagRatio.value)
+    } else {
+      ElMessage.warning('暂无本周音乐标签数据')
+      musicTagRatio.value = []
+    }
+  } catch (error) {
+    console.error('加载标签占比失败:', error)
+    ElMessage.error('加载音乐标签数据失败')
+    musicTagRatio.value = []
+  } finally {
+    tagRatioLoading.value = false
+  }
+}
+const dailyListenSeconds = ref<number[]>([0, 0, 0, 0, 0, 0, 0])
+// 修改：加载每日听歌数据（适配对象数组）
+// 修改 loadWeeklyListenCount 函数中的这段代码：
+const loadWeeklyListenCount = async () => {
+  try {
+    listenCountLoading.value = true
+    const res = await getWeeklyDailyListenCount()
+    console.log('每日听歌时长响应：', res)
+
+    if (res.success && res.data) {
+      // 类型检查确保 res.data 是数组
+      const rawData = Array.isArray(res.data) ? res.data : []
+
+      // 如果是空数组，初始化为7个默认值
+      // if (rawData.length === 0) {
+      //   for (let i = 0; i < 7; i++) {
+      //     rawData.push({ count: 0, seconds: 0 })
+      //   }
+      // }
+
+      let secondsArr = rawData.map((item: any) => item.seconds || 0)
+
+      // 确保数组长度为7
+      while (secondsArr.length < 7) {
+        secondsArr.push(0)
+      }
+      if (secondsArr.length > 7) {
+        secondsArr = secondsArr.slice(0, 7)
+      }
+
+      // 存储原始秒数和转换后的分钟数
+      dailyListenSeconds.value = secondsArr
+      dailyListenDuration.value = secondsArr.map(secondsToMinutes)
+      console.log('本周每日听歌时长（分钟）：', dailyListenDuration.value)
+    } else {
+      ElMessage.warning('暂无本周听歌时长数据')
+      dailyListenDuration.value = [0, 0, 0, 0, 0, 0, 0]
+      dailyListenSeconds.value = [0, 0, 0, 0, 0, 0, 0]
+    }
+  } catch (error) {
+    console.error('加载本周听歌时长失败:', error)
+    ElMessage.error('加载听歌时长数据失败')
+    dailyListenDuration.value = [0, 0, 0, 0, 0, 0, 0]
+    dailyListenSeconds.value = [0, 0, 0, 0, 0, 0, 0]
+  } finally {
+    listenCountLoading.value = false
+  }
+}
+// 修改onMounted：新增加载标签占比
+onMounted(async () => {
+  await Promise.all([
+    loadUserInfo(),
+    loadLikedSongs(),
+    loadCollectPlaylists(),
+    loadCreatePlaylists(),
+    loadWeeklyListenCount(),
+    loadWeeklyTagRatio(),
+    loadCollectAlbums(), // 新增：加载收藏专辑
+  ])
+})
+// 父组件新增：处理编辑成功后的刷新
+const handleUpdateSuccess = async () => {
+  try {
+    await loadCreatePlaylists()
+  } catch (error) {
+    console.error('刷新歌单列表失败:', error)
+    ElMessage.error('刷新歌单列表失败，请手动刷新页面')
+  }
+}
+const loadCollectPlaylists = async () => {
+  try {
+    collectPlaylistLoading.value = true
+    const res: CollectPlaylistResp = await getCollectPlaylists(collectPagination)
+    console.log('加载收藏的歌单完整响应：', res)
+
+    if (res.success && res.data) {
+      if (res.data.records && res.data.records.length > 0) {
+        const records = res.data.records
+        collectPlaylists.value = Array.isArray(records[0])
+          ? (records[0] as PlaylistVO[])
+          : (records as PlaylistVO[])
+        console.log('处理后的收藏歌单数据：', collectPlaylists.value)
+      } else {
+        collectPlaylists.value = []
+      }
+    } else {
+      ElMessage.error(res.errorMsg || '获取收藏的歌单失败')
+      collectPlaylists.value = []
+    }
+  } catch (error) {
+    console.error('加载收藏的歌单失败:', error)
+    ElMessage.error('加载收藏的歌单失败，请稍后重试')
+    collectPlaylists.value = []
+  } finally {
+    collectPlaylistLoading.value = false
+  }
+}
+
+const loadCreatePlaylists = async () => {
+  try {
+    createPlaylistLoading.value = true
+    const res: CreatePlaylistResp = await getCreatePlaylists(createPagination)
+    console.log('加载创建的歌单：', res)
+    if (res.success) {
+      const pageData = res.data || { records: [], total: 0 }
+      const rawRecords = pageData.records || []
+      createPlaylists.value = Array.isArray(rawRecords[0])
+        ? (rawRecords[0] as PlaylistVO[])
+        : (rawRecords as PlaylistVO[])
+      console.log('createPlaylists:', createPlaylists.value)
+    } else {
+      ElMessage.error(res.errorMsg || '获取创建的歌单失败')
+      createPlaylists.value = []
+    }
+  } catch (error) {
+    console.error('加载创建的歌单失败:', error)
+    ElMessage.error('加载创建的歌单失败，请稍后重试')
+    createPlaylists.value = []
+  } finally {
+    createPlaylistLoading.value = false
+  }
+}
+
+const loadLikedSongs = async () => {
+  loading.value = true
+  try {
+    const res = await getMyLikeSongs({
+      pageNum: pagination.pageNum,
+      pageSize: pagination.pageSize,
+    })
+    console.log('API原始返回:', res)
+
+    if (res.success) {
+      const rawRecords = res.data?.records || []
+      likedSongs.value = Array.isArray(rawRecords[0])
+        ? (rawRecords[0] as MusicVO[])
+        : (rawRecords as MusicVO[])
+      console.log('最终传递给子组件的数组:', likedSongs.value)
+    } else {
+      ElMessage.error(res.errorMsg || '获取喜欢的歌曲失败')
+      likedSongs.value = []
+    }
+  } catch (error) {
+    console.error('加载喜欢的歌曲失败:', error)
+    likedSongs.value = []
+    ElMessage.error('加载失败，请稍后重试')
+  } finally {
+    loading.value = false
+  }
+}
+const handleCollectChange = async (playlistId: string | number) => {
+  const id = Number(playlistId) // 确保转换为数字
+  try {
+    // 重新加载收藏歌单列表
+    await loadCollectPlaylists()
+  } catch (error) {
+    console.error('处理收藏变更失败:', error)
+  }
+}
+
+// 新增：处理删除变更
+const handleDeleteChange = async (playlistId: string | number) => {
+  const id = Number(playlistId)
+  try {
+    // 重新加载创建歌单列表
+    await loadCreatePlaylists()
+  } catch (error) {
+    console.error('处理删除变更失败:', error)
+  }
+}
+const loadUserInfo = async () => {
+  try {
     const res = await getUserInfo()
     console.log(res)
-    // res直接是data部分（因为returnFullResponse=false）
     userInfo.value = {
       ...res.data,
-      // 接口字段 → 页面字段映射
-      username: res.data.username, // 接口username → 页面name
-      introduction: res.data.introduction, // 接口introduction → 页面signature
+      username: res.data.username,
+      introduction: res.data.introduction,
       followCount: res.data.followCount || 0,
       fansCount: res.data.fansCount || 0,
-      likedCount: res.data.likedCount || 0,
+      likeCount: res.data.likeCount || 0,
+      onlineStatus: res.data.onlineStatus || 0,
+      userRole: res.data.userRole || '普通用户',
     }
     console.log(userInfo.value.lastCheckinTime)
   } catch (error) {
     console.error('加载用户信息失败:', error)
-    // 错误提示已在request拦截器中处理，无需重复提示
   }
-})
+}
 
-// 处理子组件传递的「修改个人信息」事件
+const openCreateDialog = () => {
+  isCreateDialogOpen.value = true
+}
+const secondsToMinutes = (seconds: number) => {
+  return Number((seconds / 60).toFixed(1))
+}
+
+/**
+ * 将秒数转换为友好的文本格式（如：1小时20分 / 30分 / 0分）
+ * @param seconds 秒数
+ * @returns 格式化的时长文本
+ */
+const formatDurationText = (seconds: number) => {
+  if (seconds === 0) return '0分钟'
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+
+  if (hours > 0) {
+    return `${hours}小时${minutes}分`
+  } else {
+    return `${minutes}分钟`
+  }
+}
+
+// 修复核心：处理创建成功事件（调用真实API）
+// 个人中心页面的handleCreateSuccess函数
+const handleCreateSuccess = async (formData: FormData) => {
+  try {
+    isCreatingPlaylist.value = true
+    console.log('传递给API的FormData：', formData)
+
+    // 1. 调用创建歌单API（直接传FormData）
+    const res = await createPlaylistApi(formData)
+    console.log('创建歌单API返回:', res)
+
+    // 2. 验证API返回（根据实际响应结构调整）
+    if (res) {
+      // 3. 重新加载创建歌单列表
+      await loadCreatePlaylists()
+    } else {
+      ElMessage.error('创建歌单失败：返回数据异常')
+    }
+  } catch (error) {
+    console.error('创建歌单失败:', error)
+    ElMessage.error('创建歌单失败，请稍后重试')
+  } finally {
+    isCreatingPlaylist.value = false
+    isCreateDialogOpen.value = false
+  }
+}
+
+// 原有其他函数不变...
 const handleUpdateUserInfo = async (editForm: EditForm) => {
   try {
-    // 映射前端表单到接口参数
     const params: UpdateUserInfoParams = {
       username: editForm.name,
       introduction: editForm.signature,
-      // 前端gender（男/女/保密）→ 接口integer（1/2/3）
       gender: editForm.gender,
+      phone: editForm.phone,
     }
 
-    // 调用修改接口
     const res = await updateUserInfo(params)
     if (res.success) {
       ElMessage.success('个人信息修改成功')
-      console.log(res)
-      // 更新本地userInfo
       userInfo.value = {
         ...userInfo.value,
         username: editForm.name,
         introduction: editForm.signature,
         gender: editForm.gender,
+        phone: editForm.phone,
       }
     }
   } catch (error) {
     console.error('修改个人信息失败:', error)
-    // 错误提示已在request拦截器中处理
   }
 }
 
-// 处理头像上传成功后的回调
-const handleUploadAvatar = async (avatarUrl: string) => {
-  userInfo.value.avatar = avatarUrl
-  ElMessage.success('头像修改成功')
-}
-
-// 处理背景图上传成功后的回调
-const handleUploadBg = async (bgUrl: string) => {
-  userInfo.value.bgImg = bgUrl
-  ElMessage.success('背景图修改成功')
-}
-
-// 原有工具方法（不变）
-const handleScroll = () => {}
-const handleSearchInput = () => {}
-const handleBlur = () => {}
-const handleSearch = () => {}
-const clearSearch = () => {}
-const selectSearchHistory = (history: string) => {}
-const removeSearchHistory = (index: number) => {}
-const selectAlbumSuggestion = (album: any) => {}
-const showNotification = (text: string) => {}
-const goToAlbumDetail = (id: number) => {}
-const playAlbum = (id: number) => {}
-const toggleCollection = (id: number) => {}
-const shareAlbum = (id: number) => {}
-const exploreAlbums = () => {}
-const beforeUpload = (file: File) => {
-  const isImage = file.type === 'image/jpeg' || file.type === 'image/png'
-  if (!isImage) {
-    ElMessage.error('仅支持JPG、PNG格式的图片')
-    return false
-  }
-  const isLt2M = file.size / 1024 / 1024 < 2
-  if (!isLt2M) {
-    ElMessage.error('图片大小不能超过2MB')
-    return false
-  }
-  return true
-}
-const handleUpload = async (options: any) => {
-  const file = options.file
-  isUploading.value = true
+const handleUploadAvatar = async (file: File) => {
   try {
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    reader.onload = () => {
-      newPlaylistCover.value = reader.result as string
-      isUploading.value = false
-      ElMessage.success('封面上传成功')
+    const params: UpdateUserInfoParams = {
+      avatarFile: file,
+    }
+    const res = await updateUserInfo(params)
+    if (res.success) {
+      if ((res.data as UserInfoVO).avatar) {
+        userInfo.value.avatar = (res.data as UserInfoVO).avatar
+      } else {
+        userInfo.value.avatar = URL.createObjectURL(file)
+      }
+      ElMessage.success('头像更新成功')
     }
   } catch (error) {
-    isUploading.value = false
-    ElMessage.error('封面上传失败，请重试')
+    console.error('头像更新失败:', error)
+    ElMessage.error('头像更新失败，请重试')
   }
 }
-const createNewPlaylist = () => {
-  const newPlaylist = {
-    id: Date.now(),
-    name: newPlaylistName.value.trim(),
-    cover:
-      newPlaylistCover.value ||
-      `https://picsum.photos/200/200?random=${Math.floor(Math.random() * 100)}`,
-    songCount: 0,
+
+const handleUploadBg = async (file: File) => {
+  try {
+    const params: UpdateUserInfoParams = {
+      backgroundImageFile: file,
+    }
+    const res = await updateUserInfo(params)
+    console.log(res)
+    if (res.success) {
+      if ((res.data as UserInfoVO).backgroundImage) {
+        userInfo.value.backgroundImage = (res.data as UserInfoVO).backgroundImage
+      } else {
+        userInfo.value.backgroundImage = URL.createObjectURL(file)
+      }
+      ElMessage.success('背景图更新成功')
+    }
+  } catch (error) {
+    console.error('背景图更新失败:', error)
+    ElMessage.error('背景图更新失败，请重试')
   }
-  createdPlaylists.value.unshift(newPlaylist)
-  resetAndClose()
-  ElMessage.success('歌单创建成功')
 }
-const resetAndClose = () => {
-  newPlaylistName.value = ''
-  newPlaylistDesc.value = ''
-  newPlaylistCover.value = ''
-  playlistPrivacy.value = 'public'
-  isUploading.value = false
-  isCreateDialogOpen.value = false
+
+const goToAlbumDetail = (id: number | string) => {
+  console.log(`跳转到专辑详情: ${id}`)
+  router.push({ path: `/album/${id}` })
+}
+
+const playAlbum = (id: number | string) => {
+  console.log(`播放专辑: ${id}`)
+  ElMessage.success('开始播放专辑')
+}
+
+// ========== 核心修改：完善取消收藏专辑逻辑 ==========
+const toggleCollection = async (id: number | string) => {
+  try {
+    // 1. 找到要取消收藏的专辑（用于乐观更新和提示）
+    const albumIndex = albums.value.findIndex((item) => item.id === id)
+    if (albumIndex === -1) {
+      ElMessage.warning('未找到该专辑')
+      return
+    }
+
+    const targetAlbum = albums.value[albumIndex]
+
+    // 2. 乐观更新：先从页面移除该专辑（提升用户体验）
+    albums.value.splice(albumIndex, 1)
+    // 同步更新筛选后的专辑列表
+    if (filteredAlbums.value.length > 0) {
+      const filterIndex = filteredAlbums.value.findIndex((item) => item.id === id)
+      if (filterIndex > -1) {
+        filteredAlbums.value.splice(filterIndex, 1)
+      }
+    }
+
+    // 3. 调用取消收藏专辑接口（targetType=2表示专辑）
+    const res = await collectAlbum(id, 2)
+    console.log(res)
+    // 4. 接口返回失败：恢复数据并提示
+    if (!res.success) {
+      ElMessage.error(res.errorMsg || '取消收藏失败')
+      // 恢复移除的专辑
+      if (targetAlbum) {
+        albums.value.splice(albumIndex, 0, targetAlbum)
+        // 恢复筛选列表
+        // 示例：假设你想把 targetAlbum 插入回 filteredAlbums 的原始位置
+        const originalIndex = albums.value.findIndex((album) => album.id === targetAlbum.id)
+        if (originalIndex !== -1) {
+          filteredAlbums.value.splice(originalIndex, 0, targetAlbum)
+        }
+      }
+
+      return
+    }
+
+    // 5. 接口返回成功：更新总数 + 显示提示
+    totalAlbums.value = Math.max(0, totalAlbums.value - 1)
+
+    ElMessage.success(res.data?.errorMsg || `已取消收藏《${targetAlbum?.name}》`)
+  } catch (error) {
+    // 6. 网络异常/其他错误：提示并重新加载数据
+    console.error('取消收藏专辑失败:', error)
+    ElMessage.error('取消收藏失败，请稍后重试')
+
+    // 重新加载最新的专辑数据（确保数据一致性）
+    await loadCollectAlbums()
+  }
+}
+
+const shareAlbum = (id: number | string) => {
+  console.log(`分享专辑: ${id}`)
+  ElMessage.success('已分享专辑')
+}
+
+const exploreAlbums = () => {
+  console.log('发现专辑')
+  router.push('/discovery')
 }
 </script>
+
+<style scoped>
+/* 原有样式不变 */
+.error-input :deep(.el-input__inner) {
+  border-color: #f56565 !important;
+}
+
+.error-input :deep(.el-input__inner:focus) {
+  border-color: #f56565 !important;
+  box-shadow: 0 0 0 1px rgba(245, 101, 101, 0.2) !important;
+}
+</style>
