@@ -33,7 +33,7 @@
       <div class="panel tags-panel">
         <div class="panel-header">
           <h2>歌单分类</h2>
-          <router-link to="{path:'/playlist',id:[1,2,3,4,5,6,7,8,9,10]}" class="more-link"
+          <router-link to="{path:'/playlist'" class="more-link"
             >全部</router-link
           >
         </div>
@@ -73,13 +73,12 @@
 </template>
 
 <script lang="ts" setup>
-import { getRecommendMusic } from '@/api/home/getRecommendMusic'
+import { getRecommendMusic } from '@/api/home'
 import MusicCarousel from '@/components/MusicCarousel.vue'
 import MusicListItem from '@/components/MusicListItem.vue'
 import TagBar from '@/components/TagBar.vue'
-// import { onMounted,ref } from 'vue'
-import { getAlbum } from '@/api/album/getAlbum'
-import { getAllTags } from '@/api/playlist/AllTag'
+import { getAlbum } from '@/api/album'
+import { getAllTags } from '@/api/playlist'
 
 defineOptions({
   name: 'HomeIndex',

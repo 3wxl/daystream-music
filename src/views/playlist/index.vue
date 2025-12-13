@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getAllTags } from '@/api/playlist/AllTag'
+import { getAllTags } from '@/api/playlist'
 import MultiBar from '@/components/MultiBar.vue'
 import { useLoadMore } from '@/composables/loadMore'
 import { transformFilterGroups } from '@/utils/transformFilterGroups'
@@ -46,7 +46,7 @@ const filterGroups = ref([])
 // 提供给 useLoadMore 或其他子组件使用
 provide('globalFilterValue', filterValue)
 
-import { getlistByTags } from '@/api/playlist/ByTags'
+import { getlistByTags } from '@/api/playlist'
 
 const { loading, noMore, listData, loadData } = useLoadMore(getlistByTags)
 

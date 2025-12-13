@@ -24,26 +24,11 @@
 </template>
 
 <script lang="ts" setup>
-import { getAlbum } from '@/api/album/getAlbum'
+import { getAlbum } from '@/api/album'
 import { useLoadMore } from '@/composables/loadMore'
 import { onMounted, type Ref } from 'vue'
 
-// const ListData = ref(
-//   Array.from({ length: 50 }, (_, i) => {
-//     const albumId = `album-${i + 1}`
 
-//     return {
-//       name: albumId,
-//       type: 'album',
-//       to: { name: 'list-id', params: { id: albumId } },
-//       data: {
-//         imgUrl: `https://picsum.photos/seed/${albumId}/400/400`,
-//         title: `专辑封面 ${i + 1}`,
-//         albumTitle: `测试专辑 ${i + 1}`,
-//       },
-//     }
-//   }),
-// )
 
 interface AlbumItem {
   id: string | number

@@ -61,6 +61,26 @@
       <el-form-item label="歌单描述" prop="description">
         <el-input placeholder="请输入歌单描述" class="dark-input" />
       </el-form-item>
+      <el-form-item label="歌单状态" prop="isPublic">
+        <el-radio-group v-model="radio">
+          <el-radio value="1" size="large">公开</el-radio>
+          <el-radio value="0" size="large">私密</el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item label="歌单标签" prop="tagsIds">
+        <el-checkbox
+          v-model="checkAll"
+          :indeterminate="isIndeterminate"
+          @change="handleCheckAllChange"
+        >
+          全选
+        </el-checkbox>
+        <el-checkbox-group v-model="Alltags" @change="handleCheckedCitiesChange">
+          <el-checkbox v-for="tag in tagsData" :key="tag.id" :label="tag.tagName" :value="tag.tagName">
+            {{ tag.tagName }}
+          </el-checkbox>
+        </el-checkbox-group>
+      </el-form-item>
     </el-form>
     <template #footer>
       <span class="dialog-footer">
@@ -72,10 +92,16 @@
 </template>
 
 <script lang="ts" setup>
+import { getAllTags } from '@/api/playlist'
 import { Plus } from '@element-plus/icons-vue'
-import type { UploadProps } from 'element-plus'
-const imageUrl = ref('')
+import type { CheckboxValueType, UploadProps } from 'element-plus'
 
+const imageUrl = ref('')
+const radio = ref(1)
+const tagsData = ref([])
+const Alltags = ref([])
+const checkAll = ref(false)
+const isIndeterminate = ref(true)
 
 const handleAvatarChange: UploadProps['onChange'] = (uploadFile) => {
   imageUrl.value = URL.createObjectURL(uploadFile.raw!)
@@ -92,7 +118,15 @@ const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
   return true
 }
 
-
+const handleCheckAllChange = (val: CheckboxValueType) => {
+  Alltags.value = val ? tagsData.value.map(item => item.tagName) : []
+  isIndeterminate.value = false
+}
+const handleCheckedCitiesChange = (value: CheckboxValueType[]) => {
+  const checkedCount = value.length
+  checkAll.value = checkedCount === tagsData.value.length
+  isIndeterminate.value = checkedCount > 0 && checkedCount < tagsData.value.length
+}
 
 const showCreatePlaylistDialog = ref(false)
 
@@ -103,6 +137,14 @@ const playlists = ref([
     cover: 'https://picsum.photos/302',
   },
 ])
+
+onMounted(() => {
+  getAllTags().then((res) => {
+    const flatList = Object.values(res.data).flat()
+    console.log(flatList)
+    tagsData.value = [...flatList]
+  })
+})
 </script>
 
 <style scoped>
