@@ -51,7 +51,7 @@
 </template>
 
 <script lang="ts" setup>
-import { setNewpassword } from '@/api/auth/Forgot'
+import { setNewpassword } from '@/api/auth'
 import { countdown, handleGetCode } from '@/composables/useCountDown'
 import type { ForgotForm } from '@/types/Auth'
 import { useAuthRules } from '@/utils/rules/auth'

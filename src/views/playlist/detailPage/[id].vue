@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getPlayListDetail } from '@/api/playlist/getPlayListDetail'
+import { getPlayListDetail } from '@/api/playlist'
 import AlbumView from '@/components/AlbumView.vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'

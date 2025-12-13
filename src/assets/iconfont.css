@@ -1,10 +1,17 @@
 /* 在线链接服务仅供平台体验和调试使用，平台不承诺服务的稳定性，企业客户需下载字体包自行发布使用并做好备份。 */
 @font-face {
+<<<<<<< HEAD
   font-family: 'iconfont'; /* Project id 5061369 */
   src:
     url('//at.alicdn.com/t/c/font_5061369_rvym1xw2ts.woff2?t=1765279500739') format('woff2'),
     url('//at.alicdn.com/t/c/font_5061369_rvym1xw2ts.woff?t=1765279500739') format('woff'),
     url('//at.alicdn.com/t/c/font_5061369_rvym1xw2ts.ttf?t=1765279500739') format('truetype');
+=======
+  font-family: "iconfont"; /* Project id 5061369 */
+  src: url('//at.alicdn.com/t/c/font_5061369_bjriqtrm3dd.woff2?t=1765279013342') format('woff2'),
+       url('//at.alicdn.com/t/c/font_5061369_bjriqtrm3dd.woff?t=1765279013342') format('woff'),
+       url('//at.alicdn.com/t/c/font_5061369_bjriqtrm3dd.ttf?t=1765279013342') format('truetype');
+>>>>>>> 16e1146f2a04d2c4e3e17c137f4479c570f38547
 }
 
 .iconfont {
@@ -13,6 +20,14 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-a-fabufeihangzhifeiji:before {
+  content: "\e64d";
+}
+
+.icon-jinggao-L:before {
+  content: "\e64a";
 }
 
 .icon-icon1:before {

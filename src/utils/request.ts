@@ -55,22 +55,18 @@ const service = axios.create({
   timeout: 20000,
   transformResponse: [
     function (data) {
-      try {
-        // 使用配置好的 JSONBigString 解析，大数字会被转为字符串
-        return JSONBigString.parse(data)
-      } catch (err) {
-        console.error('JSON解析失败:', err)
+      if (typeof data === 'string') {
         try {
-          // 尝试普通JSON解析
-          return JSON.parse(data)
-        } catch (e) {
+          // 如果转换成功则返回转换的数据结果
+          return JSONBig.parse(data)
+        } catch (err) {
+          // 如果转换失败，则包装为统一数据格式并返回
           return {
-            data: data,
-            success: false,
-            errorMsg: 'JSON解析失败',
+            data,
           }
         }
       }
+      return data
     },
   ],
 })

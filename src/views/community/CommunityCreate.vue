@@ -33,15 +33,15 @@
           <p class="text-[#bdbdbd] mt-[2px] text-[12px]">{{userInfo.introduction}}</p>
           <div class="flex mt-6 text-[#e5e7eb] mb-2">
             <span>
-              <span class="mr-[2px]">111</span>
+              <span class="mr-[2px]">{{userInfo.fansCount}}</span>
               粉丝
             </span>
             <span class="mx-14">
-              <span class="mr-[2px]">111</span>
+              <span class="mr-[2px]">{{ userInfo.likeCount }}</span>
               点赞
             </span>
             <span>
-              <span class="mr-[2px]">111</span>
+              <span class="mr-[2px]">{{userInfo.followCount}}</span>
               关注
             </span>
           </div>
@@ -102,15 +102,15 @@
   import Editor from '@tinymce/tinymce-vue';
   import { useRouter } from 'vue-router'
   import { ref } from 'vue'
-  import {updateImage} from '@/api/community/updateImage'
-  import {DeleteImage} from '@/api/community/DeleteImage'
-  import {ReleaseDynamic} from '@/api/community/ReleaseDynamic'   // 发布动态
+  import {updateImage,DeleteImage} from '@/api/community/ImageOperate'
+  import {ReleaseDynamic} from '@/api/community/Dynamic'   // 发布动态
   import { ElMessage } from 'element-plus'
+  import { getUserInfo } from '@/api/personalCenter/index'
   let router = useRouter()
   // 双向绑定
   const editorContent = ref('请输入内容（支持图片上传）')
   let title = ref('')
-  let userInfo = JSON.parse(localStorage.getItem('user')).userInfo
+  let userInfo = ref({                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     })
   const tinyRef = ref(null)
   const uploadedImages = reactive([])      // 上传的图片列表
   let usedImages = reactive([])       // 使用的图片列表
@@ -333,7 +333,17 @@
         this.value = this.value.substring(0, 100);
       }
     })
+    getUser()
   })
+  async function getUser(){
+    let userInfoRes = await getUserInfo()
+    console.log(userInfoRes)
+    if(userInfoRes.success){
+      userInfo.value = userInfoRes.data
+    }else{
+      console.log('获取用户信息失败')
+    }
+  }
   // 草稿箱
   let drafts = reactive(JSON.parse(localStorage.getItem('drafts')) ? JSON.parse(localStorage.getItem('drafts')) : [])
   function saveDraft(){

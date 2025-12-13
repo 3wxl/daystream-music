@@ -1,0 +1,20 @@
+export let reportRule = {
+  targetId:[
+    {required:true,message:'请选择举报对象',trigger:'blur'},
+    {type:'string',message:'请选择举报对象',trigger:'blur'}
+  ],
+  targetType:[
+    {required:true,message:'请选择举报对象类型',trigger:'blur'},
+    {type:'number',message:'请选择举报对象类型',trigger:'blur'},
+    {enum:[1,2,3],message:'请选择正确的举报对象类型',trigger:'blur'}
+  ],
+  reason:[
+    {required:true,message:'请选择举报类型',trigger:'blur'},
+    {type:'number',message:'请选择举报类型',trigger:'blur'},
+    {enum:[1,2,3,4,5],message:'请选择举报类型',trigger:'blur'}
+  ],
+  reportContent:[
+    {required:true,message:'请填写举报内容',trigger:'blur'},
+    {type:'string',message:'请填写举报内容',trigger:'blur'}
+  ]
+}

@@ -46,6 +46,18 @@
                 >New</span
               >
             </router-link>
+            <router-link
+              to="/musician/Works"
+              class="text-white text-base hover:text-gray-200 transition-colors duration-300"
+            >
+              作品管理
+            </router-link>
+            <router-link
+              to="/musician/Upload"
+              class="text-white text-base hover:text-gray-200 transition-colors duration-300"
+            >
+              发布作品
+            </router-link>
           </div>
 
           <div class="flex items-center gap-5">
@@ -134,8 +146,10 @@ onUnmounted(() => {
     width: 60px !important;
   }
 
-  .space-x-10 {
-    space-x: 4px !important;
+  .space-x-10 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: 0;
+    margin-right: calc(4px * var(--tw-space-x-reverse));
+    margin-left: calc(4px * (1 - var(--tw-space-x-reverse)));
   }
 
   main {

@@ -1,9 +1,12 @@
 // 防抖和节流函数
-
-//防抖
-function debounce(fn, delay:number, immediate = false) {
-  let timer = null;
-  return function (...args:[any]) {
+  // 防抖
+function debounce<T extends (...args: any[]) => any>(
+  fn: T,
+  delay: number,
+  immediate = false
+): (...args: Parameters<T>) => void {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
     if (timer) clearTimeout(timer);
     if (immediate && !timer) {
       fn.apply(this, args);
@@ -16,11 +19,17 @@ function debounce(fn, delay:number, immediate = false) {
     }, delay);
   };
 }
-// 节流
-function throttle(fn, interval:number, leading = true, trailing = true) {
+
+  // 节流
+function throttle<T extends (...args: any[]) => any>(
+  fn: T,
+  interval: number,
+  leading = true,
+  trailing = true
+): (...args: Parameters<T>) => void {
   let lastTime = 0;
-  let timer = null;
-  return function (...args) {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
     const now = Date.now();
     if (!leading && lastTime === 0) {
       lastTime = now;
@@ -33,8 +42,7 @@ function throttle(fn, interval:number, leading = true, trailing = true) {
       }
       fn.apply(this, args);
       lastTime = now;
-    }
-    else if (trailing && !timer) {
+    } else if (trailing && !timer) {
       timer = setTimeout(() => {
         fn.apply(this, args);
         lastTime = leading ? Date.now() : 0;

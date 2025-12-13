@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getCaptcha } from '@/api/auth/Login'
+import { getCaptcha } from '@/api/auth'
 import { useUserStore } from '@/stores/user'
 import type { LoginForm } from '@/types/Auth'
 import { useAuthRules } from '@/utils/rules/auth'

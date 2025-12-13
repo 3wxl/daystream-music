@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-col h-screen bg-gradient-to-b from-[#151a2d] via-[#101425] to-[#0b0f1b] border-r border-white/5 shadow-xl transition-all duration-300 text-gray-100"
+    class="flex flex-col h-screen bg-linear-to-b from-[#151a2d] via-[#101425] to-[#0b0f1b] border-r border-white/5 shadow-xl transition-all duration-300 text-gray-100"
     :class="isCollapse ? 'w-20' : 'w-56'"
   >
     <!-- Logo 区域 -->
@@ -74,7 +74,7 @@ const menuItems = [
   { path: '/', title: '首页', icon: House },
   { path: '/mv', title: 'MV', icon: View },
   { path: '/album', title: '专辑', icon: Tickets },
-  { path: '/aritist', title: '歌手', icon: Mic },
+  { path: '/Aritist', title: '歌手', icon: Mic },
   { path: '/playlist', title: '歌单', icon: Files },
   { path: '/MusicRanking', title: '榜单', icon: Histogram },
   { path: '/community/CommunityDisplay', title: '社区', icon: ChatLineSquare },

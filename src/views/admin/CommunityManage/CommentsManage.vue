@@ -7,7 +7,7 @@
             class="mr-5"
             type="text"
             placeholder="请输入用户名"
-            value=""
+            v-model="commentSearch"
             width="w-[300px]"
             label="用户名:"
           ></AdminInput>
@@ -21,10 +21,11 @@
             ]"
             label="类型"
           ></AdminSelect>
-          <el-button type="primary">
-            <IconFontSymbol name="sousuo" class="mr-1"></IconFontSymbol>
-            搜索
-          </el-button>
+          <AdminButton
+            text="搜索"
+            class="ml-4 text-[15px]!"
+            @click="handleSearch"
+          />
         </div>
       </div>
     </div>
@@ -115,8 +116,8 @@
 </template>
 
 <script setup lang="ts">
-import AdminInput from '@/components/admin/AdminInput.vue'
-import AdminSelect from '@/components/admin/AdminSelect.vue'
+import AdminInput from '@/components/Admin/AdminInput.vue'
+import AdminSelect from '@/components/Admin/AdminSelect.vue'
 import IconFontSymbol from '@/components/IconFontSymbol.vue'
 
 let typeVal = ref('1')
@@ -147,6 +148,11 @@ let commentsListDynamic = reactive([
     date: '2024-05-01 12:30:45',
   },
 ])
+let commentSearch = ref('')
+
+function handleSearch() {
+  console.log(commentSearch.value)
+}
 </script>
 
 <style scoped>
