@@ -76,7 +76,9 @@
       createTime: "2021-01-01 12:00:00"
     }
   ])
+
   // 方法
+
   function search(searchData:{userSearchKeyword:string,userType:string}){     // 接收暴漏的数据，并搜索
     console.log(searchData)
   }
