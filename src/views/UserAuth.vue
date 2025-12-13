@@ -48,24 +48,32 @@
 </template>
 
 <script lang="ts" setup>
+import { getQQLoginUrl } from '@/api/auth'
 import qqIcon from '@/assets/qq.png'
 import ForgotForm from '@/components/Auth/ForgotForm.vue'
 import LoginForm from '@/components/Auth/LoginForm.vue'
 import RegisterForm from '@/components/Auth/RegisterForm.vue'
 import { ref } from 'vue'
 
+
+
 const currentView = ref<'login' | 'register' | 'forgot'>('login')
 
-const handleQQLogin = () => {
-  window.location.href =
-    'https://graph.qq.com/oauth2.0/show?which=Login&display=pc&client_id=102818237&response_type=token&scope=all&redirect_uri=https%3A%2F%2Fwww.histweilai.top%2FUserAuth'
+
+const handleQQLogin = async () => {
+  try {
+    const res = await getQQLoginUrl()
+    window.location.href = res.data
+  } catch (e) {
+    ElMessage.error('获取QQ登录授权url失败')
+  }
 }
 </script>
 
 <style lang="scss" scoped>
 .auth-wrapper {
   min-height: 100vh;
-  background-color: #050505; /* Deep static black */
+  background-color: #050505;
   color: white;
   display: flex;
   align-items: center;
@@ -80,7 +88,7 @@ const handleQQLogin = () => {
 .auth-container {
   width: 100%;
   max-width: 440px;
-  background: rgba(20, 20, 25, 0.9); /* Higher opacity for static look */
+  background: rgba(20, 20, 25, 0.9);
   border-radius: 1.5rem;
   padding: 3rem 2.5rem;
   border: 1px solid rgba(255, 255, 255, 0.08);

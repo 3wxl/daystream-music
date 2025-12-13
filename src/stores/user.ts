@@ -1,5 +1,5 @@
-import { LoginByemail } from '@/api/auth/Login'
-import { getUserInfo } from '@/api/home/getUserInfo'
+import { LoginByemail } from '@/api/auth'
+import { getUserInfo } from '@/api/home'
 import { getToken, removeToken, setToken } from '@/utils/request'
 import { defineStore } from 'pinia'
 import { useChatStore } from './chat'

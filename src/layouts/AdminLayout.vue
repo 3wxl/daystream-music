@@ -2,14 +2,28 @@
   <!-- 作用：后台的layout -->
   <el-container class="admin-container relative">
     <el-aside width="220px" class="fixed top-0">
-      <el-scrollbar height="100vh" class="bg-linear-to-tr from-[#2b4c60] to-[#645078] shadow-xl/20 shadow-[#A070EE]">
-      <!-- bg-linear-to-tr from-[#58768a] to-[#544464] shadow-xl/20 shadow-[#A070EE] -->
-      <!-- bg-linear-to-tr from-[#517185] to-[#8b62b6] shadow-xl/20 shadow-[#A070EE] -->
+      <el-scrollbar
+        height="100vh"
+        class="bg-linear-to-tr from-[#2b4c60] to-[#645078] shadow-xl/20 shadow-[#A070EE]"
+      >
+        <!-- bg-linear-to-tr from-[#58768a] to-[#544464] shadow-xl/20 shadow-[#A070EE] -->
+        <!-- bg-linear-to-tr from-[#517185] to-[#8b62b6] shadow-xl/20 shadow-[#A070EE] -->
         <div class="w-full my-4">
-          <img class="w-full h-[70px] object-contain" src="@/assets/logo_0.png" alt="" >
-          <p class="bg-clip-text text-center font-[700] text-[20px] bg-linear-to-r from-[#EC369F] to-[#AE4AFE] text-transparent">Daystream Music</p>
+          <img class="w-full h-[70px] object-contain" src="@/assets/logo_0.png" alt="" />
+          <p
+            class="bg-clip-text text-center font-[700] text-[20px] bg-linear-to-r from-[#EC369F] to-[#AE4AFE] text-transparent"
+          >
+            Daystream Music
+          </p>
         </div>
-        <el-menu mode="vertical" class="admin-menu" default-active="1" background-color="transparent" text-color="rgb(200,200,200)" active-text-color="white">
+        <el-menu
+          mode="vertical"
+          class="admin-menu"
+          default-active="1"
+          background-color="transparent"
+          text-color="rgb(200,200,200)"
+          active-text-color="white"
+        >
           <el-menu-item index="1" @click="router.push('/admin/dataStatistics')">
             <IconFontSymbol name="shouye" class="mr-1"></IconFontSymbol>
             <span>首页</span>
@@ -67,7 +81,10 @@
               <IconFontSymbol name="resou" class="mr-1"></IconFontSymbol>
               <span>热搜列表</span>
             </el-menu-item> -->
-            <el-menu-item index="5-2" @click="router.push('/admin/operationManage/recommendManage')">
+            <el-menu-item
+              index="5-2"
+              @click="router.push('/admin/operationManage/recommendManage')"
+            >
               <IconFontSymbol name="shouyetuijianwei" class="mr-1"></IconFontSymbol>
               <span>首页推荐位</span>
             </el-menu-item>
@@ -115,15 +132,22 @@
             <el-col :span="4" :offset="6">
               <el-row class="h-full w-full text-base/[60px]">
                 <el-col :span="8">
-                  <span class="cursor-pointer hover:text-[#529FFD] duration-[0.3s] max-[1347px]:text-[13px]">
-                    <IconFontSymbol name="a-shezhi-shucaidanshezhi-copy" class="mr-1"></IconFontSymbol>
+                  <span
+                    class="cursor-pointer hover:text-[#529FFD] duration-[0.3s] max-[1347px]:text-[13px]"
+                  >
+                    <IconFontSymbol
+                      name="a-shezhi-shucaidanshezhi-copy"
+                      class="mr-1"
+                    ></IconFontSymbol>
                     <span>设置</span>
                   </span>
                 </el-col>
                 <el-col :span="16">
                   <div class="h-full flex gap-[10px] text-[15px]/[60px] cursor-pointer">
-                    <el-avatar :src="user.avatar" :size="36" class="my-[12px]"/>
-                    <span class="inline-block h-[60px] max-w-[60px] text-ellipsis line-clamp-1">{{ user.username }}</span>
+                    <el-avatar :src="user.avatar" :size="36" class="my-[12px]" />
+                    <span class="inline-block h-[60px] max-w-[60px] text-ellipsis line-clamp-1">{{
+                      user.username
+                    }}</span>
                   </div>
                 </el-col>
               </el-row>
@@ -142,63 +166,63 @@
 </template>
 
 <script setup>
-  import {useRouter } from 'vue-router'
-  import {getUserInfo} from '@/api/home/getUserInfo'
+import { getUserInfo } from '@/api/home'
+import { useRouter } from 'vue-router'
 
-  // 数据
-  let router = useRouter()
-  let user = ref({})
+// 数据
+let router = useRouter()
+let user = ref({})
 
-  function logout() {
-    // 退出登录时的一些处理工作，如清除用户信息等
+function logout() {
+  // 退出登录时的一些处理工作，如清除用户信息等
 
-    router.push('/')
+  router.push('/')
+}
+async function UserInfo() {
+  let userInfo = await getUserInfo()
+  if (userInfo.success) {
+    user.value = userInfo.data
+    localStorage.setItem('user', JSON.stringify(user.value))
   }
-  async function UserInfo(){
-    let userInfo = await getUserInfo()
-    if(userInfo.success){
-      user.value = userInfo.data
-      localStorage.setItem('user',JSON.stringify(user.value))
-    }
-  }
-  UserInfo()
+}
+UserInfo()
 </script>
 
 <style scoped>
-  ::v-deep .admin-menu .el-menu-item,
-  ::v-deep .admin-menu .el-sub-menu__title {
-    border-radius: 6px;
-    margin: 0 8px;
-    height: 50px;
-  }
-  ::v-deep .admin-menu .el-menu-item.is-active {      /* 调整激活时的背景颜色 */
-    background-image: linear-gradient(to right,#6d8af2,#bf60ef);
-  }
-  ::v-deep .admin-menu{
-    --el-menu-active-font-weight: 700;
-  }
-  /* 1. 一级菜单项激活时：图标颜色 */
-  ::v-deep .admin-menu .el-menu-item.is-active .iconfont {
-    color: white;
-  }
+::v-deep .admin-menu .el-menu-item,
+::v-deep .admin-menu .el-sub-menu__title {
+  border-radius: 6px;
+  margin: 0 8px;
+  height: 50px;
+}
+::v-deep .admin-menu .el-menu-item.is-active {
+  /* 调整激活时的背景颜色 */
+  background-image: linear-gradient(to right, #6d8af2, #bf60ef);
+}
+::v-deep .admin-menu {
+  --el-menu-active-font-weight: 700;
+}
+/* 1. 一级菜单项激活时：图标颜色 */
+::v-deep .admin-menu .el-menu-item.is-active .iconfont {
+  color: white;
+}
 
-  /* 3. 子菜单项激活时：图标颜色 */
-  ::v-deep .admin-menu .el-sub-menu .el-menu .el-menu-item.is-active .iconfont {
-    color: white;
-  }
+/* 3. 子菜单项激活时：图标颜色 */
+::v-deep .admin-menu .el-sub-menu .el-menu .el-menu-item.is-active .iconfont {
+  color: white;
+}
 
-  /* 可选：未激活时的默认颜色（按需调整） */
-  ::v-deep .admin-menu .el-menu-item .iconfont,
-  ::v-deep .admin-menu .el-sub-menu__title .iconfont {
-    color: rgb(168,177,194); /* 默认灰色 */
-  }
+/* 可选：未激活时的默认颜色（按需调整） */
+::v-deep .admin-menu .el-menu-item .iconfont,
+::v-deep .admin-menu .el-sub-menu__title .iconfont {
+  color: rgb(168, 177, 194); /* 默认灰色 */
+}
 
-  .el-tooltip__trigger:focus-visible {    /** 去除 focus 样式 */
-    outline: none;
-  }
-  .el-container{
-    width: calc(100% - 220px);
-  }
+.el-tooltip__trigger:focus-visible {
+  /** 去除 focus 样式 */
+  outline: none;
+}
+.el-container {
+  width: calc(100% - 220px);
+}
 </style>
-
-
