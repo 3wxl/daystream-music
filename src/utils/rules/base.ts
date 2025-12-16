@@ -2,17 +2,17 @@ import type { FormItemRule } from 'element-plus'
 
 // 通用：必填
 export const requiredRule = (msg: string): FormItemRule[] => [
-  { required: true, message: msg, trigger: 'blur' }
+  { required: true, message: msg, trigger: 'blur' },
 ]
 
 // 通用：邮箱格式
-export const emailRule:FormItemRule[] = [
+export const emailRule: FormItemRule[] = [
   { required: true, message: '请填写对应邮箱', trigger: 'blur' },
   { type: 'email', message: '邮箱格式不正确', trigger: ['blur', 'change'] },
 ]
 
 // 通用：密码强度
-export const passwordStrengthRule:FormItemRule[] = [
+export const passwordStrengthRule: FormItemRule[] = [
   { required: true, message: '请输入密码', trigger: 'blur' },
   {
     pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[a-zA-Z\d!@#$%^&*]{8,20}$/,
@@ -22,8 +22,8 @@ export const passwordStrengthRule:FormItemRule[] = [
 ]
 
 // 通用：验证码
-export const captchaRule:FormItemRule[] = [
-  { required: true, message: '请输入验证码', trigger: 'blur' }
+export const captchaRule: FormItemRule[] = [
+  { required: true, message: '请输入验证码', trigger: 'blur' },
 ]
 
 //通用：昵称
@@ -32,6 +32,27 @@ export const nicknameRule: FormItemRule[] = [
   {
     pattern: /^[\u4e00-\u9fa5a-zA-Z0-9_]{2,16}$/,
     message: '昵称格式错误：只能包含汉字、字母、数字、下划线，长度2-16位',
+    trigger: 'blur',
+  },
+]
+
+export const phoneRule: FormItemRule[] = [
+  {
+    pattern: /^1[3-9]\d{9}$/,
+    message: '手机号格式错误：请输入11位有效手机号',
+    trigger: 'blur',
+  },
+]
+
+export const introRule: FormItemRule[] = [
+  {
+    max: 30,
+    message: '个人简介不能超过30个字',
+    trigger: ['blur', 'change'],
+  },
+  {
+    pattern: /^[\u4e00-\u9fa5a-zA-Z0-9\s，。！？；：""''()（）【】、·~@#￥%…&*+-=<>《》]{0,30}$/,
+    message: '个人简介仅支持汉字、字母、数字及常用标点符号',
     trigger: 'blur',
   },
 ]

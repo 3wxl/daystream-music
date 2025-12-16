@@ -47,7 +47,7 @@
       </div>
 
       <!-- 中间操作按钮区 -->
-      <div class="flex items-center w-[500px]">
+      <div class="flex items-center w-[500px] justify-center">
         <div class="flex items-center gap-6 opacity-0 group-hover:opacity-100 transition-opacity">
           <!-- 下载按钮 -->
           <el-tooltip content="下载作品文件" placement="top" custom-class="tooltip-small">
@@ -107,29 +107,14 @@
             </button>
           </el-tooltip>
         </div>
+      </div>
 
-        <!-- 播放量/发布时间 -->
+      <!-- 右侧操作区 -->
+      <div class="flex items-center gap-3 shrink-0 w-200px] justify-end">
         <div class="w-[200px] text-gray-500 text-xs text-center">
           <span>播放量: {{ formatPlayCount(song.playCount) }}</span>
           <span class="ml-2">|</span>
           <span>{{ song.releaseTime }}</span>
-        </div>
-      </div>
-
-      <!-- 右侧操作区 -->
-      <div class="flex items-center gap-3 shrink-0 w-[100px] justify-end">
-        <!-- 上架/下架状态 -->
-        <el-switch
-          v-model="song.isOnline"
-          active-text="上架"
-          inactive-text="下架"
-          active-color="#ec479a"
-          inactive-color="#666"
-          size="small"
-          @change="handleOnlineStatusChange(song.id, song.isOnline)"
-        />
-        <div class="text-gray-500 text-xs">
-          {{ formatTime(song.duration) }}
         </div>
       </div>
 

@@ -1,106 +1,96 @@
+// @/composables/useVipExchange.ts
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import type { Ref } from 'vue'
-
 import type {
   UserData,
-  Countdown,
   VipPackage,
-  VipPackageOption,
+  FlashSale,
   ExchangeOption,
   ExchangeRecord,
-  FlashSale,
-  Coupon,
   PurchaseResult,
   ExchangeResult,
-} from '@/types//vip/vipExchange'
+} from '@/types/vip/vipExchange'
 
 // 用户数据管理
-export function useUserData(initialData?: Partial<UserData>) {
+export function useUserData() {
   const userData: Ref<UserData> = ref({
-    waves: 12580,
-    vipLevel: '黄金VIP',
+    waves: 15000,
+    vipLevel: '1',
     vipDays: 15,
     username: '音乐爱好者',
-    ...initialData,
   })
 
+  // 更新音浪
   const updateWaves = (amount: number): void => {
-    userData.value.waves = Math.max(0, userData.value.waves + amount)
+    const newWaves = userData.value.waves + amount
+    if (newWaves < 0) {
+      ElMessage.error('音浪不足')
+      return
+    }
+    userData.value.waves = newWaves
   }
 
+  // 更新VIP天数
   const updateVipDays = (days: number): void => {
-    userData.value.vipDays = Math.max(0, userData.value.vipDays + days)
-  }
+    userData.value.vipDays += days
 
-  const updateVipLevel = (level: string): void => {
-    userData.value.vipLevel = level
+    // 根据天数更新VIP等级
+    const totalDays = userData.value.vipDays
+    if (totalDays > 365) {
+      userData.value.vipLevel = '3'
+    } else if (totalDays > 90) {
+      userData.value.vipLevel = '2'
+    } else {
+      userData.value.vipLevel = '1'
+    }
   }
 
   return {
     userData,
     updateWaves,
     updateVipDays,
-    updateVipLevel,
   }
 }
 
 // 倒计时管理
-export function useCountdown(
-  initialHours: number = 2,
-  initialMinutes: number = 30,
-  initialSeconds: number = 15,
-) {
-  const countdown: Ref<Countdown> = ref({
-    hours: initialHours.toString().padStart(2, '0'),
-    minutes: initialMinutes.toString().padStart(2, '0'),
-    seconds: initialSeconds.toString().padStart(2, '0'),
-  })
+export function useCountdown() {
+  const countdown = ref('')
+  let timer: NodeJS.Timeout | null = null
 
-  let interval: number | null = null
+  // 更新倒计时显示
+  const updateCountdown = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+    const secs = seconds % 60
+    return `${hours.toString().padStart(2, '0')}:${minutes
+      .toString()
+      .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  }
 
-  const startCountdown = (): void => {
-    interval = setInterval(() => {
-      let seconds =
-        parseInt(countdown.value.hours) * 3600 +
-        parseInt(countdown.value.minutes) * 60 +
-        parseInt(countdown.value.seconds)
+  // 启动倒计时
+  const startCountdown = (initialSeconds: number = 86400): void => {
+    let seconds = initialSeconds
 
-      if (seconds > 0) {
-        seconds--
-        const hours = Math.floor(seconds / 3600)
-        const minutes = Math.floor((seconds % 3600) / 60)
-        const secs = seconds % 60
+    const update = () => {
+      countdown.value = updateCountdown(seconds)
+      seconds--
 
-        countdown.value = {
-          hours: hours.toString().padStart(2, '0'),
-          minutes: minutes.toString().padStart(2, '0'),
-          seconds: secs.toString().padStart(2, '0'),
+      if (seconds < 0) {
+        if (timer) {
+          clearInterval(timer)
+          timer = null
         }
-      } else {
-        stopCountdown()
-        ElMessage.warning('秒杀活动已结束')
+        // 重置倒计时
+        startCountdown(86400)
       }
-    }, 1000)
-  }
-
-  const stopCountdown = (): void => {
-    if (interval) {
-      clearInterval(interval)
-      interval = null
     }
-  }
 
-  const resetCountdown = (
-    hours: number = initialHours,
-    minutes: number = initialMinutes,
-    seconds: number = initialSeconds,
-  ): void => {
-    countdown.value = {
-      hours: hours.toString().padStart(2, '0'),
-      minutes: minutes.toString().padStart(2, '0'),
-      seconds: seconds.toString().padStart(2, '0'),
-    }
-    stopCountdown()
-    startCountdown()
+    // 立即更新一次
+    update()
+
+    // 每秒更新
+    timer = setInterval(update, 1000)
   }
 
   onMounted(() => {
@@ -108,39 +98,43 @@ export function useCountdown(
   })
 
   onUnmounted(() => {
-    stopCountdown()
+    if (timer) {
+      clearInterval(timer)
+    }
   })
 
   return {
     countdown,
-    startCountdown,
-    stopCountdown,
-    resetCountdown,
   }
 }
 
 // VIP套餐管理
 export function useVipPackages(packages: VipPackage[]) {
   const selectedPackageType = ref<'month' | 'quarter' | 'year' | 'permanent'>('month')
-  const selectedPackage = ref<string>('')
-  const selectedOption = ref<Record<string, 'money' | 'waves'>>({})
+  const selectedPackage: Ref<VipPackage | null> = ref(null)
+  const selectedOption = ref<Record<string, 'waves'>>({}) // 只保留音浪选项
 
+  // 过滤套餐
   const filteredPackages = computed(() => {
     return packages.filter((pkg) => pkg.type === selectedPackageType.value)
   })
 
+  // 选择套餐
   const selectPackage = (pkg: VipPackage): void => {
-    selectedPackage.value = pkg.id
-    if (!selectedOption.value[pkg.id]) {
-      const firstOption = pkg.exchangeOptions?.[0]
-      if (firstOption) {
-        selectedOption.value[pkg.id] = firstOption.type
-      }
+    selectedPackage.value = pkg
+    // 默认选择音浪兑换选项
+    if (pkg.id) {
+      selectedOption.value[pkg.id] = 'waves'
     }
   }
 
-  const selectOption = (pkgId: string, optionType: 'money' | 'waves'): void => {
-    selectedOption.value[pkgId] = optionType
+  // 选择兑换选项（只支持音浪）
+  const selectOption = (pkgId: string, optionType: 'waves'): void => {
+    if (optionType !== 'waves') {
+      console.warn('只支持音浪兑换')
+      return
+    }
+    selectedOption.value[pkgId] = 'waves'
   }
 
   return {
@@ -156,123 +150,118 @@ export function useVipPackages(packages: VipPackage[]) {
 // 音浪兑换管理
 export function useWavesExchange(exchangeOptions: ExchangeOption[], userData: Ref<UserData>) {
   const exchangeDuration = ref<number | null>(null)
-  const requiredWaves = ref<number>(0)
-  const isExchanging = ref<boolean>(false)
+  const isExchanging = ref(false)
+  const selectedExchangeOption = ref<ExchangeOption | null>(null)
 
-  const selectedExchangeOption = computed(() => {
-    return exchangeOptions.find((opt) => opt.value === exchangeDuration.value)
+  // 计算所需音浪
+  const requiredWaves = computed(() => {
+    if (!exchangeDuration.value) return 0
+    const option = exchangeOptions.find((opt) => opt.value === exchangeDuration.value)
+    return option ? option.waves : 0
   })
 
-  const calculateExchangeWaves = (): void => {
-    const option = selectedExchangeOption.value
-    requiredWaves.value = option?.waves || 0
+  // 更新兑换时长
+  const updateExchangeDuration = (duration: number | null): void => {
+    exchangeDuration.value = duration
+    selectedExchangeOption.value = exchangeOptions.find((opt) => opt.value === duration) || null
   }
 
-  const handleExchange = (): Promise<ExchangeResult> => {
-    return new Promise((resolve, reject) => {
-      if (!exchangeDuration.value) {
-        ElMessage.warning('请选择兑换时长')
-        reject(new Error('未选择兑换时长'))
-        return
+  // 处理音浪兑换
+  const handleExchange = async (): Promise<ExchangeResult> => {
+    if (!exchangeDuration.value || !selectedExchangeOption.value) {
+      throw new Error('请选择兑换时长')
+    }
+
+    // 检查音浪是否足够
+    if (userData.value.waves < requiredWaves.value) {
+      throw new Error('音浪不足，无法兑换')
+    }
+
+    isExchanging.value = true
+
+    try {
+      // 模拟API调用
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      // 扣除音浪
+      userData.value.waves -= requiredWaves.value
+
+      // 计算增加的VIP天数
+      const daysAdded = exchangeDuration.value
+
+      return {
+        option: selectedExchangeOption.value,
+        wavesUsed: requiredWaves.value,
+        daysAdded,
       }
-
-      if (userData.value.waves < requiredWaves.value) {
-        ElMessage.error('音浪不足，请签到获取更多音浪')
-        reject(new Error('音浪不足'))
-        return
-      }
-
-      isExchanging.value = true
-
-      setTimeout(() => {
-        const option = selectedExchangeOption.value
-
-        if (!option) {
-          isExchanging.value = false
-          reject(new Error('兑换选项不存在'))
-          return
-        }
-
-        userData.value.waves -= requiredWaves.value
-        userData.value.vipDays += option.value
-
-        isExchanging.value = false
-
-        resolve({
-          option,
-          wavesUsed: requiredWaves.value,
-          daysAdded: option.value,
-        })
-      }, 1500)
-    })
+    } catch (error) {
+      console.error('兑换失败:', error)
+      throw error
+    } finally {
+      isExchanging.value = false
+    }
   }
-
-  watch(exchangeDuration, calculateExchangeWaves)
 
   return {
     exchangeDuration,
     requiredWaves,
     isExchanging,
     selectedExchangeOption,
+    updateExchangeDuration,
     handleExchange,
   }
 }
 
 // 购买管理
 export function usePurchase() {
-  const showConfirmDialog = ref<boolean>(false)
+  const showConfirmDialog = ref(false)
   const selectedVipPackage = ref<VipPackage | null>(null)
-  const selectedOptionType = ref<'waves' | 'money'>('waves')
-  const selectedOptionPrice = ref<string>('')
-  const selectedOptionWaves = ref<number>(0)
+  const selectedOptionType = ref<'waves' | null>(null)
+  const selectedOptionPrice = ref('')
+  const selectedOptionWaves = ref(0)
   const selectedCoupon = ref<number | null>(null)
-  const isProcessing = ref<boolean>(false)
+  const isProcessing = ref(false)
 
-  const openPurchaseDialog = (pkg: VipPackage, optionType: 'waves' | 'money'): void => {
+  // 打开购买对话框
+  const openPurchaseDialog = (pkg: VipPackage, optionType: 'waves'): void => {
     selectedVipPackage.value = pkg
     selectedOptionType.value = optionType
 
-    const option = pkg.exchangeOptions.find((opt) => opt.type === optionType)
-    if (option) {
-      selectedOptionPrice.value = option.price
-      selectedOptionWaves.value = option.waves || 0
+    // 设置价格
+    if (optionType === 'waves') {
+      selectedOptionPrice.value = `${pkg.price}音浪`
+      selectedOptionWaves.value = pkg.wavesPrice
     }
 
     showConfirmDialog.value = true
   }
 
-  const closePurchaseDialog = (): void => {
-    showConfirmDialog.value = false
-    selectedVipPackage.value = null
-    selectedCoupon.value = null
+  // 确认购买（音浪兑换）
+  const confirmPurchase = async (): Promise<PurchaseResult> => {
+    if (!selectedVipPackage.value || selectedOptionType.value !== 'waves') {
+      throw new Error('购买信息不完整')
+    }
+
+    isProcessing.value = true
+
+    try {
+      // 模拟API调用
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      return {
+        type: 'waves',
+        package: selectedVipPackage.value,
+        waves: selectedOptionWaves.value,
+        success: true,
+      }
+    } catch (error) {
+      console.error('购买失败:', error)
+      throw error
+    } finally {
+      isProcessing.value = false
+      showConfirmDialog.value = false
+    }
   }
-
-  //   const handlePurchase = (): Promise<PurchaseResult> => {
-  //     return new Promise((resolve) => {
-  //       isProcessing.value = true
-
-  //       setTimeout(() => {
-  //         isProcessing.value = false
-  //         closePurchaseDialog()
-
-  //         if (selectedOptionType.value === 'waves') {
-  //           resolve({
-  //             type: 'waves',
-  //             package: selectedVipPackage.value,
-  //             waves: selectedOptionWaves.value,
-  //             success: true,
-  //           })
-  //         } else {
-  //           resolve({
-  //             type: 'money',
-  //             package: selectedVipPackage.value,
-  //             price: parseFloat(selectedOptionPrice.value.replace('¥', '')),
-  //             success: true,
-  //           })
-  //         }
-  //       }, 2000)
-  //     })
-  //   }
 
   return {
     showConfirmDialog,
@@ -283,95 +272,136 @@ export function usePurchase() {
     selectedCoupon,
     isProcessing,
     openPurchaseDialog,
-    closePurchaseDialog,
-    // handlePurchase,
+    confirmPurchase,
   }
 }
 
 // 兑换记录管理
-export function useExchangeRecords(initialRecords: ExchangeRecord[] = []) {
-  const exchangeRecords = ref<ExchangeRecord[]>([
-    {
-      id: 1,
-      type: '音浪兑换VIP',
-      date: '2024-01-15 14:30',
-      amount: 30,
-      unit: '天',
-      waves: 2500,
-      status: 'success',
-    },
-    ...initialRecords,
-  ])
+export function useExchangeRecords(initialRecords: ExchangeRecord[]) {
+  const exchangeRecords = ref<ExchangeRecord[]>(initialRecords)
 
-  const addRecord = (
-    record: Omit<ExchangeRecord, 'id' | 'date' | 'status'> & Partial<ExchangeRecord>,
-  ): void => {
-    exchangeRecords.value.unshift({
-      id: Date.now(),
-      date: new Date().toLocaleString('zh-CN'),
+  // 添加记录
+  const addRecord = (recordData: {
+    type: string
+    amount: number
+    unit: string
+    waves?: number
+    price?: string
+  }): void => {
+    const newRecord: ExchangeRecord = {
+      id: Date.now().toString(),
+      type: recordData.type,
+      date: new Date().toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      amount: recordData.amount,
+      unit: recordData.unit,
+      waves: recordData.waves,
+      price: recordData.price,
       status: 'success',
-      ...record,
-    })
+    }
+
+    exchangeRecords.value.unshift(newRecord)
+
+    // 保持最多10条记录
+    if (exchangeRecords.value.length > 10) {
+      exchangeRecords.value = exchangeRecords.value.slice(0, 10)
+    }
   }
 
-  const updateRecordStatus = (id: number, status: 'success' | 'pending' | 'failed'): void => {
-    const record = exchangeRecords.value.find((r) => r.id === id)
+  // 更新记录状态
+  const updateRecordStatus = (recordId: string, status: 'success' | 'failed'): void => {
+    const record = exchangeRecords.value.find((r) => r.id === recordId)
     if (record) {
       record.status = status
     }
-  }
-
-  const deleteRecord = (id: number): void => {
-    const index = exchangeRecords.value.findIndex((r) => r.id === id)
-    if (index !== -1) {
-      exchangeRecords.value.splice(index, 1)
-    }
-  }
-
-  const getRecordById = (id: number): ExchangeRecord | undefined => {
-    return exchangeRecords.value.find((r) => r.id === id)
   }
 
   return {
     exchangeRecords,
     addRecord,
     updateRecordStatus,
-    deleteRecord,
-    getRecordById,
   }
 }
 
 // 秒杀活动管理
-export function useFlashSales(flashSales: FlashSale[]) {
-  const sales = ref<FlashSale[]>([...flashSales])
+export function useFlashSales(initialSales: FlashSale[]) {
+  const sales = ref(initialSales)
+  const processingFlashId = ref<string | null>(null)
 
-  const handleFlashSale = (flashId: string): Promise<boolean> => {
-    return new Promise((resolve, reject) => {
-      const flash = sales.value.find((s) => s.id === flashId)
+  // 处理秒杀
+  const handleFlashSale = async (flashId: string): Promise<boolean> => {
+    const sale = sales.value.find((s) => s.id === flashId)
+    if (!sale) {
+      throw new Error('秒杀活动不存在')
+    }
 
-      if (!flash) {
-        reject(new Error('秒杀活动不存在'))
-        return
-      }
+    if (sale.remaining <= 0) {
+      throw new Error('已售罄')
+    }
 
-      if (flash.remaining === 0) {
-        ElMessage.warning('该秒杀商品已售罄')
-        reject(new Error('已售罄'))
-        return
-      }
+    processingFlashId.value = flashId
 
-      setTimeout(() => {
-        flash.sold += 1
-        flash.remaining -= 1
+    try {
+      // 模拟API调用
+      await new Promise((resolve) => setTimeout(resolve, 800))
 
-        ElMessage.success('秒杀成功！')
-        resolve(true)
-      }, 1000)
-    })
+      // 更新库存
+      sale.remaining -= 1
+      sale.sold += 1
+
+      ElMessage.success(`成功秒杀${sale.title}！`)
+      return true
+    } catch (error) {
+      console.error('秒杀失败:', error)
+      ElMessage.error('秒杀失败，请重试')
+      return false
+    } finally {
+      processingFlashId.value = null
+    }
   }
 
   return {
     sales,
+    processingFlashId,
     handleFlashSale,
+  }
+}
+
+// 优惠券管理
+export function useCoupons() {
+  const coupons = ref([
+    { id: 1, name: '新人音浪券', amount: 50, minAmount: 200 },
+    { id: 2, name: 'VIP专属音浪券', amount: 100, minAmount: 500 },
+    { id: 3, name: '节日音浪券', amount: 80, minAmount: 300 },
+  ])
+
+  // 获取可用优惠券
+  const getAvailableCoupons = (amount: number) => {
+    return coupons.value.filter((coupon) => amount >= coupon.minAmount)
+  }
+
+  // 应用优惠券
+  const applyCoupon = (couponId: number, amount: number) => {
+    const coupon = coupons.value.find((c) => c.id === couponId)
+    if (!coupon) {
+      throw new Error('优惠券不存在')
+    }
+
+    if (amount < coupon.minAmount) {
+      throw new Error(`金额未达到优惠券使用门槛（${coupon.minAmount}音浪）`)
+    }
+
+    return Math.max(0, amount - coupon.amount)
+  }
+
+  return {
+    coupons,
+    getAvailableCoupons,
+    applyCoupon,
   }
 }
