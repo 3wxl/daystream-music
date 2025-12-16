@@ -81,11 +81,17 @@
                     <IconFontSymbol name="bofang" size="18px" color="white"></IconFontSymbol>
                   </el-tooltip>
                 </span> -->
-                <span class="text-[#529FFD] cursor-pointer">
-                  <IconFontSymbol name="qianshoushenpitongguo-xianxing" size="17px"></IconFontSymbol>
+                <span
+                  class="active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#bfdcff] inline-block bg-[#e0eeff] text-[#529FFD] py-[3px] rounded-[20px] px-[12px] cursor-pointer text-[14px]"
+                  @click=""
+                >
+                  <IconFontSymbol name="qianshoushenpitongguo-xianxing" size="18px"></IconFontSymbol>
                   通过
                 </span>
-                <span class="text-red-700 cursor-pointer">
+                <span
+                  class="active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#ffbfbf] inline-block bg-[#ffe0e0] text-[#fd5252] py-[3px] rounded-[20px] px-[12px] cursor-pointer text-[14px]"
+                  @click=""
+                >
                   <IconFontSymbol name="bohui" size="15px"></IconFontSymbol>
                   驳回
                 </span>

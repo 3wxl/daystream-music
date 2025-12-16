@@ -21,7 +21,7 @@
           <!-- 秒杀活动 -->
           <FlashSale
             :flash-sales="flashSales"
-            :countdown="countdown"
+            :countdown="countdownData"
             @flash-sale="handleFlashSale"
           />
 
@@ -359,6 +359,20 @@ const handleQuickAction = (action: QuickAction): void => {
 const updateSelectedCoupon = (value: number | null): void => {
   selectedCoupon.value = value
 }
+const countdownData = computed(() => {
+  const countdownStr = countdown.value // '00:00:00' 格式的字符串
+
+  if (!countdownStr) {
+    return { hours: '00', minutes: '00', seconds: '00' }
+  }
+
+  const [hours, minutes, seconds] = countdownStr.split(':')
+  return {
+    hours: hours || '00',
+    minutes: minutes || '00',
+    seconds: seconds || '00',
+  }
+})
 
 // 生命周期
 onMounted(() => {

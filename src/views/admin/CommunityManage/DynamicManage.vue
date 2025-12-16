@@ -64,8 +64,18 @@
           </el-table-column>
           <el-table-column label="操作" align="center">
             <template #default="scope">
-              <el-button type="primary">编辑</el-button>
-              <el-button type="danger">删除</el-button>
+              <span
+                class="active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#bfdcff] inline-block bg-[#e0eeff] text-[#529FFD] py-[3px] rounded-[20px] px-[12px] cursor-pointer mr-4 text-[15px]"
+              >
+                <IconFontSymbol name="xiugai" size="18px"></IconFontSymbol>
+                编辑
+              </span>
+              <span
+                class="active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#ffbfbf] inline-block bg-[#ffe0e0] text-[#fd5252] py-[3px] rounded-[20px] px-[12px] cursor-pointer mr-4 text-[15px]"
+              >
+                <IconFontSymbol name="bohui" size="15px"></IconFontSymbol>
+                删除
+              </span>
             </template>
           </el-table-column>
         </el-table>

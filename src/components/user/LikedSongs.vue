@@ -1,11 +1,12 @@
 <template>
-  <div v-if="likedSongs.length === 0" class="py-12 text-center">
+  <!-- 先解析二维数组，取 records[0] 作为歌曲列表 -->
+  <div v-if="(likedSongsList || []).length === 0" class="py-12 text-center">
     <el-empty description="空空如也" class="text-gray-500" />
   </div>
 
   <div class="song-list">
     <div
-      v-for="(song, index) in likedSongs"
+      v-for="(song, index) in likedSongsList"
       :key="song.id"
       class="relative flex items-center px-5 py-3 hover:bg-gray-800/30 transition-colors group cursor-pointer justify-between"
     >
@@ -18,22 +19,26 @@
             >&#xe638;</i
           >
         </div>
-        <img :src="song.cover" class="w-10 h-10 rounded object-cover shrink-0" />
+        <!-- 封面URL补全（若后端返回相对路径，需拼接域名） -->
+        <img :src="song.coverUrl" class="w-10 h-10 rounded object-cover shrink-0" alt="歌曲封面" />
         <div class="ml-3 min-w-0">
           <div class="flex items-center gap-2 mb-0.5">
             <span
               class="text-white text-sm font-medium group-hover:text-pink-400 transition-colors truncate max-w-[150px]"
             >
-              {{ song.name }}
+              {{ song.musicName }}
             </span>
-            <template v-for="(tag, tagIndex) in song.tags" :key="tagIndex">
-              <span :class="getTagClass(tag)" class="text-xs px-1.5 py-0.25 rounded">
-                {{ tag }}
+            <!-- 渲染VIP标签（替代原tags逻辑，后端无tags字段） -->
+            <template v-if="song.isVip === 1">
+              <span
+                class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-xs px-1.5 py-0.25 rounded"
+              >
+                VIP
               </span>
             </template>
           </div>
           <div class="text-gray-500 text-xs truncate">
-            {{ song.artist }}
+            {{ song.musicianName || '未知歌手' }}
           </div>
         </div>
       </div>
@@ -81,101 +86,98 @@
             </button>
           </el-tooltip>
         </div>
+        <!-- 专辑名：后端返回的是albumName，且可能为null -->
         <div class="w-[200px] text-gray-500 text-xs text-center">
-          {{ song.album }}
+          {{ song.albumName || '未知专辑' }}
         </div>
       </div>
 
       <div class="flex items-center gap-3 shrink-0 w-[100px] justify-end">
         <i
           class="iconfont cursor-pointer transition-all text-lg"
-          :class="song.isLiked ? 'text-[#FF4D4F]' : 'text-gray-500 hover:text-[#FF4D4F]'"
+          :class="song.isLiked ? 'text-[#FF4D4F]' : 'text-gray-500'"
           @click.stop="handleLike(song.id)"
+          v-loading="loadingIds.includes(song.id)"
+          element-loading-text=""
+          element-loading-spinner="el-icon-loading"
         >
           &#xe8c3;
         </i>
+        <!-- 时长：后端直接返回格式化后的字符串，无需转换 -->
         <div class="text-gray-500 text-xs">
-          {{ formatTime(song.duration) }}
+          {{ song.duration }}
         </div>
       </div>
     </div>
   </div>
 </template>
-
+<!-- LikedSongs.vue 脚本部分 -->
 <script setup lang="ts">
-const visible = ref(false)
-const formatTime = (seconds: number) => {
-  const m = Math.floor(seconds / 60)
-    .toString()
-    .padStart(2, '0')
-  const s = (seconds % 60).toString().padStart(2, '0')
-  return `${m}:${s}`
+import type { MusicVO, LikeRecordResponse } from '@/types/personalCenter'
+import { likeRecord } from '@/api/personalCenter'
+import { ref, computed, watch, onMounted, nextTick } from 'vue' // 补充缺失的导入
+import { ElMessage } from 'element-plus' // 补充缺失的导入
+
+// 关键修改：Props 改为一维数组
+interface Props {
+  likedSongs: MusicVO[] // 原：MusicVO[][]
 }
 
-const getTagClass = (tag: string) => {
-  switch (tag) {
-    case '超清母带':
-      return 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-    case 'VIP':
-      return 'bg-pink-500/20 text-pink-400 border border-pink-500/30'
-    case 'MV':
-      return 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-    case '无损':
-      return 'bg-green-500/20 text-green-400 border border-green-500/30'
-    default:
-      return 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+const props = defineProps<Props>()
+const loadingIds = ref<number[]>([])
+
+// 简化解析逻辑（直接使用一维数组）
+const likedSongsList = computed(() => {
+  return Array.isArray(props.likedSongs) ? props.likedSongs : [] // 原：props.likedSongs[0]
+})
+
+watch(
+  () => props.likedSongs,
+  (newVal) => {
+    console.log('子组件监听：likedSongs 最新值', newVal)
+    console.log('解析后的歌曲列表（可渲染）', likedSongsList.value)
+  },
+  { deep: true, immediate: true },
+)
+
+onMounted(async () => {
+  await nextTick()
+  console.log('mounted 解析后列表', likedSongsList.value)
+})
+
+const handleLike = async (songId: number) => {
+  if (loadingIds.value.includes(songId)) return
+  loadingIds.value.push(songId)
+
+  try {
+    const song = likedSongsList.value.find((item) => item.id === songId)
+    if (!song) {
+      ElMessage.warning('未找到该歌曲')
+      return
+    }
+
+    const res = await likeRecord({
+      targetId: songId,
+      targetType: 1,
+    })
+    console.log(res)
+    if (res.success) {
+      song.isLiked = res.data.islike ? 1 : 0
+      if (res.data.likecount !== undefined) {
+        song.likeCount = res.data.likecount
+      }
+      ElMessage.success(res.data.msg || (res.data.islike ? '点赞成功' : '取消点赞成功'))
+    } else {
+      ElMessage.error(res.errorMsg || '操作失败，请重试')
+    }
+  } catch (error) {
+    console.error('点赞/取消点赞失败:', error)
+    ElMessage.error('网络异常，操作失败')
+  } finally {
+    loadingIds.value = loadingIds.value.filter((id) => id !== songId)
   }
 }
-
-const likedSongs = ref([
-  {
-    id: 1,
-    name: '夏日晚风',
-    artist: 'Daystream Music',
-    album: '晚风集',
-    cover: 'https://picsum.photos/80/80?random=1',
-    duration: 237,
-    tags: ['超清母带', 'MV'],
-    isLiked: true,
-  },
-  {
-    id: 2,
-    name: '星光坠落时',
-    artist: 'Daystream Music',
-    album: '星光合集',
-    cover: 'https://picsum.photos/80/80?random=2',
-    duration: 198,
-    tags: ['VIP', '无损'],
-    isLiked: false,
-  },
-  {
-    id: 3,
-    name: '城市浪漫',
-    artist: 'Daystream Music',
-    album: '城市之声',
-    cover: 'https://picsum.photos/80/80?random=3',
-    duration: 215,
-    tags: ['超清母带'],
-    isLiked: true,
-  },
-  {
-    id: 4,
-    name: '深海回响',
-    artist: 'Daystream Music',
-    album: '深海秘境',
-    cover: 'https://picsum.photos/80/80?random=4',
-    duration: 242,
-    tags: [],
-    isLiked: false,
-  },
-])
-
-const handleLike = (songId: number) => {
-  const song = likedSongs.value.find((item) => item.id === songId)
-  if (song) song.isLiked = !song.isLiked
-}
 </script>
-
 <style lang="scss" scoped>
 ::v-deep .text-\[\#FF4D4F\] {
   text-shadow: 0 0 6px rgba(255, 77, 79, 0.4);
@@ -188,5 +190,16 @@ button.hover\:text-amber-400:hover {
 
 .iconfont.hover\:text-\[\#FF4D4F\]:hover {
   transform: scale(1.1);
+}
+
+// 补充封面加载失败的样式
+img[alt='歌曲封面']:error {
+  content: '';
+  background: #333;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
 }
 </style>

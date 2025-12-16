@@ -75,11 +75,15 @@
       <div
         class="mt-3 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-3 group-hover:translate-y-0"
       >
+        <!-- 取消收藏按钮：添加loading状态 + 阻止事件冒泡 -->
         <button
           class="text-xs text-[#64748b] hover:text-[#ec4899] transition-colors duration-300"
-          @click.stop="toggleCollection(album.id)"
+          @click.stop="handleCancelCollect(album.id)"
+          :disabled="loadingIds.includes(album.id)"
         >
-          <i class="iconfont mr-1 text-xs">&#xe62b;</i> 取消收藏
+          <i class="iconfont mr-1 text-xs" v-if="loadingIds.includes(album.id)">&#xe634;</i>
+          <i class="iconfont mr-1 text-xs" v-else>&#xe62b;</i>
+          {{ loadingIds.includes(album.id) ? '取消中...' : '取消收藏' }}
         </button>
         <button
           class="text-xs text-[#64748b] hover:text-[#ec4899] transition-colors duration-300"
@@ -119,9 +123,12 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
+
+// 1. 修复Props类型：id兼容数字/字符串
 const props = defineProps<{
   albums: {
-    id: number
+    id: number | string // 关键：兼容数字/字符串ID
     name: string
     artist: string
     cover: string
@@ -131,18 +138,37 @@ const props = defineProps<{
   }[]
 }>()
 
+// 2. 修复Emits类型：id兼容数字/字符串
 const emit = defineEmits<{
-  (e: 'goToAlbumDetail', id: number): void
-  (e: 'playAlbum', id: number): void
-  (e: 'toggleCollection', id: number): void
-  (e: 'shareAlbum', id: number): void
+  (e: 'goToAlbumDetail', id: number | string): void
+  (e: 'playAlbum', id: number | string): void
+  (e: 'toggleCollection', id: number | string): void
+  (e: 'shareAlbum', id: number | string): void
   (e: 'exploreAlbums'): void
 }>()
 
-const goToAlbumDetail = (id: number) => emit('goToAlbumDetail', id)
-const playAlbum = (id: number) => emit('playAlbum', id)
-const toggleCollection = (id: number) => emit('toggleCollection', id)
-const shareAlbum = (id: number) => emit('shareAlbum', id)
+// 3. 添加loading状态（避免重复点击）
+const loadingIds = ref<(number | string)[]>([])
+
+// 4. 封装取消收藏逻辑（带loading）
+const handleCancelCollect = async (id: number | string) => {
+  // 避免重复点击
+  if (loadingIds.value.includes(id)) return
+
+  try {
+    loadingIds.value.push(id)
+    // 触发父组件的取消收藏事件
+    emit('toggleCollection', id)
+  } finally {
+    // 移除loading状态（无论成功/失败）
+    loadingIds.value = loadingIds.value.filter((item) => item !== id)
+  }
+}
+
+// 5. 保留原有事件触发函数
+const goToAlbumDetail = (id: number | string) => emit('goToAlbumDetail', id)
+const playAlbum = (id: number | string) => emit('playAlbum', id)
+const shareAlbum = (id: number | string) => emit('shareAlbum', id)
 const exploreAlbums = () => emit('exploreAlbums')
 </script>
 

@@ -4,10 +4,12 @@
       <div class="container">
         <div class="header-content">
           <div class="playlist-cover group">
+            <!-- 使用动态封面 -->
             <img
               :src="playlistInfo.coverUrl"
               alt="歌单封面"
               class="cover-img transition-transform duration-500 group-hover:scale-105"
+              @error="handleCoverError"
             />
             <div
               class="cover-overlay opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
@@ -21,16 +23,20 @@
             <div class="playlist-meta">
               <div class="creator flex items-center gap-2 group cursor-pointer">
                 <img
-                  :src="playlistInfo.creator.avatarUrl"
+                  :src="userInfo.avatar"
                   alt="创作者头像"
                   class="creator-avatar transition-transform group-hover:scale-110"
                 />
                 <span class="creator-name text-sm group-hover:text-pink-400 transition-colors">
-                  {{ playlistInfo.creator.name }}
+                  {{ userInfo.username }}
                 </span>
               </div>
               <span class="create-time text-xs text-gray-400">
                 {{ formatDate(playlistInfo.createTime) }} 创建
+              </span>
+              <!-- 添加歌曲数量显示 -->
+              <span class="song-count text-xs text-gray-400" v-if="likedSongs.length > 0">
+                {{ likedSongs.length }} 首歌
               </span>
             </div>
 
@@ -41,6 +47,7 @@
                 size="large"
                 @click="handlePlayAll"
                 :class="{ 'animate-pulse': isPlayingAll }"
+                :disabled="likedSongs.length === 0"
               >
                 <i class="iconfont">&#xe623;</i>
                 播放全部
@@ -48,6 +55,7 @@
               <el-button
                 class="download-btn"
                 size="large"
+                :disabled="likedSongs.length === 0"
                 @mouseenter="isDownloadHover = true"
                 @mouseleave="isDownloadHover = false"
               >
@@ -91,7 +99,11 @@
 
         <div class="tabs-content">
           <div v-if="activeTab === 'songs'" class="tab-pane">
-            <likedSongs />
+            <div v-if="loading" class="py-12 text-center"></div>
+            <div v-else-if="likedSongs.length === 0" class="py-12 text-center">
+              <el-empty description="暂无喜欢的歌曲" class="text-gray-500" />
+            </div>
+            <LikedSongs v-else :likedSongs="likedSongs" />
           </div>
 
           <div v-if="activeTab === 'comments'">
@@ -114,7 +126,31 @@
 </template>
 
 <script setup lang="ts">
-// 标签配置
+import { getUserInfo, getPlaylistDetail } from '@/api/personalCenter/index'
+import type { MusicVO, UserInfoVO, PlaylistDetailVO } from '@/types/personalCenter/index'
+const userInfo = ref<UserInfoVO>({})
+const loading = ref(false)
+const pagination = reactive({
+  pageNum: 1,
+  pageSize: 10,
+})
+const playlistDetail = ref<PlaylistDetailVO | null>(null)
+import { usePlaylistStore } from '@/stores/playList'
+const playlistStore = usePlaylistStore()
+// 默认封面，当第一首歌没有封面或加载失败时使用
+const DEFAULT_COVER = 'https://picsum.photos/300/300?random=10'
+
+// 歌单信息 - 改为响应式（删除下面重复的定义）
+const playlistInfo = reactive({
+  title: '我喜欢的音乐',
+  coverUrl: DEFAULT_COVER, // 初始使用默认封面
+  createTime: Date.now(), // 使用当前时间
+  creator: {
+    name: '问安200824',
+    avatarUrl: 'https://picsum.photos/100/100?random=20',
+  },
+})
+
 const tabs = [
   { name: 'songs', label: '歌曲' },
   { name: 'comments', label: '评论' },
@@ -129,31 +165,6 @@ interface Collector {
   collectTime: number
   signature?: string
   followStatus: boolean // 是否关注
-}
-
-// 创作者类型
-interface Creator {
-  name: string
-  avatarUrl: string
-}
-
-// 歌单信息类型
-interface PlaylistInfo {
-  title: string
-  coverUrl: string
-  createTime: number
-  creator: Creator
-}
-
-// 歌单模拟数据
-const playlistInfo: PlaylistInfo = {
-  title: '我喜欢的音乐',
-  coverUrl: 'https://picsum.photos/300/300?random=10',
-  createTime: 1598246400000,
-  creator: {
-    name: '问安200824',
-    avatarUrl: 'https://picsum.photos/100/100?random=20',
-  },
 }
 
 // 收藏者模拟数据
@@ -200,6 +211,9 @@ const isPlayingAll = ref(false)
 const isDownloadHover = ref(false)
 const isSearchFocused = ref(false)
 
+// 歌曲列表
+const likedSongs = ref<MusicVO[]>([])
+
 // 计算属性
 const collectorCount = computed(() => collectors.value.length)
 
@@ -213,8 +227,19 @@ const formatDate = (timestamp: number) => {
   })
 }
 
+// 封面图片加载失败处理
+const handleCoverError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  console.warn('封面图片加载失败，使用默认封面')
+  img.src = DEFAULT_COVER
+}
+
 // 播放全部按钮事件
 const handlePlayAll = () => {
+  if (likedSongs.value.length === 0) {
+    ElMessage.warning('歌单中没有歌曲')
+    return
+  }
   isPlayingAll.value = true
   setTimeout(() => (isPlayingAll.value = false), 1000)
 }
@@ -228,6 +253,52 @@ const toggleFollow = (id: number) => {
     return collector
   })
 }
+const loadUserInfo = async () => {
+  try {
+    const res = await getUserInfo()
+    console.log(res)
+    userInfo.value = {
+      ...res.data,
+      username: res.data.username,
+      avatar: res.data.avatar,
+    }
+    console.log(userInfo.value.username)
+  } catch (error) {
+    console.error('加载用户信息失败:', error)
+  }
+}
+
+const loadPlaylistDetail = async () => {
+  loading.value = true
+  try {
+    // 获取路由参数（歌单ID）+ 默认分页参数
+    console.log(22)
+    const playlistIdStr = playlistStore.currentPlaylistId
+    console.log('从Pinia读取的歌单ID:', playlistIdStr)
+    if (!playlistIdStr) {
+      ElMessage.error('未选择歌单，请返回列表页重新选择')
+      // 兜底：返回上一页
+      window.history.back()
+      loading.value = false
+      return
+    }
+    const res = await getPlaylistDetail({
+      playlistId: playlistIdStr,
+      pageNum: 1,
+      pageSize: 10,
+    })
+    console.log(res)
+    playlistDetail.value = res.data
+  } catch (error) {
+    console.error('加载歌单详情失败:', error)
+    ElMessage.error('加载歌单详情失败，请稍后重试')
+  } finally {
+    loading.value = false
+  }
+}
+onMounted(async () => {
+  await Promise.all([loadUserInfo(), loadPlaylistDetail()])
+})
 </script>
 
 <style lang="scss" scoped>
@@ -268,19 +339,13 @@ const toggleFollow = (id: number) => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: all 0.5s ease;
 }
 
 .cover-overlay {
   position: absolute;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.6);
-}
-
-.cover-overlay .play-icon {
-  width: 60px;
-  height: 60px;
-  color: #ff8fab;
-  filter: drop-shadow(0 0 8px rgba(255, 153, 204, 0.5));
 }
 
 .playlist-title {
@@ -309,6 +374,12 @@ const toggleFollow = (id: number) => {
   color: #d1d5db;
 }
 
+.song-count {
+  padding-left: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  margin-left: 8px;
+}
+
 .action-buttons {
   display: flex;
   align-items: center;
@@ -321,9 +392,7 @@ const toggleFollow = (id: number) => {
   transition: all 0.3s ease !important;
   box-shadow: 0 4px 12px rgba(255, 153, 204, 0.3) !important;
 }
-::v-deep .el-input__wrapper {
-  background-color: transparent !important;
-}
+
 .play-all-btn:hover {
   background-color: #e63493 !important;
   border-color: #e63493 !important;
@@ -341,34 +410,6 @@ const toggleFollow = (id: number) => {
 .download-btn:hover {
   background-color: rgba(255, 153, 204, 0.1) !important;
   border-color: #ff8fab !important;
-  color: #ff8fab !important;
-}
-
-.more-btn {
-  background-color: rgba(255, 255, 255, 0.05) !important;
-  color: #e0e0e0 !important;
-  border-color: rgba(255, 153, 204, 0.2) !important;
-  transition: all 0.3s ease !important;
-}
-
-.more-btn:hover {
-  background-color: rgba(255, 153, 204, 0.1) !important;
-  border-color: #ff8fab !important;
-  color: #ff8fab !important;
-}
-
-.custom-dropdown {
-  background-color: #1a1a30 !important;
-  border-color: rgba(255, 153, 204, 0.2) !important;
-}
-
-.dropdown-item {
-  color: #e0e0e0 !important;
-  transition: all 0.2s ease !important;
-}
-
-.dropdown-item:hover {
-  background-color: rgba(255, 153, 204, 0.1) !important;
   color: #ff8fab !important;
 }
 
@@ -450,6 +491,7 @@ const toggleFollow = (id: number) => {
 }
 
 ::v-deep .el-input__wrapper {
+  background-color: transparent !important;
   border-radius: 20px !important;
   background: linear-gradient(145deg, #181832, #1a1a36) !important;
   border: 1px solid rgba(255, 143, 171, 0.1) !important;
@@ -507,23 +549,6 @@ const toggleFollow = (id: number) => {
 
 ::v-deep .el-input__wrapper:focus-within {
   outline: none !important;
-}
-
-.tab-placeholder {
-  padding: 80px 0;
-  text-align: center;
-  color: #6b7280;
-  border: 1px dashed rgba(255, 153, 204, 0.1);
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.tab-placeholder:hover {
-  border-color: rgba(255, 153, 204, 0.3);
-}
-
-.tab-placeholder p {
-  font-size: 16px;
 }
 
 @keyframes pulse {

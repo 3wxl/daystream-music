@@ -49,9 +49,9 @@
           <button
             @click="clearSearch"
             v-if="searchQuery.length > 0"
-            class="absolute inset-y-0 right-4 flex items-center text-[#64748b] hover:text-[#cd3181] transition-colors duration-300 hover:scale-110 active:scale-95"
+            class="absolute inset-y-0 right-4 flex z-100 items-center text-[#64748b] hover:text-[#cd3181] transition-colors duration-300 hover:scale-110 active:scale-95"
           >
-            <i class="iconfont text-lg">&#xe672;</i>
+            <i class="iconfont text-lg">&#xe607;</i>
           </button>
 
           <!-- 搜索结果计数（实时反馈） -->
@@ -69,42 +69,41 @@
 
       <!-- 粉丝总数统计 -->
       <div class="mb-6 flex justify-between items-center px-4">
-        <h3 class="text-base font-medium text-[#e2e8f0]">
-          总计 <span class="text-[#cd3181] font-bold">{{ totalFans }}</span> 个粉丝
-        </h3>
-        <!-- 排序下拉框 -->
-        <!-- <div class="relative group">
+        <!-- 排序按钮 -->
+        <div class="flex gap-2">
           <button
-            class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#121225] border border-[rgba(205,49,129,0.1)] text-sm text-[#94a3b8] hover:text-white hover:border-[rgba(205,49,129,0.2)] transition-all duration-300"
+            @click="sortFans('latest')"
+            class="px-3 py-1 rounded-full text-xs transition-all duration-300"
+            :class="
+              sortType === 'latest'
+                ? 'bg-[#cd3181]/20 text-[#cd3181]'
+                : 'bg-[#121225] text-[#94a3b8]'
+            "
           >
-            <i class="iconfont text-xs">&#xe65c;</i>
-            {{ sortType === 'latest' ? '最新关注' : '粉丝数最多' }}
-            <i class="iconfont text-xs transition-transform duration-300 group-hover:rotate-180"
-              >&#xe641;</i
-            >
+            最新关注
           </button>
-          <div
-            class="absolute right-0 top-full mt-2 w-36 bg-[#121225] border border-[rgba(205,49,129,0.1)] rounded-xl shadow-lg shadow-black/20 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-10"
+          <button
+            @click="sortFans('popular')"
+            class="px-3 py-1 rounded-full text-xs transition-all duration-300"
+            :class="
+              sortType === 'popular'
+                ? 'bg-[#cd3181]/20 text-[#cd3181]'
+                : 'bg-[#121225] text-[#94a3b8]'
+            "
           >
-            <button
-              @click="sortFans('latest')"
-              class="w-full text-left px-4 py-2 text-sm hover:bg-[rgba(205,49,129,0.08)] hover:text-[#cd3181] transition-colors duration-200 flex items-center gap-1.5"
-              :class="sortType === 'latest' ? 'text-[#cd3181]' : 'text-[#94a3b8]'"
-            >
-              <i class="iconfont text-xs">&#xe60b;</i> 最新关注
-            </button>
-            <button
-              @click="sortFans('popular')"
-              class="w-full text-left px-4 py-2 text-sm hover:bg-[rgba(205,49,129,0.08)] hover:text-[#cd3181] transition-colors duration-200 flex items-center gap-1.5"
-              :class="sortType === 'popular' ? 'text-[#cd3181]' : 'text-[#94a3b8]'"
-            >
-              <i class="iconfont text-xs">&#xe66a;</i> 粉丝数最多
-            </button>
-          </div>
-        </div> -->
+            粉丝数最多
+          </button>
+        </div>
       </div>
 
+      <!-- 粉丝列表 -->
       <div class="space-y-4">
+        <!-- 加载中状态 -->
+        <div v-if="loading && fansList.length === 0" class="flex justify-center py-12">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#cd3181]"></div>
+        </div>
+
+        <!-- 粉丝列表项 -->
         <div
           v-for="(fan, index) in filteredFans"
           :key="fan.id"
@@ -128,10 +127,10 @@
                 class="w-16 h-16 rounded-full object-cover border-2 border-transparent group-hover:border-[#cd3181] transition-all duration-400 shadow-md shadow-black/20"
               />
               <!-- 在线状态 -->
-              <div
-                v-if="fan.isOnline"
+              <!-- <div
+                v-if="fan.userStatus === 1"
                 class="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-[#cd3181] border-2 border-[#121225] shadow-md shadow-[#cd3181]/30 animate-pulse"
-              ></div>
+              ></div> -->
             </div>
 
             <!-- 粉丝信息 - 添加 min-width: 0 确保文本截断 -->
@@ -140,7 +139,7 @@
                 <h4
                   class="font-medium text-base truncate text-white group-hover:text-[#ff8fab] transition-colors duration-300"
                 >
-                  <span v-html="highlightKeyword(fan.name)"></span>
+                  <span v-html="highlightKeyword(fan.username)"></span>
                 </h4>
                 <!-- 认证标识 -->
                 <span
@@ -152,7 +151,9 @@
               </div>
               <!-- 个性签名 -->
               <p class="text-[#94a3b8] text-sm line-clamp-1 truncate italic mb-2">
-                <span v-html="highlightKeyword(fan.signature)"></span>
+                <span
+                  v-html="highlightKeyword(fan.introduction || '这个人很懒，什么都没写')"
+                ></span>
               </p>
 
               <!-- 粉丝数据统计 -->
@@ -163,13 +164,13 @@
                   <i class="iconfont text-[#64748b] text-base group-hover:text-[#8b5cf6]"
                     >&#xe612;</i
                   >
-                  {{ fan.posts }} 动态
+                  {{ fan.dynamicCount || 0 }} 动态
                 </span>
                 <span
                   class="text-xs text-[#64748b] flex items-center gap-1.5 group-hover:text-[#cd3181] transition-colors"
                 >
                   <i class="iconfont text-[#64748b] text-lg group-hover:text-[#cd3181]">&#xe66a;</i>
-                  {{ fan.fansCount }} 粉丝
+                  {{ fan.fansCount || 0 }} 粉丝
                 </span>
                 <span
                   class="text-xs text-[#64748b] flex items-center gap-1.5 group-hover:text-[#4ade80] transition-colors"
@@ -193,7 +194,7 @@
               >
                 <i class="iconfont text-xs">&#xe614;</i> 私信
               </button>
-              <button
+              <!-- <button
                 class="px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-400 flex items-center justify-center gap-1.5 hover:shadow-lg hover:shadow-[#cd3181]/20 active:scale-95 min-w-[80px]"
                 style="
                   background: rgba(205, 49, 129, 0.08);
@@ -201,18 +202,53 @@
                   color: #cd3181;
                 "
                 @click.stop="toggleFollowBack(fan.id)"
+                :disabled="followLoading[fan.id]"
               >
                 <i class="iconfont text-xs">&#xe62b;</i>
-                {{ fan.isFollowed ? '已回关' : '未回关' }}
-              </button>
+                {{ fan.isMutual ? '已回关' : '未回关' }}
+              </button> -->
             </div>
+          </div>
+        </div>
+
+        <!-- 加载更多按钮区域 -->
+        <div class="flex justify-center py-6">
+          <!-- 加载中状态：仅非搜索/搜索有结果时显示 -->
+          <div
+            v-if="loadingMore && !(searchQuery.trim() && filteredFans.length === 0)"
+            class="flex justify-center"
+          >
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#cd3181]"></div>
+          </div>
+
+          <!-- 加载更多按钮：新增判断条件 - 搜索无结果时不显示 -->
+          <button
+            v-else-if="
+              hasMore && fansList.length > 0 && !(searchQuery.trim() && filteredFans.length === 0)
+            "
+            @click="loadFans(true)"
+            class="px-6 py-2 rounded-full bg-[#121225] border border-[#cd3181]/30 text-[#cd3181] hover:bg-[#cd3181]/10 transition-all duration-300 flex items-center gap-2"
+            :disabled="loadingMore"
+          >
+            <i class="iconfont">&#xe62b;</i>
+            加载更多
+          </button>
+
+          <!-- 无更多数据提示：仅非搜索/搜索有结果时显示 -->
+          <div
+            v-else-if="
+              !hasMore && fansList.length > 0 && !(searchQuery.trim() && filteredFans.length === 0)
+            "
+            class="text-[#94a3b8] text-sm"
+          >
+            已加载全部粉丝
           </div>
         </div>
       </div>
 
       <!-- 空状态（无粉丝/无搜索结果） -->
       <div
-        v-if="filteredFans.length === 0"
+        v-if="!loading && filteredFans.length === 0"
         class="flex flex-col items-center justify-center py-24 text-center"
       >
         <div
@@ -234,7 +270,7 @@
         </p>
         <button
           class="px-8 py-3.5 rounded-full bg-gradient-to-r from-[#cd3181] to-[#ff8fab] text-white font-medium shadow-lg shadow-[#cd3181]/20 hover:shadow-[#cd3181]/30 transition-all duration-400 hover:-translate-y-1 active:scale-95 flex items-center gap-2"
-          @click="searchQuery.length > 0 ? clearSearch : shareWorks()"
+          @click="searchQuery.length > 0 ? clearSearch() : shareWorks()"
         >
           <i class="iconfont text-sm" style="font-size: 23px">
             {{ searchQuery.length > 0 ? '&#xe633;' : '&#xe60a;' }}
@@ -258,96 +294,122 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ElMessage } from 'element-plus'
+import { getFollower } from '@/api/follow'
+import type { NormalUserItem } from '@/types/follow'
+
+// 分页参数定义
+interface FollowListParams {
+  lastId?: string | null
+  size: number
+  keyword?: string // 新增：搜索关键词参数
+  type?: string
+}
+
+interface FollowListResp {
+  dateList: NormalUserItem[]
+  hasMore: boolean
+  lastId: string | null
+  total: number
+}
+
+// 基础状态
 const searchQuery = ref('')
 const isSearchFocused = ref(false)
 const notificationRef = ref<HTMLDivElement | null>(null)
 const sortType = ref<'latest' | 'popular'>('latest')
 
-const fans = ref([
-  {
-    id: 1001,
-    name: 'MusicLover01',
-    avatar: 'https://picsum.photos/100/100?random=101',
-    signature: '你的每首歌我都听过，超喜欢！',
-    verified: false,
-    posts: 89,
-    fansCount: 1250,
-    followTime: '2025-01-15',
-    isOnline: true,
-    isFollowed: true,
-  },
-  {
-    id: 1002,
-    name: 'NightOwlMusic',
-    avatar: 'https://picsum.photos/100/100?random=102',
-    signature: '深夜听歌党，为你打call！',
-    verified: true,
-    posts: 218,
-    fansCount: 3420,
-    followTime: '2025-02-20',
-    isOnline: false,
-    isFollowed: false,
-  },
-  {
-    id: 1003,
-    name: 'SynthWaveFan',
-    avatar: 'https://picsum.photos/100/100?random=103',
-    signature: '复古电子乐爱好者，喜欢你的编曲',
-    verified: false,
-    posts: 156,
-    fansCount: 890,
-    followTime: '2025-03-05',
-    isOnline: true,
-    isFollowed: true,
-  },
-  {
-    id: 1004,
-    name: 'JazzCat88',
-    avatar: 'https://picsum.photos/100/100?random=104',
-    signature: '爵士与蓝调的忠实听众，期待你的新作',
-    verified: true,
-    posts: 98,
-    fansCount: 2780,
-    followTime: '2025-04-12',
-    isOnline: false,
-    isFollowed: false,
-  },
-  {
-    id: 1005,
-    name: 'IndieMusicFan',
-    avatar: 'https://picsum.photos/100/100?random=105',
-    signature: '独立音乐挖掘者，你的音乐超有态度！',
-    verified: false,
-    posts: 320,
-    fansCount: 1560,
-    followTime: '2025-05-18',
-    isOnline: true,
-    isFollowed: true,
-  },
-])
+// 接口相关状态
+const fansList = ref<NormalUserItem[]>([])
+const loading = ref(false)
+const loadingMore = ref(false)
+const hasMore = ref(true)
+const lastId = ref<string | null>(null)
+const totalFans = ref(0)
+const followLoading = ref<Record<number, boolean>>({})
 
-const totalFans = computed(() => fans.value.length)
-
+// 过滤后的粉丝列表
 const filteredFans = computed(() => {
-  let result = [...fans.value]
+  let result = [...fansList.value]
 
+  // 搜索过滤（前端兜底，优先接口过滤）
   const query = searchQuery.value.trim().toLowerCase()
   if (query) {
     result = result.filter(
       (fan) =>
-        fan.name.toLowerCase().includes(query) || fan.signature.toLowerCase().includes(query),
+        fan.username.toLowerCase().includes(query) ||
+        (fan.introduction && fan.introduction.toLowerCase().includes(query)),
     )
   }
 
+  // 排序
   if (sortType.value === 'latest') {
-    result.sort((a, b) => new Date(b.followTime).getTime() - new Date(a.followTime).getTime())
+    result.sort((a, b) => {
+      const timeA = a.followTime ? new Date(a.followTime).getTime() : 0
+      const timeB = b.followTime ? new Date(b.followTime).getTime() : 0
+      return timeB - timeA
+    })
   } else {
-    result.sort((a, b) => b.fansCount - a.fansCount)
+    result.sort((a, b) => (b.fansCount || 0) - (a.fansCount || 0))
   }
 
   return result
 })
 
+// 加载粉丝数据（核心修改：支持传递搜索关键词）
+const loadFans = async (isLoadMore = false) => {
+  if ((isLoadMore && loadingMore.value) || (!isLoadMore && loading.value)) return
+
+  try {
+    if (isLoadMore) {
+      loadingMore.value = true
+    } else {
+      loading.value = true
+      lastId.value = null
+      hasMore.value = true
+      fansList.value = []
+    }
+
+    // 构造请求参数：携带搜索关键词
+    const params: FollowListParams = {
+      lastId: isLoadMore ? lastId.value : null,
+      size: 10,
+      keyword: searchQuery.value.trim() || undefined, // 有搜索词则传递，无则不传
+    }
+
+    // 调用接口（实际项目中接口需支持keyword参数过滤）
+    const res = await getFollower(params)
+    const { dateList, hasMore: respHasMore, lastId: respLastId, total } = res
+    console.log(`加载${isLoadMore ? '更多' : '第一页'}数据：`, res)
+
+    if (isLoadMore) {
+      fansList.value = [...fansList.value, ...dateList]
+    } else {
+      fansList.value = dateList
+      totalFans.value = total ?? 0
+    }
+
+    hasMore.value = respHasMore
+    lastId.value = respLastId ?? null
+  } catch (error) {
+    console.error('加载粉丝失败:', error)
+    ElMessage.error('加载粉丝失败，请稍后重试')
+  } finally {
+    loading.value = false
+    loadingMore.value = false
+  }
+}
+
+// 生命周期
+onMounted(async () => {
+  await loadFans()
+  console.log('✅ 初始数据加载完成')
+})
+
+onUnmounted(() => {})
+
+// 搜索焦点处理
 const handleSearchFocus = (isFocused: boolean) => {
   isSearchFocused.value = isFocused
   if (isFocused && notificationRef.value) {
@@ -355,24 +417,42 @@ const handleSearchFocus = (isFocused: boolean) => {
   }
 }
 
+// 搜索处理（输入时触发，加载对应关键词的第一页数据）
 const handleSearch = () => {
-  nextTick(() => {
-    const fanCards = document.querySelectorAll('.fan-card')
-    fanCards.forEach((card, index) => {
-      const el = card as HTMLElement
-      el.style.opacity = '0.8'
-      setTimeout(() => {
-        el.style.opacity = '1'
-      }, index * 50)
+  // 防抖处理（可选，避免频繁请求）
+  clearTimeout((window as any).searchTimer)
+  ;(window as any).searchTimer = setTimeout(() => {
+    loadFans(false) // 重新加载第一页（带关键词）
+    nextTick(() => {
+      const fanCards = document.querySelectorAll('.fan-card')
+      fanCards.forEach((card, index) => {
+        const el = card as HTMLElement
+        el.style.opacity = '0.8'
+        setTimeout(() => {
+          el.style.opacity = '1'
+        }, index * 50)
+      })
     })
-  })
+  }, 300)
 }
 
+// 清除搜索（核心修改：完全还原页面初始状态）
 const clearSearch = () => {
+  // 1. 清空搜索框
   searchQuery.value = ''
-  showNotification('已清除搜索')
+  // 2. 重置排序为默认值
+  sortType.value = 'latest'
+  // 3. 重新加载原始数据（无关键词）
+  loadFans(false)
+  // 4. 隐藏通知提示
+  if (notificationRef.value) {
+    notificationRef.value.style.transform = 'translateX(calc(100% + 2rem))'
+  }
+  // 5. 提示用户
+  showNotification('已清除搜索，恢复全部粉丝列表')
 }
 
+// 排序处理
 const sortFans = (type: 'latest' | 'popular') => {
   sortType.value = type
   showNotification(type === 'latest' ? '已按最新关注排序' : '已按粉丝数最多排序')
@@ -391,6 +471,7 @@ const sortFans = (type: 'latest' | 'popular') => {
   })
 }
 
+// 关键词高亮
 const highlightKeyword = (text: string) => {
   const query = searchQuery.value.trim()
   if (!query) return text
@@ -401,32 +482,49 @@ const highlightKeyword = (text: string) => {
   )
 }
 
-const formatFollowTime = (time: string) => {
+// 格式化关注时间
+const formatFollowTime = (time?: string) => {
+  if (!time) return '未知时间'
   const date = new Date(time)
   return `${date.getMonth() + 1}月${date.getDate()}日`
 }
 
+// 跳转粉丝主页
 const goToFanProfile = (fanId: number) => {
   console.log(`跳转到粉丝主页：${fanId}`)
+  // router.push(`/user/${fanId}`)
 }
 
+// 发送私信
 const sendMessage = (fanId: number) => {
   console.log(`给粉丝${fanId}发送私信`)
   showNotification('私信窗口已打开')
 }
 
-const toggleFollowBack = (fanId: number) => {
-  const fan = fans.value.find((f) => f.id === fanId)
-  if (fan) {
-    fan.isFollowed = !fan.isFollowed
-    showNotification(fan.isFollowed ? '已回关该粉丝' : '已取消回关')
+// 回关/取消回关
+const toggleFollowBack = async (fanId: number) => {
+  try {
+    followLoading.value[fanId] = true
+    const fan = fansList.value.find((f: NormalUserItem) => f.id === fanId)
+    if (fan) {
+      fan.isMutual = !fan.isMutual
+      showNotification(fan.isMutual ? '已回关该粉丝' : '已取消回关')
+    }
+    // await followUser(fanId) // 真实接口调用
+  } catch (error) {
+    console.error('回关失败:', error)
+    ElMessage.error('操作失败，请稍后重试')
+  } finally {
+    followLoading.value[fanId] = false
   }
 }
 
+// 分享作品
 const shareWorks = () => {
   showNotification('分享功能已打开')
 }
 
+// 显示通知
 const showNotification = (text: string) => {
   if (notificationRef.value) {
     const textEl = notificationRef.value.querySelector('#notification-text')

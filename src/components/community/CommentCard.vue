@@ -101,7 +101,7 @@
   import {debounce,throttle} from '@/utils/debounceThrottle';                  // 节流防抖
   import {Like} from '@/api/community/DynamicOperate';                         // 点赞
   import SonCommentCard from './SonCommentCard.vue';                           // 子评论组件
-  import {reportRule} from '@/rules/community/report'                          // 举报规则
+  import {reportRule} from '@/utils/rules/community/report'                          // 举报规则
   import {Report} from '@/api/community/Report';                               // 举报
   // 数据
   let props = defineProps({

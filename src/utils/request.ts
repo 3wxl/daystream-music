@@ -8,6 +8,7 @@ import type {
 import axios from 'axios'
 import type { LoadingInstance } from 'element-plus'
 import { ElLoading, ElMessage } from 'element-plus'
+import JSONBig from 'json-bigint'
 
 let isRelogging = false
 const TOKEN_KEY = 'auth_token'
@@ -25,7 +26,7 @@ const removeToken = () => {
 }
 
 // 响应数据通用类型
-type Data<T = unknown> = {
+export type Data<T = unknown> = {
   success: boolean
   errorMsg: string
   data: T
@@ -46,7 +47,8 @@ interface RequestConfig<T = unknown> extends AxiosRequestConfig {
   noToken?: boolean
 }
 
-import JSONBig from 'json-bigint'
+// 配置 JSONBig 将大数字转为字符串
+const JSONBigString = JSONBig({ storeAsString: true })
 
 const service = axios.create({
   baseURL: '/api',
@@ -69,6 +71,39 @@ const service = axios.create({
   ],
 })
 
+// 大数字转换工具函数
+function convertBigNumbersToString(obj: any): any {
+  if (!obj) return obj
+
+  // 检查是否是 BigNumber 对象
+  const isBigNumber =
+    obj._isBigNumber ||
+    (obj.constructor && obj.constructor.name === 'BigNumber') ||
+    (obj.s !== undefined && obj.e !== undefined && obj.c !== undefined) // BigNumber2 的结构
+
+  if (isBigNumber) {
+    return obj.toString()
+  }
+
+  // 处理数组
+  if (Array.isArray(obj)) {
+    return obj.map((item) => convertBigNumbersToString(item))
+  }
+
+  // 处理普通对象
+  if (typeof obj === 'object') {
+    const result: any = {}
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        result[key] = convertBigNumbersToString(obj[key])
+      }
+    }
+    return result
+  }
+
+  return obj
+}
+
 // 请求拦截器
 service.interceptors.request.use(
   (config: InternalAxiosRequestConfig & { noToken?: boolean }) => {
@@ -88,6 +123,12 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   (response: AxiosResponse<Data<unknown>>) => {
+    // 转换大数字为字符串
+    const data = response.data
+    if (data && typeof data === 'object') {
+      response.data = convertBigNumbersToString(data)
+    }
+
     const headers = response.headers
     const newToken = headers['authorization'] || headers['Authorization']
     const isRefreshed = headers['token-refreshed'] || headers['Token-Refreshed']
@@ -103,12 +144,11 @@ service.interceptors.response.use(
 
     if (res.success === false) {
       const msg = res.errorMsg || '请求失败'
-      // 为了防止重复弹出，关闭所有消息后再弹出新的
       ElMessage.closeAll()
       ElMessage.error(msg)
       return Promise.reject(new Error(msg))
     }
-    return response // 返回完整响应对象
+    return response
   },
   (error: AxiosError) => {
     console.error('响应错误：', error)

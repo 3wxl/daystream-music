@@ -22,13 +22,21 @@
               <slot v-if="isCustom"></slot>
             </div>
             <div class="my-5" v-if="!isCustom">
-              <div class="flex justify-end gap-10">
-                <el-button @click="isShow=false" class="w-[90px]">
-                  <span class="text-[15px]">取消</span>
-                </el-button>
-                <el-button type="primary" @click="isShow=false" class="mr-4 w-[90px]">
-                  <span class="text-[15px]">确定</span>
-                </el-button>
+              <div class="flex justify-end gap-5 mt-10">
+                <button
+                  type="button"
+                  @click="isShow=false"
+                  class="cancel-btn"
+                >
+                  取消
+                </button>
+                <button
+                  type="button"
+                  class="mr-14"
+                  @click="emit('confirmClick')"
+                >
+                  确定
+                </button>
               </div>
             </div>
           </div>
@@ -79,7 +87,7 @@ const props = defineProps({
     default: 'prop:content没有使用'
   }
 });
-
+let emit = defineEmits(['confirmClick'])
 const isShow = defineModel<boolean>({ required: true });
 </script>
 
@@ -104,4 +112,39 @@ const isShow = defineModel<boolean>({ required: true });
 .dialog-fade-leave-active {
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); /* 平滑的缓动曲线 */
 }
+button {
+    padding: 5px 30px;
+    border: 0;
+    border-radius: 100px;
+    background-color: #2ba8fb;
+    color: #ffffff;
+    font-weight: 700;
+    transition: all 0.5s;
+    -webkit-transition: all 0.5s;
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #6fc5ff;
+    box-shadow: 0 0 20px #6fc5ff50;
+    transform: scale(1.05);
+  }
+
+  button:active {
+    background-color: #3d94cf;
+    transition: all 0.25s;
+    -webkit-transition: all 0.25s;
+    box-shadow: none;
+    transform: scale(0.98);
+  }
+  .cancel-btn{
+    background-color: #909399;
+  }
+  .cancel-btn:hover{
+    background-color: #B1B3B8;
+  }
+  .cancel-btn:active{
+    background-color: rgb(123, 125, 131);
+  }
 </style>
