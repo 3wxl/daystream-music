@@ -6,10 +6,22 @@
           @search="search"
         ></UserManageHeader>
       </div>
-      <div class="shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px] mt-3">
+      <div class="shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px] mt-3 relative">
         <UserManageContainer
           :userData="userData"
+          @prePage="skipPage"
+          @nextPage="skipPage"
+          @clickPage="skipPage"
+          @addUser="refresh"
+          @refresh="refresh"
+          @deleteUser="deleteUser"
+          :total="total"
         ></UserManageContainer>
+        <div v-show="isLoading" class="w-full h-full absolute top-0 left-0 z-10 bg-[rgba(255,255,255,0.15)] rounded-[8px] flex items-center justify-center">
+          <svg viewBox="25 25 50 50">
+            <circle r="20" cy="50" cx="50"></circle>
+          </svg>
+        </div>
       </div>
     </div>
   </transition>
@@ -17,74 +29,115 @@
 
 <script setup lang="ts">
   import {GetUserList} from '@/api/Admin/userManage'        // 获取用户列表数据的
+  import type {getListSubmitData,xGetListSubmitData} from '@/types/admin/userManage'       // 获取用户列表参数
   // 数据
-  let userData = reactive([      // 用户数据
-    {
-      avatar:'awdaw',
-      name: "张三",
-      emil: "2450488888@qq.com",
-      status: true,
-      createTime: "2021-01-01 12:00:00"
-    },
-    {
-      avatar:'wad',
-      name: "爱吃糖葫芦的小猫",
-      emil: "88451545@qq.com",
-      status: false,
-      createTime: "2021-01-01 12:00:00"
-    },
-    {
-      avatar:'wad',
-      name: "荆芥",
-      emil: "48949684@qq.com",
-      status: true,
-      createTime: "2021-01-01 12:00:00"
-    },
-    {
-      avatar:'wad',
-      name: "荆芥",
-      emil: "48949684@qq.com",
-      status: false,
-      createTime: "2021-01-01 12:00:00"
-    },
-    {
-      avatar:'wad',
-      name: "荆芥",
-      emil: "48949684@qq.com",
-      status: true,
-      createTime: "2021-01-01 12:00:00"
-    },
-    {
-      avatar:'wad',
-      name: "荆芥",
-      emil: "48949684@qq.com",
-      status: true,
-      createTime: "2021-01-01 12:00:00"
-    },
-    {
-      avatar:'wad',
-      name: "荆芥",
-      emil: "48949684@qq.com",
-      status: true,
-      createTime: "2021-01-01 12:00:00"
-    },
-    {
-      avatar:'wad',
-      name: "荆芥",
-      emil: "48949684@qq.com",
-      status: true,
-      createTime: "2021-01-01 12:00:00"
-    }
-  ])
+  let userData = reactive([])     // 用户数据
+  let pageNum = 1                 // 页码
+  const pageSize = 8              // 每页显示的条数
+  let status = 0                  // 默认状态
+  let total = ref(0)              // 总个数
+  let currentTotal = ref(0)       // 当前页的数据个数
+  let key = ''                    // 搜索关键字,默认或者当前，用于比较新搜索的是否为新的，判断是否要重置currentPage
+  let isLoading = ref(true)       // 加载中
 
   // 方法
-
-  function search(searchData:{userSearchKeyword:string,userType:string}){     // 接收暴漏的数据，并搜索
-    console.log(searchData)
+  async function getUserList(key?:string,status?:number){
+    let getData:getListSubmitData = {pageNum,pageSize}
+    if(key){
+      getData.key = key
+    }
+    if(status && status !== 1){
+      if(status === 2){
+        getData.status = 1
+      }else if(status === 3){
+        getData.status = 0
+      }
+    }
+    isLoading.value = true
+    try{
+      let userListRes = await GetUserList(getData)
+      if(userListRes.success){
+        currentTotal.value = userListRes.data.records.length
+        userData.splice(0,userData.length)
+        userData.push(...userListRes.data.records)
+        total.value = userListRes.data.total
+      }
+      isLoading.value = false
+    }
+    catch(err){
+      isLoading.value = false
+      ElMessage({
+        message: '查找失败',
+        type: 'error',
+      })
+    }
   }
+  function skipPage(page:number){       // 跳转的函数
+    pageNum = page
+    getUserList(key,status)
+  }
+  function search(searchData:{userSearchKeyword:string,userType:string}){     // 接收暴漏的数据，并搜索
+    getUserList(searchData.userSearchKeyword,Number(searchData.userType))
+  }
+  function refresh(){       // 刷新用的
+    skipPage(pageNum)
+  }
+  function deleteUser(){        // 删除一个用户后的回调
+    currentTotal.value -= 1
+    if(currentTotal.value < 0){
+      skipPage(1)
+      return
+    }
+    if(currentTotal.value === 0){
+      skipPage(pageNum-1)
+      return
+    }
+    skipPage(pageNum)
+  }
+  onMounted(()=>{
+    getUserList()
+    document.querySelector('.el-pagination__goto').textContent = '跳转到'
+  })
 </script>
 
 <style scoped>
+  svg {
+  width:5em;
+  transform-origin: center;
+  animation: rotate4 2s linear infinite;
+  }
+
+  circle {
+  fill: none;
+  stroke: hsl(214, 97%, 59%);
+  stroke-width: 2;
+  stroke-dasharray: 1, 200;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  animation: dash4 1.5s ease-in-out infinite;
+  }
+
+  @keyframes rotate4 {
+  100% {
+    transform: rotate(360deg);
+  }
+  }
+
+  @keyframes dash4 {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 90, 200;
+    stroke-dashoffset: -35px;
+  }
+
+  100% {
+    stroke-dashoffset: -125px;
+  }
+  }
   .el-button--primary{
     transition: all 0.2s;
   }
