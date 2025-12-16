@@ -26,6 +26,8 @@ export function useAuthRules(formData: Record<string, any>, pwdKey = 'password')
     { validator: validateConfirmPwd, trigger: 'blur' },
   ]
 
+
+
   // 登录规则
   const loginRules = reactive<FormRules>({
     email: emailRule,
