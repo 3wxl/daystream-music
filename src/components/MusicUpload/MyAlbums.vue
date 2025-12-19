@@ -82,6 +82,11 @@ const albums = ref([
     title: 'My Debut Album',
     cover: 'https://picsum.photos/300',
     songCount: 12,
+  }, {
+    id: '2',
+    title: 'My Second Album',
+    cover: 'https://picsum.photos/300',
+    songCount: 12,
   },
 ])
 

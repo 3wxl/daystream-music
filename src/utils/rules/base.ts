@@ -56,3 +56,15 @@ export const introRule: FormItemRule[] = [
     trigger: 'blur',
   },
 ]
+// 长度校验
+export const lengthRule = (count: number) => {
+    return (rule:any,value:string,callback:any) => {
+     if(!value || value.trim().length === 0){
+      callback(new Error('请输入内容，文本内容不能为空或全是空格'))
+     }else if(value.trim().length>count){
+      callback(new Error(`文本内容长度不能超过${count}位`))
+     }else{
+      callback()
+     }
+    }
+  }
