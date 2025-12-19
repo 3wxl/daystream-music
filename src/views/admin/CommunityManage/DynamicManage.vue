@@ -1,177 +1,164 @@
 <template>
   <div>
     <div class="shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px]">
-      <div class="flex justify-between px-4 items-center">
-        <div class="flex items-center h-full">
-          <AdminInput v-model="dynamicSearch" class="mr-5" type="text" placeholder="请输入动态标题" width="w-[300px]" label="动态："></AdminInput>
-          <AdminSelect v-model="typeVal" class="mr-16" :options="[{value:'1',label:'全部'},{value:'2',label:'普通用户'},{value:'3',label:'音乐人'}]" label="类型" ></AdminSelect>
-          <AdminButton
-            text="搜索"
-            class="ml-4 text-[15px]!"
-            @click="handleSearch"
-          />
-        </div>
-      </div>
+      <DynamicManageHeader
+        @search="search"
+      />
     </div>
     <div class="shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px] mt-3">
-      <div class="flex justify-between">
-        <span class="text-[18px] font-700 ml-2">动态管理</span>
-        <div class="flex mr-8">
-          <el-tooltip content="删除所选动态">
-            <IconFontSymbol name="shanchu" class="text-[#666] font-700 relative top-[3px] cursor-pointer hover:text-red-700 mr-4"></IconFontSymbol>
-          </el-tooltip>
-          <el-tooltip content="刷新">
-            <IconFontSymbol name="refresh" class="text-[#666] font-700 relative top-[3px] cursor-pointer hover:text-[#529FFD] mr-2"></IconFontSymbol>
-          </el-tooltip>
-        </div>
-      </div>
-      <div class="user-table w-full mt-4">
-        <el-table :data="dynamicList" stripe >
-          <el-table-column type="selection" width="55" align="center" class="ml-3"/>
-          <el-table-column label="标题" width="250" align="center" class="relative">
-            <template #default="scope">
-              <span class="line-clamp-1 cursor-pointer text-[15px] hover:text-[#529FFD] duration-300" @click="router.push('/admin/CommunityManage/DynamicManageDetail')">{{ scope.row.title }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="内容" width="220" align="center" class="relative">
-            <template #default="scope">
-              <span class="line-clamp-1 cursor-pointer hover:text-[#529FFD] duration-300" @click="router.push('/admin/CommunityManage/DynamicManageDetail')">{{ scope.row.content }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="作者" width="140" align="center" class="relative">
-            <template #default="scope">
-              <span class="line-clamp-1">{{ scope.row.author }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="状态" width="100" align="center" class="relative">
-            <template #default="scope">
-              <el-switch
-                v-model="scope.row.status"
-                class="ml-2"
-                style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
-              />
-            </template>
-          </el-table-column>
-          <el-table-column label="类型" width="140" align="center" class="relative">
-            <template #default="scope">
-              <span class="line-clamp-1">{{ scope.row.type }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="发布时间" width="200" align="center" class="relative">
-            <template #default="scope">
-              <span class="line-clamp-1">{{ scope.row.date }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" align="center">
-            <template #default="scope">
-              <span
-                class="active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#bfdcff] inline-block bg-[#e0eeff] text-[#529FFD] py-[3px] rounded-[20px] px-[12px] cursor-pointer mr-4 text-[15px]"
-              >
-                <IconFontSymbol name="xiugai" size="18px"></IconFontSymbol>
-                编辑
-              </span>
-              <span
-                class="active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#ffbfbf] inline-block bg-[#ffe0e0] text-[#fd5252] py-[3px] rounded-[20px] px-[12px] cursor-pointer mr-4 text-[15px]"
-              >
-                <IconFontSymbol name="bohui" size="15px"></IconFontSymbol>
-                删除
-              </span>
-            </template>
-          </el-table-column>
-        </el-table>
-        <div class="admin-page mt-8 mb-4 flex justify-end mr-12">
-          <el-pagination
-            background
-            layout="prev, pager, next ,jumper"
-            :total="100"
-            :default-page-size="8"
-          />
-        </div>
+      <DynamicManageContainer
+        :dynamicList="dynamicList"
+        @prePage="skipPage"
+        @nextPage="skipPage"
+        @clickPage="skipPage"
+        :total="total"
+        @refresh="refresh"
+        @deleteDynamic="deleteDynamic"
+        @deleteDynamicList="deleteDynamicList"
+        @credit="credit"
+      />
+      <div v-show="isLoading" class="w-full h-full absolute top-0 left-0 z-10 bg-[rgba(255,255,255,0.15)] rounded-[8px] flex items-center justify-center">
+        <svg viewBox="25 25 50 50">
+          <circle r="20" cy="50" cx="50"></circle>
+        </svg>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-  import AdminInput from "@/components/Admin/AdminInput.vue";
-  import AdminSelect from "@/components/Admin/AdminSelect.vue";
-  import IconFontSymbol from "@/components/IconFontSymbol.vue";
+  import DynamicManageHeader from "@/components/Admin/Community/DynamicManage/DynamicManageHeader.vue";
+  import DynamicManageContainer from "@/components/Admin/Community/DynamicManage/DynamicManageContainer.vue";
   import { useRouter } from "vue-router";
-  let router = useRouter();
-  let typeVal = ref('1')
-  let dynamicSearch = ref('')
-  let dynamicList = reactive([
-    {
-      title: '动态标题1',
-      content: '这是动态内容的简要描述。',
-      author: '用户1',
-      status: true,
-      type: '普通用户',
-      date: '2024-01-15 10:30:00',
-    },
-    {
-      title: '动态标题1',
-      content: '这是动态内容的简要描述。',
-      author: '用户1',
-      status: true,
-      type: '普通用户',
-      date: '2024-01-15 10:30:00',
-    },
-    {
-      title: '动态标题1',
-      content: '这是动态内容的简要描述。',
-      author: '用户1',
-      status: true,
-      type: '普通用户',
-      date: '2024-01-15 10:30:00',
-    },
-    {
-      title: '动态标题1',
-      content: '这是动态内容的简要描述。',
-      author: '用户1',
-      status: true,
-      type: '普通用户',
-      date: '2024-01-15 10:30:00',
-    },
-    {
-      title: '动态标题1',
-      content: '这是动态内容的简要描述。',
-      author: '用户1',
-      status: true,
-      type: '普通用户',
-      date: '2024-01-15 10:30:00',
-    },
-    {
-      title: '动态标题1',
-      content: '这是动态内容的简要描述。',
-      author: '用户1',
-      status: true,
-      type: '普通用户',
-      date: '2024-01-15 10:30:00',
-    },
-    {
-      title: '动态标题1',
-      content: '这是动态内容的简要描述。',
-      author: '用户1',
-      status: true,
-      type: '普通用户',
-      date: '2024-01-15 10:30:00',
-    },
-    {
-      title: '动态标题1',
-      content: '这是动态内容的简要描述。',
-      author: '用户1',
-      status: true,
-      type: '普通用户',
-      date: '2024-01-15 10:30:00',
-    },
-  ])
-  function handleSearch(){
-    console.log(dynamicSearch.value)
+  import {GetDynamicList} from '@/api/Admin/communtiy/dynamicManage'      //  获取动态列表
+  import type {getDynamicListType,xGetDynamicListType,dynamicType} from '@/types/admin/dynamic'       // 获取动态列表参数
+
+  let dynamicList:dynamicType[] = reactive([])    // 动态列表
+  let pageNum = 1                 // 页码
+  const pageSize = 8              // 每页显示的条数
+  let total = ref(0)              // 总个数
+  let currentTotal = ref(0)       // 当前页的数据个数
+  let key = ''                    // 搜索关键字,默认或者当前，用于比较新搜索的是否为新的，判断是否要重置currentPage
+  let role = 0
+  let isLoading = ref(true)       // 加载中
+
+  function search(searchObj:{key:string,role:number}){      // 搜索
+    key = searchObj.key
+    role = searchObj.role
+    getDynamicList(key,role)
   }
+  async function getDynamicList(key?:string,role?:number){
+    let getData:getDynamicListType = {pageNum,pageSize}
+    if(key){
+      getData.key = key
+    }
+    if(role !== 0){
+      getData.role = role
+    }
+    isLoading.value = true
+    try{
+      let dynamicListRes:xGetDynamicListType = (await GetDynamicList(getData)) as xGetDynamicListType
+      if(dynamicListRes.success){
+        currentTotal.value = dynamicListRes.data.records.length
+        dynamicList.splice(0)
+        dynamicList.push(...dynamicListRes.data.records)
+        total.value = dynamicListRes.data.total
+      }
+      isLoading.value = false
+    }
+    catch(err){
+      isLoading.value = false
+      ElMessage({
+        message: '查找失败',
+        type: 'error',
+      })
+    }
+  }
+  function skipPage(page:number){      // 跳转的函数
+    pageNum = page
+    getDynamicList(key,role)
+  }
+  function refresh(){
+    isLoading.value = true
+    setTimeout(() => {
+      getDynamicList(key,role)
+      ElMessage({
+        message: '以刷新为最新数据',
+        type: 'success',
+      })
+    }, 500);
+  }
+  function credit(){
+    getDynamicList(key,role)
+  }
+  function deleteDynamic(){     // 删除单个动态时的回调
+    currentTotal.value --
+    if(currentTotal.value<=0 && pageNum==1){
+      skipPage(1)
+      return
+    }else if(currentTotal.value<=0){
+      skipPage(pageNum-1)
+      return
+    }else{
+      skipPage(pageNum)
+    }
+  }
+  function deleteDynamicList(deleteLength:number){  // 删除动态列表时的回调
+    currentTotal.value -= deleteLength
+    if(currentTotal.value<=0 && pageNum==1){
+      skipPage(1)
+      return
+    }else if(currentTotal.value<=0){
+      skipPage(pageNum-1)
+      return
+    }else{
+      skipPage(pageNum)
+    }
+  }
+  onMounted(()=>{
+    getDynamicList(key,role)
+    document.querySelector('.el-pagination__goto').textContent='跳转'
+  })
 </script>
 
 <style scoped>
+  svg {
+  width:5em;
+  transform-origin: center;
+  animation: rotate4 2s linear infinite;
+  }
+
+  circle {
+  fill: none;
+  stroke: hsl(214, 97%, 59%);
+  stroke-width: 2;
+  stroke-dasharray: 1, 200;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  animation: dash4 1.5s ease-in-out infinite;
+  }
+
+  @keyframes rotate4 {
+  100% {
+    transform: rotate(360deg);
+  }
+  }
+
+  @keyframes dash4 {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 90, 200;
+    stroke-dashoffset: -35px;
+  }
+
+  100% {
+    stroke-dashoffset: -125px;
+  }
+  }
   ::v-deep(.el-table__row){
     height:70px;
   }

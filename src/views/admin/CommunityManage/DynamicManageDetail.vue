@@ -1,45 +1,18 @@
 <template>
-  <button class="absolute top-3 z-100 left-60 flex items-center cursor-pointer px-[10px] py-[2px] hover:bg-[#f5f5f5] rounded-md shadow-md/5" @click="router.back()">
+  <!-- <button v-if="hasGet" class="absolute top-12 z-100 right-[36%] flex items-center cursor-pointer px-[10px] py-[2px] hover:bg-[#f5f5f5] rounded-md shadow-md/5" @click="router.back()">
     <IconFontSymbol name="fanhui" size="20px" class="relative top-[1px]"></IconFontSymbol>
     <span class="ml-1 text-[16px] font-[500]">返回</span>
-  </button>
+  </button> -->
   <div class="flex items-start relative" style="height: calc(100vh - 174px)">
-    <div class="bg-white flex-grow-0 shrink-0 basis-[67%] mb-4 duration-[.2s] rounded-xl  overflow-hidden shadow-lg backdrop-blur-sm w-240 py-[15px] px-[30px] pb-10">
+    <div class="min-h-[333px] bg-white flex-grow-0 shrink-0 basis-[67%] mb-4 duration-[.2s] rounded-xl  overflow-hidden shadow-lg backdrop-blur-sm w-240 py-[15px] px-[30px] pb-10">
       <div class="">
-        <h1 class="text-[black] font-[600] text-[36px]">我是一个普普通通的标题</h1>
+        <h1 class="text-[black] font-[600] text-[36px]" v-if="hasGet">{{ dynamic.title }}</h1>
         <div class="my-3">
-          <p class="text-[#666] text-[13px]">
-            2022-01-01 00:00:00 · 白昼音流
+          <p class="text-[#666] text-[13px]" v-if="hasGet">
+            {{ formatDateTime(dynamic.createTime) }} · {{dynamic.authorName}}
           </p>
         </div>
-        <div class="mt-[20px] text-black">    <!-- 动态详情内容 -->
-          <!-- 动态详细内容 ---->    <!-- 文本部分 -->
-          <p class="indent-[2em] break-words break-all text-[16px] my-[2px] text-[#ff5100]">
-            #四个大人喜人第四赛段第一#
-          </p>
-          <p class="indent-[2em] break-words break-all text-[16px] my-[2px]">
-            感谢大家抬爱啊啊啊啊啊！
-          </p>
-          <p class="indent-[2em] break-words break-all text-[16px] my-[2px]">
-            [泪][泪][泪][努力][努力][努力]好开心！
-          </p>
-          <p class="indent-[2em] break-words break-all text-[16px] my-[2px]">
-            我们一定会继续努力的！！
-          </p>
-          <p class="indent-[2em] break-words break-all text-[16px] my-[2px]">
-            冲啊！！！！！！！！！！！！！！！
-          </p>
-          <p class="indent-[2em] break-words break-all text-[16px] my-[2px] text-[#55ff00]">
-            #喜人奇妙夜# ​
-          </p>
-          <p class="indent-[2em] break-words break-all text-[16px] my-[2px]">
-            11月21日，中国常驻联合国代表傅聪致函联合国秘书长古特雷斯，就日本首相高市早苗涉华错误言行阐明中国政府立场。该函将作为联合国大会正式文件，向全体会员国散发。
-          </p>
-          <img src="../../../../public/头像.png" alt="文章图片" class="mx-auto w-[80%] my-3 rounded-[16px] cursor-pointer">
-          <p class="indent-[2em] break-words break-all text-[16px] my-[2px]">
-            中国国际问题研究院副研究员苏晓晖表示，日本希望在亚太地区安全当中来提升自身的地位，同时推动大国竞争和战略博弈，在试图形成更强的阵营对抗。而在这个过程当中，所谓打“台湾牌”来实现日本的目标，甚至形成“多海联动”，就成了日本在政策方面的危险的态势。不过，高市早面的这番错误言论在日本国内也遭遇了强烈的反弹，很多人指向的是高市早苗此番言论背后的意图，以及对中日关系所造成的影响和日本承受的损失。
-          </p>
-        </div>
+        <div class="mt-[20px] text-black dynamic-detail-style" v-html="dynamic.content" v-if="hasGet "></div>
       </div>
     </div>
     <div class="bg-white flex-grow-0 shrink-0 w-[28%] sticky top-0 self-start ml-10 mb-4 duration-[.2s] rounded-xl overflow-hidden shadow-lg backdrop-blur-sm w-100 p-[15px]">
@@ -48,29 +21,29 @@
         <p class="text-[14px] text-[#666] self-start">作者:</p>
         <div class="w-30 h-30 md:w-30 md:h-30 rounded-full border-4 border-white/20 overflow-hidden shadow-lg">
           <img
-            :src="'http://39.96.214.163:9000/file/70567a01-09d0-443b-9d8a-bab6e5623967.png'"
+            :src="dynamic.avatar"
             class="cursor-pointer w-full h-full object-cover transition-transform duration-500 hover:scale-110"
             @click="router.push('/User/PersonalCenter')"
+            v-if="hasGet"
           />
         </div>
-        <p class="text-[black] text-[18px] font-[600] mt-2">蔡徐坤</p>
-        <p class="text-[#666] mt-[2px] text-[12px]">坤坤音乐创作者</p>
-        <div class="flex mt-6 text-[#666] mb-2">
+        <p class="text-[black] text-[18px] font-[600] mt-2" v-if="hasGet">{{dynamic.authorName}}</p>
+        <p class="text-[#666] mt-[2px] text-[12px]" v-if="hasGet">{{dynamic.introduction}}</p>
+        <div class="flex mt-6 text-[#666] mb-2" v-if="hasGet">
           <span>
-            <span class="mr-[2px]">111</span>
+            <span class="mr-[2px]">{{dynamic.followCount}}</span>
             粉丝
           </span>
           <span class="mx-14">
-            <span class="mr-[2px]">111</span>
+            <span class="mr-[2px]">{{ dynamic.postlikeCount }}</span>
             点赞
           </span>
           <span>
-            <span class="mr-[2px]">111</span>
+            <span class="mr-[2px]">{{ dynamic.followerCount }}</span>
             关注
           </span>
         </div>
         <div class="flex mt-3 gap-7 flex-col">        <!-- 审核按钮 -->
-
           <button class="danger-btn" style="background-color: #ff4d4f;">
             <IconFontSymbol name="shanchu" size="16px" class="mr-1">
             </IconFontSymbol>
@@ -79,29 +52,93 @@
         </div>
       </div>
     </div>
+    <div v-show="!hasGet" class="w-full h-full absolute top-0 left-0 z-10 bg-[rgba(255,255,255,0.15)] rounded-[8px] flex items-center justify-center">
+      <svg viewBox="25 25 50 50">
+        <circle r="20" cy="50" cx="50"></circle>
+      </svg>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-  let commentWords = ref(0);
-  let commentInput = ref(null);
+  import {useRoute,useRouter} from 'vue-router'
+  import {GetDynamicDetail} from '@/api/community/Dynamic'
+  import {formatDateTime} from '@/utils/timeToolFun';     // 时间格式化
+  let route = useRoute();
   let router = useRouter();
-  let isAttent = ref(false);
-  let status = ref(true);
-  function updateWords(event) {
-    commentWords.value = event.target.value.length;
+  let dynamic = ref();
+  let hasGet = ref(false);      // 是否已获取动态详情
+  let dynamicId = ref(route.query.id);    // 当前动态id
+  async function getNowDaynamic(){      // 获取当前动态详情
+    hasGet.value = false
+    let res = await GetDynamicDetail(dynamicId.value as string);
+    if(res.success){
+      dynamic.value = res.data;
+      hasGet.value = true
+    }else{
+      ElMessage({
+        message: '获取动态详情失败',
+        type: 'warning',
+      })
+    }
   }
-  onMounted(() => {
-    watch(commentWords, (value) => {
-      if (value > 100) {
-        commentInput.value.value = commentInput.value.value.substring(0, 100);
-        commentWords.value = 100;
-      }
-    })
+  onMounted(()=>{
+    getNowDaynamic();
   })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+  svg {
+  width:5em;
+  transform-origin: center;
+  animation: rotate4 2s linear infinite;
+  }
+
+  circle {
+  fill: none;
+  stroke: hsl(214, 97%, 59%);
+  stroke-width: 2;
+  stroke-dasharray: 1, 200;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  animation: dash4 1.5s ease-in-out infinite;
+  }
+
+  @keyframes rotate4 {
+  100% {
+    transform: rotate(360deg);
+  }
+  }
+
+  @keyframes dash4 {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 90, 200;
+    stroke-dashoffset: -35px;
+  }
+
+  100% {
+    stroke-dashoffset: -125px;
+  }
+  }
+  .dynamic-detail-style{
+    ::v-deep(p){
+      text-indent: 2rem;
+      font-size: 16px;
+      margin:2px 0;
+    }
+    ::v-deep(img){
+      max-height: 800px;
+      object-fit: cover;
+      border-radius: 16px;
+      cursor: pointer;
+      margin: 12px 0;
+    }
+  }
   .danger-btn {
     border: none;
     color: #fff;
