@@ -12,7 +12,7 @@
         @addUser="addUser"
       />
       <el-tooltip content="删除所选用户">
-        <IconFontSymbol name="shanchu" class="font-700 relative top-[3px] cursor-pointer hover:text-red-700 mr-4"></IconFontSymbol>
+        <IconFontSymbol @click="isShowDelList=true" name="shanchu" class="font-700 relative top-[3px] cursor-pointer hover:text-red-700 mr-4"></IconFontSymbol>
       </el-tooltip>
       <el-tooltip content="刷新">
         <IconFontSymbol @click="refresh" name="refresh" class="font-700 relative top-[3px] cursor-pointer hover:text-[#529FFD] mr-2"></IconFontSymbol>
@@ -21,12 +21,12 @@
   </div>
   <div class="user-table w-full mt-4">
     <transition name="ttb" appear>
-      <el-table :data="userData" stripe >
+      <el-table :data="userData" stripe @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" class="ml-3"/>
         <el-table-column label="头像" width="130" align="center">
           <template #default="scope">
             <div class="flex justify-center">
-              <img :src="scope.row.avatar" alt="头像" class="m-1 w-[45px] h-[45px] rounded-[40px] outline-1.5 outline-offset-1 outline-solid outline-[#619ca4]">
+              <img :src="scope.row.avatar" alt="头像" class="object-cover m-1 w-[45px] h-[45px] rounded-[40px] outline-1.5 outline-offset-1 outline-solid outline-[#619ca4]">
             </div>
           </template>
         </el-table-column>
@@ -43,12 +43,14 @@
         <el-table-column label="状态" align="center" width="120">
           <template #default="scope">
             <span
-              class="bg-[#c8f2d1] text-[#37D159] rounded-[16px] py-1 px-[14px] border-[1px] border-solid border-transparent text-[11px] inline-block font-[700] text-center"
-              v-show="scope.row.status"
+              class="cursor-pointer bg-[#c8f2d1] text-[#37D159] rounded-[16px] py-1 px-[14px] border-[1px] border-solid border-transparent text-[11px] inline-block font-[700] text-center"
+              v-show="scope.row.status==='1'"
+              @click="banUser(scope.row.id)"
             >启用</span>
             <span
-              class="bg-[#ffd4cb] text-[#FF6746] rounded-[16px] py-1 px-[14px] border-[1px] border-solid border-transparent text-[11px] inline-block font-[700] text-center"
-              v-show="!scope.row.status"
+              class="cursor-pointer bg-[#ffd4cb] text-[#FF6746] rounded-[16px] py-1 px-[14px] border-[1px] border-solid border-transparent text-[11px] inline-block font-[700] text-center"
+              v-show="scope.row.status==='0'"
+              @click="banUser(scope.row.id)"
             >禁用</span>
           </template>
         </el-table-column>
@@ -83,11 +85,21 @@
       :content="`是否删除该用户？操作执行后将无法撤销。`"
       @confirmClick="DeleteUserFun"
     ></AdminConfirm>
+    <AdminConfirm
+      v-model="isShowDelList"
+      width="470px"
+      iconName="gongzuotai-dongtaishenhe"
+      iconColor="#F72A33"
+      title="操作确认"
+      :content="`是否删除所选用户？操作执行后将无法撤销。`"
+      @confirmClick="deleteSelect"
+    ></AdminConfirm>
     <UpdateUserData
       v-model="isShowUpdate"
       :userInfo="nowUserInfo"
       :updateLoading="updateLoading"
       :updateId="updateId"
+      @refresh="refresh"
     ></UpdateUserData>
     <div class="admin-page mt-8 mb-4 flex justify-end mr-12">
       <el-pagination
@@ -105,16 +117,16 @@
 </template>
 
 <script setup lang="ts">
-  import {GetUserInfo,DeleteUser} from '@/api/Admin/userManage'        // 获取用户信息、删除用户
+  import {GetUserInfo,DeleteUser,BanUser,DeleteUsersApi} from '@/api/Admin/userManage'        // 获取用户信息、删除用户、封禁解封用户、批量删除用户
   import Message from '@/views/message.vue';
-  import { ElStep } from 'element-plus';
   // 添加用户
   let isAddUser = ref(false)      // 添加用户弹窗
   let isShowDel = ref(false)      // 删除用户弹窗
   let isShowUpdate = ref(false)   // 修改用户弹窗
+  let isShowDelList = ref(false)  // 批量删除用户弹窗
 
   let props = defineProps<{userData:any,total:number}>()
-  let emit = defineEmits(['prePage', 'nextPage','clickPage','addUser','refresh','deleteUser'])
+  let emit = defineEmits(['prePage', 'nextPage','clickPage','addUser','refresh','deleteUser','deleteUsers'])
 
   let nowUserInfo = ref({
     avatar:'',
@@ -131,8 +143,9 @@
   let updateLoading = ref(true)
   let nowId = ref('')       // 当前可能选择的用户的id,删除的时候使用
   let updateId = ref('')    // 当前修改用户的Id
+  let deleteUsers = reactive([])      // 批量删除用户
 
-  async function updateUserInfo(id:string){               // 修改用户信息
+  async function updateUserInfo(id:string){               // 修改用户信息,这里仅作获取信息传递给对应修改用户信息组件
     updateLoading.value = true
     isShowUpdate.value = true
     let userInfo:any = await GetUserInfo(id)        // 第一步先获取该用户的信息
@@ -165,6 +178,51 @@
     catch(err){
       Message.error('删除失败')
     }
+  }
+  async function banUser(userId:string){      // 封禁解封用户
+    let banRes = await BanUser(Number(userId))
+    if(banRes.success){
+      ElMessage({
+        message: '操作成功',
+        type: 'success',
+      })
+      emit('refresh')
+    }else{
+      ElMessage({
+        message: '操作失败',
+        type: 'error',
+      })
+    }
+  }
+  function handleSelectionChange(selection: any[]){
+    deleteUsers.splice(0)
+    selection.forEach(item => {
+      deleteUsers.push(item.id)
+    })
+  }
+  async function deleteSelect(){      // 删除所选用户
+    if(deleteUsers.length === 0){
+      ElMessage({
+        message: '请选择要删除的用户',
+        type: 'warning',
+      })
+      isShowDelList.value = false
+      return
+    }
+    let deleteRes = await DeleteUsersApi(deleteUsers)
+    if(deleteRes.success){
+      ElMessage({
+        message: '批量删除成功',
+        type: 'success',
+      })
+      emit('deleteUsers',deleteUsers.length)
+    }else{
+      ElMessage({
+        message: '操作失败',
+        type: 'error',
+      })
+    }
+    isShowDelList.value=false
   }
   function preSkip(page:number){
     emit('prePage', page)

@@ -141,7 +141,7 @@ const input = ref('')
 const userStore = useUserStore()
 
 const goToAdmin = () => {
-  router.push('/admin')
+  router.push('/admin/dataStatistics')
 }
 // 后端接口返回的数据结构
 // const user = ref({

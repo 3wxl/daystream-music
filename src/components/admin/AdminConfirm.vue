@@ -2,7 +2,7 @@
   <teleport :to="Teleport">
     <transition name="mask-fade">
       <div
-        v-show="isShow"
+        v-if="isShow"
         class="w-[100vw] h-[100vh] fixed top-0 left-0 bg-[rgba(0,0,0,0.15)] flex justify-center items-center z-[10]"
         @click="isShow=false"
       >

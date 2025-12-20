@@ -64,11 +64,10 @@
           </div>
           <div class="mt-2">
             <span class="text-gray-800 font-bold text-[18px] mr-2">会员到期时间:</span>
-            <span class="text-gray-600 text-[15px] font-[400]">{{ userInfo.vipExpireTime?userInfo.vipExpireTime:'暂不是vip' }}</span>
             <el-date-picker
               v-model="vipEndTime"
               type="date"
-              placeholder="Pick a day"
+              :placeholder="userInfo.vipExpireTime?formatDateToIsoLikeString(new Date(userInfo.vipExpireTime)):'暂不是vip或未指定截止时间'"
               @change = "vipEndTimeChange"
             />
           </div>
@@ -99,6 +98,8 @@
 </template>
 
 <script setup lang="ts">
+  import {updateImage} from '@/api/community/ImageOperate'
+  import {UpdateUserAPI} from '@/api/Admin/userManage'
   let isShowUpdate = defineModel<boolean>()        // 添加用户弹窗是否显示
   let isAddLoading = ref(false)
   let props = defineProps<{
@@ -106,14 +107,18 @@
     updateLoading:boolean,
     updateId:string
   }>()
+  let emit = defineEmits(['refresh'])
   let avatarSelect:any = ref(null)
   let avatar:any = ref(null)
-  let newAvatar:any = ref()           // 记录更新的头像
-  let newUsername:any = ref(null)     // 新用户名
-  let newIntroduction:any = ref(null)   // 新简介
-  let newWalletBalance:any = ref(null)     // 新钱包余额
-  let vipEndTime:any = ref()          // vip到期时间
-  function updateAvatar(){
+  let newAvatar:any = ref()                 // 记录更新的头像
+  let newUsername:any = ref(null)           // 新用户名
+  let newIntroduction:any = ref(null)       // 新简介
+  let newWalletBalance:any = ref(null)      // 新钱包余额
+  let vipEndTime:any = ref(props.userInfo.vipExpireTime)                // vip到期时间
+  watch(() => props.userInfo.vipExpireTime, (newVal) => {
+    vipEndTime.value = newVal
+  })
+  function updateAvatar(){                  // 选择头像
     avatarSelect.value.click()
     avatarSelect.value.onchange = function(){
       let reader = new FileReader()
@@ -124,7 +129,7 @@
       newAvatar.value = avatarSelect.value.files[0]
     }
   }
-  async function updateUser(){
+  async function updateUser(){        // 更新用户信息
     isAddLoading.value = true
     let updateInfo = reactive({     // 用户信息，更新时更新这里面的数据
       id: props.updateId,
@@ -133,27 +138,83 @@
       introduction: props.userInfo.introduction,
       gender: props.userInfo.gender,
       walletBalance: props.userInfo.walletBalance,
-      vipExpireTime: props.userInfo.vipExpireTime,
     })
-    updateInfo.username = newUsername.value.value
+    updateInfo.username = newUsername.value.value         // 获取最新的信息
     updateInfo.introduction = newIntroduction.value.value
     updateInfo.walletBalance = newWalletBalance.value.value
     let genders = document.getElementsByName('gender')
-    for(let i = 0; i < genders.length; i++){
+    for(let i = 0; i < genders.length; i++){          // 性别值
       if(genders[i].checked){
         updateInfo.gender = Number(genders[i].value)
       }
     }
-
-    // for(let key in document.getElementsByName('vip'))
-    //console.log(updateInfo)
+    let isVips = document.getElementsByName('vip')        // vip
+    for(let i = 0; i < isVips.length; i++){
+      if(isVips[i].checked){
+        if(Number(isVips[i].value) === 0){
+          // updateInfo.isVip = true
+          if(!vipEndTime.value){
+            ElMessage.warning('请选择会员到期时间')
+            isAddLoading.value = false
+            return
+          }
+          updateInfo.vipExpireTime = formatDateToIsoLikeString(new Date(vipEndTime.value))
+        }
+      }
+    }
+    let avatarForm
+    if(newAvatar.value){
+      avatarForm = new FormData()
+      avatarForm.append('file', newAvatar.value)
+    }
+    try{
+      if(newAvatar.value){
+        let avatarRes = await updateImage(avatarForm)
+        if(!avatarRes.success){
+          ElMessage.error('头像上传失败')
+          return
+        }
+        updateInfo.avatar = avatarRes.data
+      }
+      let updateRes =  await UpdateUserAPI(updateInfo)
+      if(updateRes.success){
+        ElMessage.success('修改用户信息成功')
+        isAddLoading.value = false
+        isShowUpdate.value = false
+        emit('refresh')
+      }
+    }
+    catch(err){
+      isAddLoading.value = false
+      ElMessage.error('修改用户信息失败')
+    }
   }
-  function vipEndTimeChange(){      // vip到期时间改变时
+  function vipEndTimeChange(){      // vip到期时间改变时判断
+    let isVips = document.getElementsByName('vip')        // vip
+    for(let i = 0; i < isVips.length; i++){
+      if(isVips[i].checked){
+        if(Number(isVips[i].value) !== 0){
+          ElMessage.warning('请先更改vip状态，再进行时间修改')
+          isAddLoading.value = false
+          vipEndTime.value = ''
+          return
+        }
+      }
+    }
     let targetTime = new Date(vipEndTime.value).getTime()
     if(targetTime < Date.now()){
       ElMessage.warning('到期时间不能早于当前时间')
       vipEndTime.value = new Date()
     }
+  }
+  function formatDateToIsoLikeString(date = new Date()) {       // 时间格式化
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
   }
 </script>
 

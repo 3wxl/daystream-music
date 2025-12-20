@@ -24,19 +24,15 @@ export const addUserRule: Record<string, FormItemRule[]> = {
       message: '密码需8-20位，含大写字母、数字及特殊字符',
       trigger: 'blur',
     }
-    // { validator: checkPassword, trigger: 'blur' }
   ],
   introduction:[
     { min: 0, max: 100, message: '长度在 0 到 100 个字符', trigger: 'blur' }
   ]
 }
 
-// function checkPassword(rule: any, value: string, callback: Function, source: Record<string, any>) {
-//   if (!value) {
-//     return callback(new Error('请再次输入密码'))
-//   } else if (value !== source.password) {
-//     return callback(new Error('两次输入的密码不一致!'))
-//   } else {
-//     callback()
-//   }
-// }
+export const updateCommentRule: Record<string, FormItemRule[]> = {
+  content: [
+    { required: true, message: '评论内容不能为空', trigger: 'blur' },
+    { min: 2, max: 100, message: '长度在 1 到 100 个字符', trigger: 'blur' }
+  ]
+}

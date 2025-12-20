@@ -302,7 +302,7 @@
       let res = await ReleaseDynamic(data)
       if(res.success){
         ElMessage({
-          message: '发布成功',
+          message: '发布成功,等待审核',
           type: 'success',
         })
         title.value = ''

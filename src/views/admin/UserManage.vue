@@ -15,6 +15,7 @@
           @addUser="refresh"
           @refresh="refresh"
           @deleteUser="deleteUser"
+          @deleteUsers="deleteUsers"
           :total="total"
         ></UserManageContainer>
         <div v-show="isLoading" class="w-full h-full absolute top-0 left-0 z-10 bg-[rgba(255,255,255,0.15)] rounded-[8px] flex items-center justify-center">
@@ -77,18 +78,38 @@
     getUserList(key,status)
   }
   function search(searchData:{userSearchKeyword:string,userType:string}){     // 接收暴漏的数据，并搜索
+    key = searchData.userSearchKeyword
     getUserList(searchData.userSearchKeyword,Number(searchData.userType))
   }
   function refresh(){       // 刷新用的
-    skipPage(pageNum)
+    isLoading.value = true
+    setTimeout(() => {
+      skipPage(pageNum)
+      ElMessage({
+        message: '以刷新为最新数据',
+        type: 'success',
+      })
+    }, 500);
   }
   function deleteUser(){        // 删除一个用户后的回调
     currentTotal.value -= 1
-    if(currentTotal.value < 0){
+    if(pageNum===1&&currentTotal.value<=0){
       skipPage(1)
       return
     }
-    if(currentTotal.value === 0){
+    if(currentTotal.value <= 0){
+      skipPage(pageNum-1)
+      return
+    }
+    skipPage(pageNum)
+  }
+  function deleteUsers(deleteLength:number){
+    currentTotal.value -= deleteLength
+    if(pageNum===1&&currentTotal.value<=0){
+      skipPage(1)
+      return
+    }
+    if(currentTotal.value <= 0){
       skipPage(pageNum-1)
       return
     }

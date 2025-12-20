@@ -1,179 +1,136 @@
 <template>
   <div>
     <div class="shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px]">
-      <div class="flex justify-between px-4 items-center">
-        <div class="flex items-center h-full">
-          <AdminInput v-model="dynamicSearch" class="mr-5" type="text" placeholder="请输入动态标题" width="w-[300px]" label="动态："></AdminInput>
-          <AdminSelect v-model="typeVal1" class="mr-18" :options="[{value:'1',label:'待审核'},{value:'2',label:'已通过'},{value:'3',label:'已驳回'}]" label="状态"></AdminSelect>
-          <AdminSelect v-model="typeVal2" class="mr-16" :options="[{value:'1',label:'全部'},{value:'2',label:'普通用户'},{value:'3',label:'音乐人'}]" label="类型" ></AdminSelect>
-          <AdminButton
-            text="搜索"
-            class="ml-4 text-[15px]!"
-            @click="handleSearch"
-          />
-        </div>
-      </div>
+      <DynamicReviewHeader
+        @search="search"
+      ></DynamicReviewHeader>
     </div>
     <div class="shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px] mt-3">
-      <div class="flex justify-between">
-        <span class="text-[18px] font-700 ml-2">动态审核</span>
-        <div class="flex mr-8">
-          <el-tooltip content="通过所选的动态">
-            <IconFontSymbol name="quanbutongguo" class="text-[#666] font-700 relative top-[3px] cursor-pointer duration-[0.3s] hover:text-[#529FFD] mr-4"></IconFontSymbol>
-          </el-tooltip>
-          <el-tooltip content="驳回所选动态">
-            <IconFontSymbol name="quanbubohui" class="text-[#666] font-700 relative top-[3px] cursor-pointer hover:text-red-700 mr-4"></IconFontSymbol>
-          </el-tooltip>
-          <el-tooltip content="删除所选动态">
-            <IconFontSymbol name="shanchu" class="text-[#666] font-700 relative top-[3px] cursor-pointer hover:text-red-700 mr-4"></IconFontSymbol>
-          </el-tooltip>
-          <el-tooltip content="刷新">
-            <IconFontSymbol name="refresh" class="text-[#666] font-700 relative top-[3px] cursor-pointer hover:text-[#529FFD] mr-2"></IconFontSymbol>
-          </el-tooltip>
-        </div>
-      </div>
-      <div class="user-table w-full mt-4">
-        <el-table :data="dynamicList" stripe >
-          <el-table-column type="selection" width="55" align="center" class="ml-3"/>
-          <el-table-column label="标题" width="250" align="center" class="relative">
-            <template #default="scope">
-              <span class="line-clamp-1 cursor-pointer text-[15px] hover:text-[#529FFD] duration-300" @click="router.push('/admin/communityManage/DynamicReviewDetail')">{{ scope.row.title }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="内容" width="220" align="center" class="relative">
-            <template #default="scope">
-              <span class="line-clamp-1 cursor-pointer hover:text-[#529FFD] duration-300"  @click="router.push('/admin/communityManage/DynamicReviewDetail')">{{ scope.row.content }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="作者" width="140" align="center" class="relative">
-            <template #default="scope">
-              <span class="line-clamp-1">{{ scope.row.author }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="类型" width="140" align="center" class="relative">
-            <template #default="scope">
-              <span class="line-clamp-1">{{ scope.row.type }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="发布时间" width="200" align="center" class="relative">
-            <template #default="scope">
-              <span class="line-clamp-1">{{ scope.row.date }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" align="center">
-            <template #default="scope">
-              <div class="flex items-center justify-center gap-2">
-                <span
-                  class="active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#bfdcff] inline-block bg-[#e0eeff] text-[#529FFD] py-[3px] rounded-[20px] px-[12px] cursor-pointer mr-4 text-[15px]"
-                >
-                  <IconFontSymbol name="qianshoushenpitongguo-xianxing" size="18px"></IconFontSymbol>
-                  通过
-                </span>
-                <span
-                  class="active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#ffbfbf] inline-block bg-[#ffe0e0] text-[#fd5252] py-[3px] rounded-[20px] px-[12px] cursor-pointer mr-4 text-[15px]"
-                >
-                  <IconFontSymbol name="bohui" size="15px"></IconFontSymbol>
-                  驳回
-                </span>
-              </div>
-            </template>
-          </el-table-column>
-        </el-table>
-        <div class="admin-page mt-8 mb-4 flex justify-end mr-12">
-          <el-pagination
-            background
-            layout="prev, pager, next ,jumper"
-            :total="100"
-            :default-page-size="8"
-          />
-        </div>
+      <DynamicReviewContainer
+        :dynamicList="dynamicList"
+        @prePage="skipPage"
+        @nextPage="skipPage"
+        @clickPage="skipPage"
+        :total="total"
+        @refresh_T="refresh_T"
+        @refresh="refresh"
+        :state="status"
+      ></DynamicReviewContainer>
+      <div v-show="isLoading" class="w-full h-full absolute top-0 left-0 z-10 bg-[rgba(255,255,255,0.15)] rounded-[8px] flex items-center justify-center">
+        <svg viewBox="25 25 50 50">
+          <circle r="20" cy="50" cx="50"></circle>
+        </svg>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-  import AdminInput from "@/components/Admin/AdminInput.vue";
-  import AdminSelect from "@/components/Admin/AdminSelect.vue";
-  import IconFontSymbol from "@/components/IconFontSymbol.vue";
-  import { useRouter } from "vue-router";
-  let router = useRouter()
-  let typeVal1 = ref('1')
-  let typeVal2 = ref('1')
-  let dynamicSearch = ref('')
-  let dynamicList = reactive([
-    {
-      title: '动态标题1',
-      content: '这是动态内容的简要描述。',
-      author: '用户1',
-      status: true,
-      type: '普通用户',
-      date: '2024-01-15 10:30:00',
-    },
-    {
-      title: '动态标题1',
-      content: '这是动态内容的简要描述。',
-      author: '用户1',
-      status: true,
-      type: '普通用户',
-      date: '2024-01-15 10:30:00',
-    },
-    {
-      title: '动态标题1',
-      content: '这是动态内容的简要描述。',
-      author: '用户1',
-      status: true,
-      type: '普通用户',
-      date: '2024-01-15 10:30:00',
-    },
-    {
-      title: '动态标题1',
-      content: '这是动态内容的简要描述。',
-      author: '用户1',
-      status: true,
-      type: '普通用户',
-      date: '2024-01-15 10:30:00',
-    },
-    {
-      title: '动态标题1',
-      content: '这是动态内容的简要描述。',
-      author: '用户1',
-      status: true,
-      type: '普通用户',
-      date: '2024-01-15 10:30:00',
-    },
-    {
-      title: '动态标题1',
-      content: '这是动态内容的简要描述。',
-      author: '用户1',
-      status: true,
-      type: '普通用户',
-      date: '2024-01-15 10:30:00',
-    },
-    {
-      title: '动态标题1',
-      content: '这是动态内容的简要描述。',
-      author: '用户1',
-      status: true,
-      type: '普通用户',
-      date: '2024-01-15 10:30:00',
-    },
-    {
-      title: '动态标题1',
-      content: '这是动态内容的简要描述。',
-      author: '用户1',
-      status: true,
-      type: '普通用户',
-      date: '2024-01-15 10:30:00',
-    },
-  ])
+  import DynamicReviewHeader from "@/components/Admin/Community/DynamicReview/DynamicReviewHeader.vue";
+  import DynamicReviewContainer from "@/components/Admin/Community/DynamicReview/DynamicReviewContainer.vue";
+  import {GetDynamicReviewList} from "@/api/Admin/communtiy/dynamicReview"      // 获取动态审核列表
+  import type {getDynRevListSubmitData,xGetDynRevListType,dynamicRevType} from "@/types/admin/dynamic"
 
-  function handleSearch() {
-    console.log(dynamicSearch.value)
+  let router = useRouter()
+  let dynamicList:dynamicRevType[] = reactive([])
+  let role = ref(1)
+  let status = ref(0)
+  let key = ref('')
+  let pageNum = 1                 // 页码
+  const pageSize = 8              // 每页显示的条数
+  let total = ref(0)              // 总个数
+  let currentTotal = ref(0)       // 当前页的数据个数
+  let isLoading = ref(true)       // 加载中
+  async function getDynRevList(key?:string,status?:number,role?:number){
+    let getData:getDynRevListSubmitData = {pageNum,pageSize,status,key}
+    if(role !==0 ){
+      getData.role = role
+    }
+    isLoading.value = true
+    try{
+      let dynamicRevListRes:xGetDynRevListType = (await GetDynamicReviewList(getData)) as xGetDynRevListType
+      if(dynamicRevListRes.success){
+        currentTotal.value = dynamicRevListRes.data.records.length
+        dynamicList.splice(0,dynamicList.length)
+        dynamicList.push(...dynamicRevListRes.data.records)
+        total.value = dynamicRevListRes.data.total
+      }
+      isLoading.value = false
+    }
+    catch(err){
+      isLoading.value = false
+      ElMessage({
+        message: '查找失败',
+        type: 'error',
+      })
+    }
   }
+  function search(val:any){
+    role.value = Number(val.role)
+    status.value = Number(val.status)
+    key.value = val.key
+    getDynRevList(key.value,status.value,role.value)
+  }
+  function skipPage(page:number){       // 跳转的函数
+    pageNum = page
+    getDynRevList(key.value,status.value,role.value)
+  }
+  function refresh_T(){     // 无等待刷新
+    getDynRevList(key.value,status.value,role.value)
+  }
+  function refresh(){     // 有等待刷新
+    isLoading.value = true
+    setTimeout(() => {
+      getDynRevList(key.value,status.value,role.value)
+      ElMessage({
+        message: '以刷新为最新数据',
+        type: 'success',
+      })
+    }, 500);
+  }
+  onMounted(()=>{
+    getDynRevList('',status.value,role.value)
+  })
 </script>
 
 <style scoped>
+  svg {
+  width:5em;
+  transform-origin: center;
+  animation: rotate4 2s linear infinite;
+  }
+
+  circle {
+  fill: none;
+  stroke: hsl(214, 97%, 59%);
+  stroke-width: 2;
+  stroke-dasharray: 1, 200;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  animation: dash4 1.5s ease-in-out infinite;
+  }
+
+  @keyframes rotate4 {
+  100% {
+    transform: rotate(360deg);
+  }
+  }
+
+  @keyframes dash4 {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 90, 200;
+    stroke-dashoffset: -35px;
+  }
+
+  100% {
+    stroke-dashoffset: -125px;
+  }
+  }
   ::v-deep(.el-table__row){
     height:70px;
   }

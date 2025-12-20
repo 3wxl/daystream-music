@@ -25,6 +25,15 @@ export function GetUserInfo(id:string) {
   )
 }
 
+// 修改用户信息
+export function UpdateUserAPI(data:{id:string,username?:string,avatar?:string,introduction?:string,gender?:number,walletBalance?:number,vipExpireTime?:string}) {
+  return request(
+    `/adminUser/updateUser`,
+    'post',
+    data
+  )
+}
+
 // 删除用户
 export function DeleteUser(id:string) {
   return request(
@@ -32,3 +41,21 @@ export function DeleteUser(id:string) {
     'get',
   )
 }
+
+// 批量删除用户
+export function DeleteUsersApi(userId:number[]) {
+  return request(
+    `/adminUser/deleteUsersList`,
+    'post',
+    {userId}
+  )
+}
+
+// 封禁/解封用户
+export function BanUser(userId:number) {
+  return request(
+    `/adminUser/banUser?userId=${userId}`,
+    'get',
+  )
+}
+

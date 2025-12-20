@@ -1,168 +1,120 @@
 <template>
   <div>
     <div class="shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px]">
-      <div class="flex justify-between px-4 items-center">
-        <div class="flex items-center h-full">
-          <AdminInput
-            class="mr-5"
-            type="text"
-            placeholder="请输入用户名"
-            v-model="commentSearch"
-            width="w-[300px]"
-            label="用户名:"
-          ></AdminInput>
-          <AdminSelect
-            class="mr-16"
-            v-model="typeVal"
-            :options="[
-              { value: '1', label: '歌曲' },
-              { value: '2', label: '歌单' },
-              { value: '3', label: '动态' },
-            ]"
-            label="类型"
-          ></AdminSelect>
-          <AdminButton
-            text="搜索"
-            class="ml-4 text-[15px]!"
-            @click="handleSearch"
-          />
-        </div>
-      </div>
+      <CommentManageHeader
+        @search="search"
+      />
     </div>
     <div class="shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px] mt-3">
-      <div class="flex justify-between">
-        <span class="text-[18px] font-700 ml-2">评论管理</span>
-        <div class="flex mr-8">
-          <el-tooltip content="删除所选评论">
-            <IconFontSymbol
-              name="shanchu"
-              class="text-[#666] font-700 relative top-[3px] cursor-pointer hover:text-red-700 mr-4"
-            ></IconFontSymbol>
-          </el-tooltip>
-          <el-tooltip content="刷新">
-            <IconFontSymbol
-              name="refresh"
-              class="text-[#666] font-700 relative top-[3px] cursor-pointer hover:text-[#529FFD] mr-2"
-            ></IconFontSymbol>
-          </el-tooltip>
-        </div>
-      </div>
-      <div class="user-table w-full mt-4">
-        <el-table
-          :data="
-            typeVal === '1'
-              ? commentsListSongs
-              : typeVal === '2'
-                ? commentsListGD
-                : commentsListDynamic
-          "
-          stripe
-        >
-          <el-table-column type="selection" width="55" align="center" class="ml-3" />
-          <el-table-column label="头像" width="130" align="center">
-            <template #default="scope">
-              <!-- <img :src="scope.row.avatar" alt="用户头像"> -->
-              <div class="flex justify-center">
-                <img
-                  src="../../../assets/头像.png"
-                  alt="头像"
-                  class="m-1 w-[45px] h-[45px] rounded-[40px] outline-1.5 outline-offset-1 outline-solid outline-[#619ca4]"
-                />
-              </div>
-            </template>
-          </el-table-column>
-          <el-table-column label="昵称" width="170" align="center">
-            <template #default="scope">
-              <span class="line-clamp-1 text-[15px] text-black">{{ scope.row.author }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="评论" width="250" align="center">
-            <template #default="scope">
-              <span class="line-clamp-1 text-[15px] text-black">{{ scope.row.content }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            :label="typeVal === '1' ? '评论歌曲' : typeVal === '2' ? '评论歌单' : '评论动态'"
-            width="320"
-            align="center"
-          >
-            <template #default="scope">
-              <span class="line-clamp-1 text-[15px] text-black">{{ scope.row.title }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="发布时间" width="200" align="center">
-            <template #default="scope">
-              <span class="line-clamp-1 text-[15px] text-black">{{ scope.row.date }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" align="center">
-            <template #default="scope">
-              <span
-                class="active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#bfdcff] inline-block bg-[#e0eeff] text-[#529FFD] py-[3px] rounded-[20px] px-[12px] cursor-pointer mr-4 text-[15px]"
-              >
-                <IconFontSymbol name="xiugai" size="18px"></IconFontSymbol>
-                通过
-              </span>
-              <span
-                class="active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#ffbfbf] inline-block bg-[#ffe0e0] text-[#fd5252] py-[3px] rounded-[20px] px-[12px] cursor-pointer mr-4 text-[15px]"
-              >
-                <IconFontSymbol name="bohui" size="15px"></IconFontSymbol>
-                删除
-              </span>
-            </template>
-          </el-table-column>
-        </el-table>
-        <div class="admin-page mt-8 mb-4 flex justify-end mr-12">
-          <el-pagination
-            background
-            layout="prev, pager, next ,jumper"
-            :total="100"
-            :default-page-size="8"
-          />
-        </div>
+      <CommentManageContainer
+        :commentDataList="commentDataList"
+        :type="type"
+        :isLoading="isLoading"
+        :total="total"
+        @prePage="skipPage"
+        @nextPage="skipPage"
+        @clickPage="skipPage"
+        @deleteComment="deleteComment"
+        @deleteComments="deleteComments"
+        @refresh="refresh"
+      />
+      <div v-show="isLoading" class="w-full h-full absolute top-0 left-0 z-10 bg-[rgba(255,255,255,0.15)] rounded-[8px] flex items-center justify-center">
+        <svg viewBox="25 25 50 50">
+          <circle r="20" cy="50" cx="50"></circle>
+        </svg>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import AdminInput from '@/components/Admin/AdminInput.vue'
-import AdminSelect from '@/components/Admin/AdminSelect.vue'
-import IconFontSymbol from '@/components/IconFontSymbol.vue'
+import CommentManageHeader from '@/components/Admin/Community/CommunityCommentManage/CommentManageHeader.vue'
+import CommentManageContainer from '@/components/Admin/Community/CommunityCommentManage/CommentManageContainer.vue'
+import {GetCommentList} from '@/api/Admin/communtiy/commentManage'      // 获取评论列表
+import type {getCommentListType,xGetCommentListType,commentType} from '@/types/admin/community'         // 获取评论列表参数
 
-let typeVal = ref('1')
-let commentsListSongs = reactive([
-  {
-    avatar: 'daw',
-    author: '一只无忧无虑的小马驹',
-    content: '歌词写的真好！！',
-    title: '光辉岁月',
-    date: '2024-05-01 12:30:45',
-  },
-])
-let commentsListGD = reactive([
-  {
-    avatar: 'daw',
-    author: '一只无忧无虑的小马驹',
-    content: '这个歌单真棒！！',
-    title: '前夜歌单',
-    date: '2024-05-01 12:30:45',
-  },
-])
-let commentsListDynamic = reactive([
-  {
-    avatar: 'daw',
-    author: '一只无忧无虑的小马驹',
-    content: '期待新歌',
-    title: '家人们，我要出新歌啦！',
-    date: '2024-05-01 12:30:45',
-  },
-])
-let commentSearch = ref('')
+let commentDataList:commentType[] = reactive([])          // 评论数据
+let type = ref(1)             // 类型：1-歌曲 2-歌单 3-专辑 4-动态
+let keyword = ref('')           // 关键词
+let pageNum = 1                 // 页码
+const pageSize = 8              // 每页显示的条数
+let total = ref(0)              // 总个数
+let currentTotal = ref(0)       // 当前页的数据个数
+let isLoading = ref(false)      // 列表加载状态
 
-function handleSearch() {
-  console.log(commentSearch.value)
+function search(obj:{key:string,type:number}){        // 搜索
+  keyword.value = obj.key
+  type.value = obj.type
+  getCommentList(obj.key,Number(obj.type))
 }
+async function getCommentList(keyword?:string,type?:number){      // 获取评论列表
+  let getData:getCommentListType = {pageNum,pageSize}
+  if(keyword){
+    getData.keyword = keyword
+  }
+  if(getData){
+    getData.type = type
+  }
+  isLoading.value = true
+  try{
+    let commentListRes:xGetCommentListType = (await GetCommentList(getData)) as xGetCommentListType
+    if(commentListRes.success){
+      currentTotal.value = commentListRes.data.records.length
+      commentDataList.splice(0,commentDataList.length)
+      commentDataList.push(...commentListRes.data.records)
+      total.value = commentListRes.data.total
+    }
+    isLoading.value = false
+  }
+  catch(err){
+    isLoading.value = false
+    ElMessage({
+      message: '查找失败',
+      type: 'error',
+    })
+  }
+}
+function skipPage(page:number){       // 跳转的函数
+  pageNum = page
+  getCommentList(keyword.value,type.value)
+}
+function deleteComment(){           // 删除一条评论成功后的回调
+  currentTotal.value --
+  if(currentTotal.value <= 0 && pageNum==1){
+    pageNum = 1
+    getCommentList(keyword.value,type.value)
+  }else if(currentTotal.value <= 0 && pageNum>1){
+    pageNum --
+    getCommentList(keyword.value,type.value)
+  }else{
+    getCommentList(keyword.value,type.value)
+  }
+}
+function deleteComments(length:number){   // 删除所选评论成功后的回调
+  total.value -= length
+  if(currentTotal.value <= 0 && pageNum==1){
+    pageNum = 1
+    getCommentList(keyword.value,type.value)
+  }else if(currentTotal.value <= 0 && pageNum>1){
+    pageNum --
+    getCommentList(keyword.value,type.value)
+  }else{
+    getCommentList(keyword.value,type.value)
+  }
+}
+function refresh(){     // 刷新
+  isLoading.value = true
+  setTimeout(() => {
+    getCommentList(keyword.value,type.value)
+    ElMessage({
+      message: '以刷新为最新数据',
+      type: 'success',
+    })
+  }, 500);
+}
+onMounted(()=>{
+  getCommentList('',type.value)
+})
 </script>
 
 <style scoped>
@@ -264,4 +216,41 @@ function handleSearch() {
 ::v-deep .admin-page .el-pager .more:hover {
   border-color: #0084ff;
 }
+svg {
+  width:5em;
+  transform-origin: center;
+  animation: rotate4 2s linear infinite;
+  }
+
+  circle {
+  fill: none;
+  stroke: hsl(214, 97%, 59%);
+  stroke-width: 2;
+  stroke-dasharray: 1, 200;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  animation: dash4 1.5s ease-in-out infinite;
+  }
+
+  @keyframes rotate4 {
+  100% {
+    transform: rotate(360deg);
+  }
+  }
+
+  @keyframes dash4 {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 90, 200;
+    stroke-dashoffset: -35px;
+  }
+
+  100% {
+    stroke-dashoffset: -125px;
+  }
+  }
 </style>
