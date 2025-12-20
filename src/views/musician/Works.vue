@@ -1,5 +1,3 @@
-
-
 <template>
   <div
     class="works-container min-h-screen bg-linear-to-br from-[#1a0f1f] via-[#050505] to-[#1a0b2e] text-white pt-24 pb-10 px-4 md:px-8"
@@ -40,6 +38,8 @@
         <MyAlbums v-else-if="currentTab === 'albums'" />
         <!-- 歌单块 -->
         <MyPlaylists v-else-if="currentTab === 'playlists'" />
+        <!-- MV块 -->
+        <MyMVs v-else-if="currentTab === 'mvs'" />
       </div>
     </div>
   </div>
@@ -47,6 +47,7 @@
 
 <script lang="ts" setup>
 import MyAlbums from '@/components/MusicUpload/MyAlbums.vue'
+import MyMVs from '@/components/MusicUpload/MyMVs.vue'
 import MyPlaylists from '@/components/MusicUpload/MyPlaylists.vue'
 import MySongs from '@/components/MusicUpload/MySongs.vue'
 import { ref } from 'vue'
