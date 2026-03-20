@@ -35,6 +35,7 @@ const props = defineProps({
     required: true,
   },
 })
+console.log(props.singers)
 </script>
 
 <style scoped>

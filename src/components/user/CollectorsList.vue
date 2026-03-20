@@ -53,8 +53,8 @@
               class="avatar-wrapper relative w-20 h-20 rounded-full overflow-hidden z-10 border border-[rgba(255,255,255,0.1)]"
             >
               <img
-                :src="collector.avatarUrl"
-                :alt="collector.name"
+                :src="getFirstAvatarUrl(collector.avatar)"
+                :alt="collector.userName || '用户'"
                 class="w-full h-full object-cover rounded-full transition-all duration-500 hover:scale-110 hover:rotate-2"
                 @error="
                   (e) => {
@@ -70,63 +70,44 @@
         <div class="relative z-2 flex flex-col gap-3">
           <div class="flex justify-between items-center">
             <h4 class="text-xl font-semibold text-white relative">
-              {{ collector.name }}
+              {{ collector.userName || '匿名用户' }}
               <span
                 class="absolute bottom-[-4px] left-0 w-0 h-0.5 rounded-sm transition-all duration-300 group-hover:w-full bg-gradient-to-r from-[#cd3181] to-[#c52075]"
               ></span>
             </h4>
-            <el-button
-              size="small"
-              :class="
-                collector.followStatus
-                  ? 'btn-unfollow flex items-center gap-1 px-4 py-15 text-xs font-medium rounded-full transition-all duration-300 hover:translate-y-[-2px]'
-                  : 'btn-follow flex items-center gap-1 px-4 py-15 text-xs font-medium text-white rounded-full transition-all duration-300 hover:translate-y-[-2px]'
-              "
-              @click.stop="$emit('toggle-follow', collector.id)"
-              :style="
-                collector.followStatus
-                  ? {
-                      background: 'rgba(205, 49, 129, 0.08)',
-                      border: '1px solid rgba(205, 49, 129, 0.4)',
-                      color: '#fdb5c7',
-                    }
-                  : {
-                      background: 'linear-gradient(135deg, #cd3181, #c52075)',
-                      border: 'none',
-                      boxShadow: '0 4px 12px rgba(205, 49, 129, 0.4)',
-                      color: '#fdb5c7',
-                    }
-              "
-            >
-              <i class="iconfont text-xs" v-if="collector.followStatus">&#xe62b;</i>
-              <i class="iconfont text-xs" v-else>&#xe626;</i>
-              {{ collector.followStatus ? '已关注' : '关注' }}
-            </el-button>
           </div>
 
           <p
-            v-if="collector.signature"
+            v-if="collector.introduction"
             class="text-sm text-[#94a3b8] leading-relaxed line-clamp-2 pl-2 border-l-2 border-[rgba(255,143,171,0.2)] transition-colors duration-300 group-hover:border-[rgba(255,143,171,0.5)] group-hover:text-[#a5b4fc]"
           >
-            {{ collector.signature }}
+            {{ collector.introduction }}
           </p>
 
           <div
             class="flex justify-between items-center pt-2 border-t border-[rgba(255,143,171,0.08)]"
           >
-            <div
-              class="collect-time text-xs text-[#64748b] flex items-center gap-1.5 transition-colors duration-300 group-hover:text-[#94a3b8]"
-            >
-              <i class="iconfont text-xs">&#xe61c;</i>
-              {{ formatDate(collector.collectTime) }} 收藏
+            <div class="flex items-center gap-3">
+              <div
+                class="collect-time text-xs text-[#64748b] flex items-center gap-1.5 transition-colors duration-300 group-hover:text-[#94a3b8]"
+              >
+                <i class="iconfont text-xs">&#xe661;</i>
+                <div
+                  v-if="collector.gender !== undefined"
+                  class="text-xs text-[#64748b] transition-colors duration-300 group-hover:text-[#94a3b8]"
+                >
+                  {{ getGenderText(collector.gender) }}
+                </div>
+              </div>
             </div>
             <div class="flex gap-3">
               <span
                 class="stat-item text-xs text-[#64748b] flex items-center gap-1 transition-colors duration-300 group-hover:text-[#8b5cf6]"
               >
-                <el-tooltip class="box-item" effect="dark" content="音乐作品" placement="top">
+                <el-tooltip class="box-item" effect="dark" content="收藏歌单数" placement="top">
                   <div class="flex justify-center items-center">
-                    <img src="../../assets/music-7683_256.gif" alt="" class="w-8" />128
+                    <img src="../../assets/music-7683_256.gif" alt="" class="w-8" />
+                    {{ collector.collectPlaylistCount }}
                   </div>
                 </el-tooltip>
               </span>
@@ -135,7 +116,8 @@
               >
                 <el-tooltip class="box-item" effect="dark" content="粉丝数" placement="top">
                   <div class="flex justify-center items-center">
-                    <img src="../../assets/dancing-22475_256.gif" alt="" class="w-8" /> 45
+                    <img src="../../assets/dancing-22475_256.gif" alt="" class="w-8" />
+                    {{ collector.fansCount }}
                   </div>
                 </el-tooltip>
               </span>
@@ -150,7 +132,7 @@
       class="flex flex-col items-center justify-center py-20 px-5 text-center text-[#64748b]"
     >
       <div class="empty-icon text-5xl text-[rgba(255,143,171,0.1)] mb-4">
-        <i class="iconfont">&#xe685;</i>
+        <i class="iconfont" style="font-size: 50px; color: aliceblue">&#xe64c;</i>
       </div>
       <p class="empty-text text-xl font-medium mb-2 text-[#94a3b8]">
         {{ internalSearchKeyword ? '未找到相关收藏者' : '暂无收藏者' }}
@@ -163,14 +145,8 @@
 </template>
 
 <script setup lang="ts">
-interface Collector {
-  id: number
-  avatarUrl: string
-  name: string
-  collectTime: number
-  signature?: string
-  followStatus: boolean
-}
+import { ref, computed, watch } from 'vue'
+import type { Collector } from '@/types/personalCenter/index'
 
 interface Props {
   collectors: Collector[]
@@ -182,17 +158,33 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  'toggle-follow': [id: number]
   'update:searchKeyword': [value: string]
 }>()
 
 const internalSearchKeyword = ref(props.searchKeyword)
 const isSearchFocused = ref(false)
 
+// 处理可能包含多个URL的avatar字段
+const getFirstAvatarUrl = (avatar: string): string => {
+  if (!avatar) return 'https://picsum.photos/200/200?random=default'
+
+  // 如果avatar包含多个URL，取第一个
+  if (avatar.includes('http')) {
+    // 匹配所有URL
+    const urls = avatar.match(/https?:\/\/[^\s]+/g)
+    if (urls && urls.length > 0) {
+      return urls[0]
+    }
+  }
+  return avatar
+}
+
 const filteredCollectors = computed(() => {
   const keyword = internalSearchKeyword.value.trim().toLowerCase()
   if (!keyword) return props.collectors
-  return props.collectors.filter((collector) => collector.name.toLowerCase().includes(keyword))
+  return props.collectors.filter(
+    (collector) => collector.userName?.toLowerCase().includes(keyword) || false,
+  )
 })
 
 watch(internalSearchKeyword, (newVal) => {
@@ -208,13 +200,16 @@ watch(
   },
 )
 
-const formatDate = (timestamp: number) => {
-  const date = new Date(timestamp)
-  return date.toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
+// 获取性别文本
+const getGenderText = (gender: number): string => {
+  switch (gender) {
+    case 1:
+      return '男'
+    case 2:
+      return '女'
+    default:
+      return '未知'
+  }
 }
 </script>
 

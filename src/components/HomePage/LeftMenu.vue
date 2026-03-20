@@ -76,10 +76,10 @@ const menuItems = [
   { path: '/album', title: '专辑', icon: Tickets },
   { path: '/Aritist', title: '歌手', icon: Mic },
   { path: '/playlist', title: '歌单', icon: Files },
-  { path: '/MusicRanking', title: '榜单', icon: Histogram },
+  { path: '/music-ranking', title: '榜单', icon: Histogram },
   { path: '/community/CommunityDisplay', title: '社区', icon: ChatLineSquare },
   // { path: '/musician/MusicianSettleIn', title: '音乐人', icon: Service },
-  { path: '/User/PersonalCenter', title: '个人中心', icon: User },
+  { path: '/user/personal-center', title: '个人中心', icon: User },
 ]
 
 const changeCollapse = () => {

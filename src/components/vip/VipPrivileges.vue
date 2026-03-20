@@ -9,15 +9,6 @@
         </h2>
         <p class="text-gray-300 text-lg">开通VIP，解锁更多专属功能</p>
       </div>
-      <el-button
-        type="primary"
-        class="bg-gradient-to-r from-pink-500 to-pink-300 border-none hover:shadow-lg hover:shadow-pink-500/30 transition-all duration-300 transform hover:-translate-y-1 hover:scale-105"
-        @click="emit('scrollToPackages')"
-        style="border: none"
-      >
-        <i class="iconfont icon-vip mr-2 text-lg">&#xe640;</i>
-        立即开通
-      </el-button>
     </div>
 
     <!-- 特权卡片 -->

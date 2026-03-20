@@ -54,3 +54,9 @@ export interface GetMyMusicResponse {
   errCode?: string
   total?: number
 }
+export interface ApplyMusicianParams {
+  stageName: string
+  introduction: string
+  avatar: string
+  tags: number[]
+}

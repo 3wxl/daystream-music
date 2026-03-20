@@ -4,7 +4,6 @@ export function getAllTags() {
   return request('/playlist/all-tags', 'get')
 }
 
-
 export function getPlayListDetail(id: string) {
   return request(`/playlist/detail/${id}`, 'get')
 }
