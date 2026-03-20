@@ -93,11 +93,11 @@
 <script setup lang="ts">
   import { Search } from '@element-plus/icons-vue';
   import { useRouter } from 'vue-router';
-  import communityDisplay from '../../components/community/CommunityDisplay.vue'
+  import communityDisplay from '../../components/Community/CommunityDisplay.vue'
   import {getDynamicList} from '@/api/community/Dynamic'
   import {debounce,throttle} from '@/utils/debounceThrottle';     // 节流防抖
-  import DynamicLoading from '@/components/community/DynamicLoading.vue'    // 动态加载组件
-  import DynamicNull from '@/components/community/DynamicNull.vue'      // 当搜索动态内容为空时展示组件
+  import DynamicLoading from '@/components/Community/DynamicLoading.vue'    // 动态加载组件
+  import DynamicNull from '@/components/Community/DynamicNull.vue'      // 当搜索动态内容为空时展示组件
   import { getUserInfo } from '@/api/personalCenter/index'
 
   // 数据

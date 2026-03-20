@@ -15,3 +15,28 @@ export function getlistByTags(currentTag: string[], pageNum: string, pageSize: s
     pageSize,
   })
 }
+
+// 获取用户歌单
+export function getUserPlaylist(pageNum: string, pageSize: string) {
+  return request('/playlist/query-my-playlist-by-collect', 'get', {
+    pageNum,
+    pageSize,
+  })
+}
+
+// 创建歌单
+export function createPlaylist(data: any) {
+  return request('/playlist/api/play-list/create-play-list', 'post', data)
+}
+
+// 删除歌单
+export function deletePlaylist(playListId: string) {
+  return request('/playlist/playList/delete-playList', 'get', {
+    playListId,
+  })
+}
+
+// 批量将歌曲添加到歌单
+export function addMusicToPlaylist(data: any) {
+  return request('/playlist/batch-add-song-to-playlist', 'post', data)
+}

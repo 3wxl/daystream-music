@@ -3,7 +3,7 @@ import { ref } from 'vue'
 export function useLoadMore(apiFunc: Function) {
   const loading = ref(false)
   const noMore = ref(false)
-  const listData = ref([])
+  const listData = ref<any[]>([])
   const currentPage = ref(1)
   const pageSize = ref(40)
 
@@ -12,7 +12,7 @@ export function useLoadMore(apiFunc: Function) {
   const loadData = async (params: any = null, isReset = false) => {
     if (loading.value) return
     if (noMore.value && !isReset) return
-    if(isError.value && !isReset) return 
+    if (isError.value && !isReset) return
 
     loading.value = true
 
@@ -24,10 +24,10 @@ export function useLoadMore(apiFunc: Function) {
     }
 
     try {
-      let res;
-      if(params){
-       res = await apiFunc(params, currentPage.value, pageSize.value)
-      }else{
+      let res
+      if (params) {
+        res = await apiFunc(params, currentPage.value, pageSize.value)
+      } else {
         res = await apiFunc(currentPage.value, pageSize.value)
       }
       const newData = res.data.records || []
@@ -57,6 +57,6 @@ export function useLoadMore(apiFunc: Function) {
     noMore,
     listData,
     loadData,
-    isError
+    isError,
   }
 }

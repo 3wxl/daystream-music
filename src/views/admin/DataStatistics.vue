@@ -76,26 +76,26 @@
   let userInfo = JSON.parse(localStorage.getItem('user'))
 
   function NumAutoPlusAnimation(targetEle, options) {
-        options = options || {};
-        let $this = targetEle,
-            time = options.time || $this.data('time'), //总时间--毫秒为单位
-            finalNum = options.num || $this.data('value'), //要显示的真实数值
-            regulator = options.regulator || 100, //调速器，改变regulator的数值可以调节数字改变的速度
-            step = finalNum / (time / regulator), /*每30ms增加的数值--*/
-            count = 0, //计数器
-            initial = 400;
-        let timer = setInterval(function () {
-            count = count + step;
-            if (count >= finalNum) {
-                clearInterval(timer);
-                count = finalNum;
-            }
-            let t = Math.floor(count);
-            if (t == initial) return;
-            initial = t;
-            $this.innerHTML = initial;
-        }, 30);
-    }
+    options = options || {};
+    let $this = targetEle,
+        time = options.time || $this.data('time'), //总时间--毫秒为单位
+        finalNum = options.num || $this.data('value'), //要显示的真实数值
+        regulator = options.regulator || 100, //调速器，改变regulator的数值可以调节数字改变的速度
+        step = finalNum / (time / regulator), /*每30ms增加的数值--*/
+        count = 0, //计数器
+        initial = 400;
+    let timer = setInterval(function () {
+        count = count + step;
+        if (count >= finalNum) {
+            clearInterval(timer);
+            count = finalNum;
+        }
+        let t = Math.floor(count);
+        if (t == initial) return;
+        initial = t;
+        $this.innerHTML = initial;
+    }, 30);
+  }
   const vNumTransform = {
     mounted(el,binding) {
       let options = {

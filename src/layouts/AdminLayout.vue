@@ -45,6 +45,10 @@
               <IconFontSymbol name="file-music" class="mr-1"></IconFontSymbol>
               <span>作品审核</span>
             </el-menu-item>
+            <el-menu-item index="3-3" @click="router.push('/admin/worksManage/classifyList')">
+              <IconFontSymbol name="fenleiorguangchangorqita" class="mr-1"></IconFontSymbol>
+              <span>分类管理</span>
+            </el-menu-item>
             <!-- <el-menu-item index="3-3"  @click="router.push('/admin/worksManage/mvList')">
               <IconFontSymbol name="songbook_mv" size="18px"  class="mr-1"></IconFontSymbol>
               <span>MV列表</span>
@@ -106,6 +110,10 @@
               <IconFontSymbol name="review" class="mr-1"></IconFontSymbol>
               <span>评论管理</span>
             </el-menu-item>
+            <el-menu-item index="6-4" @click="router.push('/admin/communityManage/commentsReport')">
+              <IconFontSymbol name="jubao" class="mr-1"></IconFontSymbol>
+              <span>评论举报</span>
+            </el-menu-item>
           </el-sub-menu>
           <el-menu-item index="7" @click="logout">
             <IconFontSymbol name="tuichudenglu" class="mr-1"></IconFontSymbol>
@@ -115,14 +123,11 @@
       </el-scrollbar>
     </el-aside>
     <el-container class="relative left-[220px]">
-      <el-header>
+      <el-header class="fixed top-0 z-10" style="width: calc(100% - 220px);">
         <div class="h-[60px] bg-white">
           <el-row class="h-full w-full">
             <el-col :span="4" :offset="10">
-              <p class="text-[15px]/[60px] line-clamp-1">
-                您好<span class="text-[13px] text-[#529FFD]">{{ user.username }}</span
-                >,欢迎登录！
-              </p>
+              <p class="text-[15px]/[60px] line-clamp-1">您好<span class="mx-1 text-[13px] text-[#529FFD]">{{ user.username }}</span>,欢迎登录！</p>
             </el-col>
             <el-col :span="4" :offset="6">
               <el-row class="h-full w-full text-base/[60px]">
@@ -150,7 +155,7 @@
           </el-row>
         </div>
       </el-header>
-      <el-main class="bg-[#E8EFF7]">
+      <el-main class="bg-[#E8EFF7] relative top-15 min-h-[calc(100vh-60px)]">
         <slot />
       </el-main>
     </el-container>

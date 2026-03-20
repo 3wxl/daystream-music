@@ -1,11 +1,12 @@
 <template>
-  <!-- to path应该指向MyList -->
-  <div
-     v-for="tag in tags"
-    :key="tag.name"
-    class="tag-item"
-    >{{ tag.name }}
-  </div>
+    <router-link
+      v-for="tag in tags"
+      :key="tag.name"
+      :to="{ path: tag.path, query: tag.query }"
+      class="tag-item"
+      active-class="router-link-active"
+      >{{ tag.name }}
+    </router-link>
 </template>
 
 <script lang="ts" setup>

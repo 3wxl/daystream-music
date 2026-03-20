@@ -20,9 +20,9 @@ export function getDynamicList(submitData:{"userId"?:number,"keyWord"?:string,"l
 }
 
 // 发布动态
-export function ReleaseDynamic(data:{targetId:string,targetType:number,content:string}) {
+export function ReleaseDynamic(data:{title:string,content:string,images:string[]}) {
   return request(
-    `/comment/releaseComment`,
+    `/community/postSocialUpdate`,
     'post',
     data
   )

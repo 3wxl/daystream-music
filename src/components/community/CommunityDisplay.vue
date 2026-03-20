@@ -24,22 +24,22 @@
         </span>
       </div>
     </div>
-    <div class="pl-[30px] font-[700] text-[24px] mt-[20px] text-white cursor-pointer hover:text-pink-400 duration-[0.2s]" @click="router.push({path:'/community/communityDetail',query:{postId:postId}})">
+    <div class="pl-[30px] font-[700] text-[24px] mt-[20px] text-white cursor-pointer hover:text-pink-400 duration-[0.2s]" @click="openDynamicDetail(`/community/communityDetail?postId=${postId}`)">
       {{title}}
     </div>
-    <div class="content-p mt-[8px] text-white cursor-pointer hover:text-pink-400 duration-[0.2s]" @click="router.push({path:'/community/communityDetail',query:{postId:postId}})" v-html="content">
+    <div class="content-p mt-[8px] text-white cursor-pointer hover:text-pink-400 duration-[0.2s]" @click="openDynamicDetail(`/community/communityDetail?postId=${postId}`)" v-html="content">
 
     </div>
     <div class="flex gap-4 px-6 flex-wrap mt-2 mb-3">     <!-- 图片部分 -->
       <div class="w-[16%] aspect-square rounded-[10px] overflow-hidden" v-if="images.length > 1" v-for="imgUrl in images" :key="imgUrl">
-        <img :src="imgUrl" alt="" @click="router.push({path:'/community/communityDetail',query:{postId:postId}})" class="cursor-pointer duration-[0.5s] w-full h-full rounded-[10px] hover:scale-[1.1] object-cover">
+        <img :src="imgUrl" alt="" @click="openDynamicDetail(`/community/communityDetail?postId=${postId}`)" class="cursor-pointer duration-[0.5s] w-full h-full rounded-[10px] hover:scale-[1.1] object-cover">
       </div>
       <div class="w-[70%] rounded-[10px] overflow-hidden" v-if="images.length === 1" v-for="imgUrl in images" :key="imgUrl">
-        <img :src="imgUrl" alt="" @click="router.push({path:'/community/communityDetail',query:{postId:postId}})" class="max-h-[700px] object-cover cursor-pointer duration-[0.5s] w-full h-full rounded-[10px] hover:scale-[1.05] object-cover">
+        <img :src="imgUrl" alt="" @click="openDynamicDetail(`/community/communityDetail?postId=${postId}`)" class="max-h-[700px] object-cover cursor-pointer duration-[0.5s] w-full h-full rounded-[10px] hover:scale-[1.05] object-cover">
       </div>
     </div>
     <div class="px-10 pt-3 flex justify-end">       <!-- 点赞评论部分 -->
-      <span class="mr-10 cursor-pointer group" @click="router.push({path:'/community/communityDetail',query:{postId:postId}})">
+      <span class="mr-10 cursor-pointer group" @click="openDynamicDetail(`/community/communityDetail?postId=${postId}`)">
         <el-tooltip
           class="box-item"
           effect="dark"
@@ -97,7 +97,7 @@
   createTime.value = formatDateTime(createTime.value);
 
   // 方法
-  function extractImgSrcByReg(html) {     // 这里是获取一个hmtl片段里面的图片的src组成的数组
+  function extractImgSrcByReg(html:string) {     // 这里是获取一个hmtl片段里面的图片的src组成的数组
     if (!html || typeof html !== 'string') return [];
     const imgSrcReg = /<img[^>]+src\s*=\s*["']([^"']*)["'][^>]*>/gi;
     const srcList = [];
@@ -112,7 +112,7 @@
     }
     return [...new Set(srcList)];
   }
-  function limitHtmlWordCount(html, maxCount) {
+  function limitHtmlWordCount(html:string, maxCount:number) {
     if (!html || typeof html !== 'string') return '';
     if (maxCount <= 0) return '';
     const pureText = html.replace(/<[^>]+>/g, '');
@@ -169,7 +169,7 @@
     const seconds = String(date.getSeconds()).padStart(2, '0');
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   }
-  function removeImgTags(html) {
+  function removeImgTags(html:string) {
     if (!html || typeof html !== 'string') return '';
     return html.replace(/<img[^>]*>/gi, '');
   }
@@ -221,6 +221,9 @@
       })
     }
   },1500)
+  function openDynamicDetail(path:string) {
+    window.open(path,'_blank')
+  }
 </script>
 
 <style scoped lang="scss">
