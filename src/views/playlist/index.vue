@@ -108,6 +108,7 @@ watch(
 )
 
 const handleScrollLoad = () => {
+  if(!filterGroups.value.length) return
   loadData(getTagValues(filterValue.value), false)
 }
 
@@ -116,27 +117,6 @@ onMounted(() => {
     console.log(err)
   })
 })
-// const ListData = ref(
-//   Array.from({ length: 50 }, (_, i) => {
-//     const albumId = `album-${i + 1}` // 唯一的ID
-
-//     return {
-//       name: albumId, // 用于 :key, 必须唯一
-//       type: 'album', // 统一类型为 'album'
-
-//       // 路由指向 "List下的id页面"
-//       to: { name: 'list-id', params: { id: albumId } },
-
-//       // 'album' 类型所需的数据
-//       data: {
-//         // 使用 picsum.photos 并提供唯一的 seed 来获取 50 张不同的图片
-//         imgUrl: `https://picsum.photos/seed/${albumId}/400/400`,
-//         title: `专辑封面 ${i + 1}`,
-//         albumTitle: `测试专辑 ${i + 1}`,
-//       },
-//     }
-//   }),
-// )
 </script>
 
 <style lang="scss" scoped>
@@ -217,3 +197,8 @@ onMounted(() => {
   }
 }
 </style>
+
+<route lang="yaml">
+meta:
+  layout: main
+</route>

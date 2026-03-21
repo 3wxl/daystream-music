@@ -47,6 +47,7 @@
         v-if="isHovered"
         class="mt-3 space-y-2 animate-fade-in-up flex-1 overflow-y-auto max-h-[150px] custom-scrollbar"
       >
+        <!-- 有歌曲时显示歌曲列表 -->
         <div
           v-for="(song, songIndex) in chart.topSongs"
           :key="songIndex"
@@ -67,6 +68,14 @@
           >
             <i class="iconfont text-xs">&#xe623;</i>
           </button>
+        </div>
+        
+        <!-- 无歌曲时显示暂无歌曲 -->
+        <div
+          v-if="chart.topSongs && chart.topSongs.length === 0"
+          class="flex items-center justify-center p-4 rounded-xl glass-effect border border-white/20"
+        >
+          <p class="text-white/60 text-sm">暂无歌曲</p>
         </div>
       </div>
 

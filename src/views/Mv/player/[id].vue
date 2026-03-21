@@ -77,7 +77,7 @@ const mvId = ref(route.params.id as string)
 const mvUrl = ref('')
 const mvDetail = ref<any>({})
 const simiMvs = ref<any[]>([])
-const currentQuality = ref<number>(0) // 0 means not set, will hold resolution like 1080, 720
+const currentQuality = ref<number>(0) 
 const qualityList = computed(() => mvDetail.value.qualityList || [])
 
 const currentQualityLabel = computed(() => {

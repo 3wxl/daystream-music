@@ -1,9 +1,10 @@
 /* 在线链接服务仅供平台体验和调试使用，平台不承诺服务的稳定性，企业客户需下载字体包自行发布使用并做好备份。 */
 @font-face {
-  font-family: "iconfont"; /* Project id 5061369 */
-  src: url('//at.alicdn.com/t/c/font_5061369_56z7mbrisiw.woff2?t=1765334306417') format('woff2'),
-       url('//at.alicdn.com/t/c/font_5061369_56z7mbrisiw.woff?t=1765334306417') format('woff'),
-       url('//at.alicdn.com/t/c/font_5061369_56z7mbrisiw.ttf?t=1765334306417') format('truetype');
+  font-family: 'iconfont'; /* Project id 5061369 */
+  src:
+    url('//at.alicdn.com/t/c/font_5061369_xqoq1tgany.woff2?t=1766046604103') format('woff2'),
+    url('//at.alicdn.com/t/c/font_5061369_xqoq1tgany.woff?t=1766046604103') format('woff'),
+    url('//at.alicdn.com/t/c/font_5061369_xqoq1tgany.ttf?t=1766046604103') format('truetype');
 }
 
 .iconfont {
@@ -13,19 +14,15 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
-.icon-fenleiorguangchangorqita:before {
-  content: "\e655";
+.icon-music:before {
+  content: '\e635';
 }
-
-.icon-gongkai:before {
-  content: "\e653";
+.icon-download:before {
+  content: '\e648';
 }
-
-.icon-yinsibaohu:before {
-  content: "\e99b";
+.icon-crown:before {
+  content: '\e60d';
 }
-
 .icon-a-fabufeihangzhifeiji:before {
   content: '\e64d';
 }
@@ -33,9 +30,24 @@
 .icon-jinggao-L:before {
   content: '\e64a';
 }
-
+.icon-volume:before {
+  content: '\e91a';
+}
 .icon-icon1:before {
   content: '\e694';
+}
+.icon-like:before {
+  content: '\e83f';
+}
+.icon-like-filled:before {
+  content: '\e85c';
+}
+.icon-pause:before {
+  content: '\e87a';
+}
+
+.icon-play:before {
+  content: '\e61f';
 }
 
 .icon-huiyuan1:before {

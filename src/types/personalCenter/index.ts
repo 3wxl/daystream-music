@@ -1,17 +1,24 @@
 /**
+ * 基础类型（抽离通用类型）
+ */
+type IDType = number | string | bigint // 兼容所有ID类型
+type BooleanNumber = 0 | 1 // 数字布尔值（0=否，1=是）
+type PublicStatus = 0 | 1 // 公开状态（0=私有，1=公开）
+
+/**
  * 用户信息VO（接口返回类型）
  */
 export interface UserInfoVO {
-  id?: bigint | number // 兼容JSONBig解析的大数字
+  id?: IDType // 兼容大数字/普通数字/字符串
   username?: string
   avatar?: string
   gender?: string // 男/女/保密
-  introduction?: string // 个性签名（对应页面的signature）
+  introduction?: string // 个性签名
   isVip?: boolean
-  vipExpireTime?: string
+  vipExpireTime?: string // ISO时间字符串
   email?: string
   phone?: string
-  totalPoint?: number
+  totalPoint?: number // 积分
   walletBalance?: number // 音浪
   createdTime?: string
   userRole?: string
@@ -25,25 +32,28 @@ export interface UserInfoVO {
   lastCheckinTime?: string
   updatedTime?: string
   onlineStatus?: number
-}
-
-export interface UpdateUserInfoParams {
-  username?: string // 可选（接口定义为可选）
-  gender?: string // 后端要求：0-未知,1-男,2-女
-  introduction?: string // 可选
-  phone?: string // 可选
-  avatarFile?: File // 头像文件（前端上传用）
-  backgroundImageFile?: File // 背景图文件（前端上传用）
-  // 注意：avatar/backgroundImage 由后端返回，前端不传
+  likePlaylistId?: string
 }
 
 /**
- * 编辑表单类型（对应EditDialog的表单）
+ * 用户信息编辑参数（前端提交给后端）
+ */
+export interface UpdateUserInfoParams {
+  username?: string
+  gender?: '0' | '1' | '2' // 后端要求：0-未知,1-男,2-女
+  introduction?: string
+  phone?: string
+  avatarFile?: File // 头像文件
+  backgroundImageFile?: File // 背景图文件
+}
+
+/**
+ * 编辑表单类型（前端展示用）
  */
 export interface EditForm {
   name: string // 对应username
   signature: string // 对应introduction
-  gender: string // 前端展示：男/女/未知
+  gender: string // 男/女/未知
   lastCheckinTime: string
   lastLoginTime: string
   updatedTime?: string
@@ -52,30 +62,134 @@ export interface EditForm {
   createdTime?: string
   phone?: string
 }
+
 /**
- * 上传图片响应类型
+ * 图片上传响应
  */
 export interface UploadImageResponse {
-  url: string // 图片地址
+  url: string // 图片CDN地址
 }
 
-export type MusicVO = {
-  id: number
-  albumId: number
-  albumName: string | null
-  bpm: number
-  commentCount: number
-  coverUrl: string
-  duration: string // 后端返回的是"04:10"格式字符串
-  isLiked: 0 | 1 // 0=未喜欢，1=已喜欢
-  isVip: 0 | 1 // 0=非VIP，1=VIP
-  likeCount: number
-  musicName: string
-  musicianId: { s: number; e: number; c: number[] } | number // 兼容BigNumber和普通数字
-  musicianName: string | null
-  createTime?: string | number
+/**
+ * 基础歌曲VO（通用歌曲信息）
+ */
+export interface BaseMusicVO {
+  id: IDType // 必选：歌曲ID
+  musicName: string // 必选：歌曲名
+  albumId: number // 必选：专辑ID
+  albumName: string | null // 专辑名（可能为空）
+  musicianId: IDType // 音乐人ID（兼容所有类型，移除错误的对象类型）
+  musicianName: string | null // 音乐人名称
+  coverUrl: string // 封面URL
+  duration: string // 时长 "04:10" 格式
+  bpm: number // 节奏BPM
+  isVip: BooleanNumber // 是否VIP歌曲
+  isLiked: BooleanNumber // 是否点赞
+  likeCount: number // 点赞数
+  commentCount: number // 评论数
+  createTime?: string | number // 创建时间
 }
 
+/**
+ * 歌曲VO（列表展示用）
+ */
+export interface MusicVO extends BaseMusicVO {
+  audioList?: string[] // 音频类型列表 ["标准", "高清"]
+}
+
+/**
+ * 播放用歌曲VO（带音频地址）
+ */
+export interface MusicPlayVO extends BaseMusicVO {
+  audioList: string[] // 音频类型列表 ["标准", "高清"]
+  audioUrl: string // 音频播放地址
+  total?: number
+  errCode?: string
+}
+
+/**
+ * 歌曲详情VO（包含歌词、标签等）
+ */
+export interface MusicDetailVO extends BaseMusicVO {
+  lyricType?: 'lrc' | 'krc' | 'txt' | 'none' // 歌词类型
+  lyricUrl?: string // 歌词文件URL
+  syncLyric?: Array<{ time: number; text: string }>
+  rawLyricText?: string // 纯文本歌词
+  tags?: Array<{
+    id: number
+    tagName: string
+    category?: string
+  }> // 歌曲标签
+  introduction?: string // 歌曲介绍
+  releaseDate?: string // 发布日期
+  playCount?: number // 播放量
+  collectCount?: number // 收藏数
+  shareCount?: number // 分享数
+  durationSeconds?: number // 时长（秒，前端计算）
+  vipInfo?: {
+    level?: number
+    expireTime?: string
+    benefits?: string[]
+  }
+  audioQuality?: {
+    bitrate?: number
+    format?: string
+    sampleRate?: number
+    channels?: number
+  }
+}
+
+/**
+ * 原始歌词行DTO（后端返回：毫秒级时间）
+ */
+export interface LyricLineRawDTO {
+  time: number // 必选：毫秒数（核心修正！之前错误定义为string）
+  text: string // 必选：歌词文本
+  translation?: string // 翻译
+  romaji?: string // 罗马音
+  startTime?: number
+  endTime?: number
+  isMain?: boolean
+}
+
+/**
+ * 格式化歌词行DTO（前端展示用：分秒字符串）
+ */
+export interface LyricLineDTO {
+  time: string // 格式化时间 "00:00.00"
+  text: string
+  translation?: string
+  romaji?: string
+  startTime?: number
+  endTime?: number
+  isMain?: boolean
+}
+
+/**
+ * 歌词完整数据
+ */
+export interface LyricData {
+  rawText: string
+  lines: LyricLineDTO[]
+  hasTranslation: boolean
+  type: string
+  totalDuration?: number
+}
+
+/**
+ * 分页响应通用类型
+ */
+export interface PageResp<T> {
+  records: T[] // 数据列表
+  total: number // 总条数
+  size: number // 页大小
+  current: number // 当前页
+  pages: number // 总页数
+}
+
+/**
+ * 我的喜欢歌曲相关
+ */
 export interface GetMyLikeSongsParams {
   pageNum: number
   pageSize?: number
@@ -84,147 +198,139 @@ export interface GetMyLikeSongsParams {
 export interface GetMyLikeSongsResponse {
   success: boolean
   errorMsg?: string
-  data: {
-    records: MusicVO[]
-    total: number
-    size: number
-    current: number
-    pages: number
-  }
+  data: PageResp<MusicVO>
+  errCode?: string
 }
 
+/**
+ * 点赞相关
+ */
 export interface LikeRecordParams {
-  targetId: string | number
+  targetId: IDType
   targetType: 1 | 2 // 1-音乐 2-评论
 }
+
 export interface LikeRecordResponse {
   success: boolean
   errorMsg?: string
   data: {
-    islike: boolean // 是否点赞（true=已点赞，false=取消点赞）
-    likecount: number // 最新点赞数
-    msg?: string // 状态提示
+    islike?: boolean
+    likecount?: number
+    msg?: string
   }
   errCode?: string
 }
-import type { Data } from '@/utils/request'
-
-/** 收藏歌单请求参数（游标分页） */
-export interface CollectPlaylistReq {
-  pageNum: number
-  pageSize?: number
-}
 
 /**
- * 创建歌单请求参数（页码分页）
+ * 歌单相关
  */
-export interface CreatePlaylistReq {
-  pageNum: number
-  pageSize?: number
+export interface PlaylistVO {
+  id: number // 歌单ID
+  name: string // 歌单名称
+  cover: string // 封面URL
+  description?: string // 描述
+  playCount?: number // 播放量
+  isPublic?: PublicStatus // 公开状态
+  tagIds?: number[] // 标签ID列表
+  createTime?: string // 创建时间
+  updateTime?: string // 更新时间
 }
-
-/**
- * 歌单VO（接口返回的歌单信息）
- */
-
-/**
- * 歌单分页响应结构（通用）
- */
-export interface PlaylistPageResp {
-  records: PlaylistVO[][] | PlaylistVO[] // 兼容二维/一维数组
-  total: number
-  size: number
-  current: number
-  pages: number
-}
-
-/**
- * 收藏歌单响应类型（根据你的实际API响应）
- */
-export interface CollectPlaylistResp {
-  success: boolean
-  errorMsg?: string
-  data?: PlaylistPageResp // 收藏歌单返回分页结构
-}
-
-/**
- * 创建歌单响应类型（根据你的实际API响应）
- */
-export interface CreatePlaylistResp {
-  success?: boolean
-  errorMsg?: string
-  data?: PlaylistPageResp // 创建歌单也返回分页结构
-}
-
-// 或者使用 Data 包装器
-export type CollectPlaylistResp2 = Data<PlaylistPageResp>
-export type CreatePlaylistResp2 = Data<PlaylistPageResp>
 
 export interface CreatePlaylistParams {
   id?: number
+  name: string // 必选：歌单名
+  cover: string // 必选：封面URL
+  description: string // 必选：描述
+  isPublic?: PublicStatus // 默认1-公开
+  tagIds?: number[]
+}
+
+export interface CollectPlaylistReq extends PageParams {}
+export interface CreatePlaylistReq extends PageParams {}
+
+// 通用分页参数
+export interface PageParams {
+  pageNum: number
+  pageSize?: number
+}
+
+export interface PlaylistPageResp extends PageResp<PlaylistVO> {}
+
+export interface CollectPlaylistResp {
+  success: boolean
+  errorMsg?: string
+  data?: PlaylistPageResp
+  errCode?: string
+}
+
+export interface CreatePlaylistResp {
+  success: boolean
+  errorMsg?: string
+  data?: PlaylistPageResp
+  errCode?: string
+}
+
+/**
+ * 歌单详情相关
+ */
+export interface PlaylistDetailParams {
+  playlistId: IDType
+  pageNum: number
+  pageSize: number
+}
+
+export interface PlaylistDetailVO {
   name: string
+  creator: string
+  avatar: string
   cover: string
   description: string
-  isPublic?: number // 1-公开，0-私有，默认1
-  tagIds?: number[]
+  musicCount: number
+  playCount: number
+  createdTime: string
+  commentCount: number
+  collectionCount: number
+  musicDetailVOList: PageResp<MusicDetailVO> // 歌单内歌曲列表
 }
 
-// 确保PlaylistVO类型存在
-export interface PlaylistVO {
-  id: number
-  name: string
-  cover: string
-  description?: string
-  playCount?: number
-  isPublic?: number
-  tagIds?: number[]
-  createTime?: string
-  updateTime?: string
-  success?: boolean
-  erroeMsg?: string
-}
-export interface DailyListenDataVO {
-  count: number // 听歌次数
-  seconds: number // 听歌时长（秒）
-}
-
-// 新增：本周每日听歌响应类型
-export interface WeeklyDailyListenResp {
+export interface PlaylistDetailResponse {
   success: boolean
   errorMsg?: string
-  data: DailyListenDataVO[] // 每日数据数组 [周一, 周二, ..., 周日]
-  total?: number // 本周总次数
+  data: PlaylistDetailVO
   errCode?: string
-
-  records: MusicTagRatioVO[]
 }
 
-// 新增：音乐标签占比VO
-export interface MusicTagRatioVO {
-  tagName: string // 标签名称（如"流行"、"摇滚"）
-  count: number // 播放次数
-  ratio: number // 占比（百分比）
+/**
+ * 歌单收藏者相关
+ */
+export interface SearchUserVO {
+  id: IDType
+  username: string // 修正：统一为username（之前是userName）
+  avatar: string
+  gender?: 0 | 1 | 2 // 0-未知，1-男，2-女
+  introduction?: string
 }
 
-// 新增：本周标签占比响应类型
-export interface WeeklyTagRatioResp {
+export interface PlaylistCollectionsResponse {
   success: boolean
   errorMsg?: string
-  data: MusicTagRatioVO[]
-  total?: number // 总播放次数
-  errCode?: string
-  records: MusicTagRatioVO[]
-}
-
-// 补充：修改原有听歌次数类型（适配真实接口返回）
-// 替换原有的 getWeeklyDailyListenCount 返回类型
-export interface WeeklyListenCountResp {
-  success: boolean
-  errorMsg?: string
-  data: DailyListenDataVO[] // 改为对象数组，而非纯数字数组
+  data: SearchUserVO[]
   total?: number
   errCode?: string
 }
+
+export interface Collector {
+  id: number
+  avatarUrl: string
+  name: string
+  collectTime: number
+  signature?: string
+  followStatus: boolean
+}
+
+/**
+ * 专辑相关
+ */
 export interface AlbumVO {
   id: number
   albumName: string
@@ -239,91 +345,59 @@ export interface AlbumVO {
   musicianName: string
   playCount?: string
 }
+
 export interface CollectAlbumResp {
   success: boolean
   errorMsg?: string
-  data: {
-    records: AlbumVO[]
-    total: number
-    size: number
-    current: number
-    pages: number
-  }
+  data: PageResp<AlbumVO>
   errCode?: string
 }
+
 export interface AlbumCardVO {
   id: number
   name: string
-  artist: string // 歌手名（接口返回musicianId，这里先占位，后续可通过musicianId查询）
+  artist: string
   cover: string
   songCount: number
-  playCount: string // 播放量（接口无此字段，可默认显示或后续扩展）
-  collectTime: string // 收藏时间（接口无此字段，可默认显示）
-}
-// ========== 新增：歌单详情相关类型 ==========
-/**
- * 歌单详情请求参数（路径+查询参数）
- */
-export interface PlaylistDetailParams {
-  playlistId: number | string // 路径参数：歌单ID
-  pageNum: number // 查询参数：页码
-  pageSize: number // 查询参数：页大小
+  playCount: string
+  collectTime: string
 }
 
 /**
- * 歌曲详情VO（歌单详情中的歌曲信息）
+ * 听歌统计相关
  */
-export interface MusicDetailVO {
-  id: number
-  musicName: string
-  albumId: number
-  musicianId: number
-  coverUrl: string
-  bpm: number
-  isVip: 0 | 1
-  likeCount: number
-  commentCount: number
-  duration: string
-  isLiked: 0 | 1
-  albumName: string
-  musicianName: string
-  audioList: string[]
+export interface DailyListenDataVO {
+  count: number // 听歌次数
+  seconds: number // 听歌时长（秒）
 }
 
-/**
- * 分页响应-歌曲VO
- */
-export interface PageRespMusicVO {
-  records: MusicDetailVO[]
-  total: number
-  size: number
-  current: number
-  pages: number
-}
-
-/**
- * 歌单详情VO
- */
-export interface PlaylistDetailVO {
-  name: string
-  creator: string
-  avatar: string
-  cover: string
-  description: string
-  musicCount: number
-  playCount: number
-  createdTime: string
-  commentCount: number
-  collectionCount: number
-  musicDetailVOList: PageRespMusicVO
-}
-
-/**
- * 歌单详情接口响应类型
- */
-export interface PlaylistDetailResponse {
+export interface WeeklyDailyListenResp {
   success: boolean
   errorMsg?: string
-  data: PlaylistDetailVO
+  data: DailyListenDataVO[] // 每日数据 [周一, 周二, ..., 周日]
+  total?: number // 本周总次数
   errCode?: string
+}
+
+export interface MusicTagRatioVO {
+  tagName: string
+  count: number
+  ratio: number
+}
+
+export interface WeeklyTagRatioResp {
+  success: boolean
+  errorMsg?: string
+  data: MusicTagRatioVO[]
+  total?: number
+  errCode?: string
+}
+export interface Collector {
+  id: number
+  avatar: string
+  collectPlaylistCount: number
+  fansCount: number
+  gender: number
+  introduction: string
+  userName: string
 }

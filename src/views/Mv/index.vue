@@ -1,7 +1,8 @@
 <template>
   <div class="h-full flex flex-col overflow-hidden">
+
     <div class="shrink-0 overflow-x-auto overflow-y-hidden tag-bar-container">
-      <TagBars :tags="mvTags" />
+      <TagBar :tags="mvTags" />
     </div>
 
     <!-- MV列表 -->
@@ -39,7 +40,7 @@
 <script lang="ts" setup>
 import { getHotMv, getNewMv, getVipMv } from '@/api/mv'
 import MvCard from '@/components/MvCard.vue'
-import TagBars from '@/components/TagBars.vue'
+import TagBar from '@/components/TagBar.vue'
 import { useLoadMore } from '@/composables/loadMore'
 import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -49,9 +50,9 @@ const router = useRouter()
 const containerRef = ref<HTMLElement | null>(null)
 
 const mvTags = [
-  { name: '热门', path: '/mv', query: { type: 'hot' } },
-  { name: '最新', path: '/mv', query: { type: 'new' } },
-  { name: 'VIP专属', path: '/mv', query: { type: 'vip' } },
+  {id:'hot', name: '热门', path: '/mv?type=hot'},
+  {id:'new', name: '最新', path: '/mv?type=new'},
+  {id:'vip', name: 'VIP专属', path: '/mv?type=vip' },
 ]
 
 // 封装API请求

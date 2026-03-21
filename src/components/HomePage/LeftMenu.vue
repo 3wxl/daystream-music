@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-col h-screen bg-linear-to-b from-[#151a2d] via-[#101425] to-[#0b0f1b] border-r border-white/5 shadow-xl transition-all duration-300 text-gray-100"
+    class="flex flex-col h-screen bg-linear-to-b from-[#151a2d] via-[#101425] to-[#0b0f1b] border-r border-white/5 shadow-xl transition-all duration-300 text-gray-100 pb-18"
     :class="isCollapse ? 'w-20' : 'w-56'"
   >
     <!-- Logo 区域 -->
@@ -44,8 +44,10 @@
         ]"
         @click="logout"
       >
+
         <Setting class="w-5 h-5 shrink-0" />
         <span v-if="!isCollapse" class="whitespace-nowrap">退出登录</span>
+
       </router-link>
     </div>
   </div>
@@ -63,8 +65,7 @@ import {
   Setting,
   Tickets,
   User,
-  View,
-  Service,
+  View
 } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 
@@ -76,10 +77,10 @@ const menuItems = [
   { path: '/album', title: '专辑', icon: Tickets },
   { path: '/Aritist', title: '歌手', icon: Mic },
   { path: '/playlist', title: '歌单', icon: Files },
-  { path: '/MusicRanking', title: '榜单', icon: Histogram },
+  { path: '/music-ranking', title: '榜单', icon: Histogram },
   { path: '/community/CommunityDisplay', title: '社区', icon: ChatLineSquare },
   // { path: '/musician/MusicianSettleIn', title: '音乐人', icon: Service },
-  { path: '/User/PersonalCenter', title: '个人中心', icon: User },
+  { path: '/user/personal-center', title: '个人中心', icon: User },
 ]
 
 const changeCollapse = () => {

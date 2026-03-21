@@ -4,18 +4,23 @@
       :key="tag.name"
       :to="{ path: tag.path, query: tag.query }"
       class="tag-item"
-      active-class="router-link-active"
+
       >{{ tag.name }}
     </router-link>
 </template>
 
 <script lang="ts" setup>
+const route = useRoute()
+
+
 defineProps({
   tags: {
     type: Object,
     required: true,
   },
 })
+
+
 </script>
 
 <style lang="scss" scoped>

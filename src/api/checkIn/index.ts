@@ -1,6 +1,6 @@
 // api/checkIn.ts
 import request from '@/utils/request'
-import type { BaseResponse, CheckInStatusVO, Data } from '@/types/checkIn'
+import type { BaseResponse, CheckInStatusVO, Data, PageRespUserTaskVO } from '@/types/checkIn'
 
 /**
  * 用户签到接口
@@ -37,4 +37,55 @@ export function getCheckInStatus(): Promise<BaseResponse<CheckInStatusVO>> {
       } as BaseResponse<CheckInStatusVO>
     },
   )
+}
+
+/**
+ * 获取用户任务状态列表
+ * GET /user/task/list
+ * @param pageNum 当前页码
+ * @param pageSize 每页显示数量
+ * @returns Promise<BaseResponse<PageRespUserTaskVO>>
+ */
+// export function getUserTaskList(
+//   pageNum: number,
+//   pageSize?: number,
+// ): Promise<BaseResponse<PageRespUserTaskVO>> {
+//   return request<PageRespUserTaskVO>('/user/task/list', 'get', {
+//     params: {
+//       pageNum,
+//       pageSize,
+//     },
+//   }).then((response: Data<PageRespUserTaskVO>) => {
+//     return {
+//       success: response.success,
+//       errorMsg: response.errorMsg,
+//       data: response.data,
+//       total: response.total,
+//       errCode: response.errCode,
+//     } as BaseResponse<PageRespUserTaskVO>
+//   })
+// }
+export function getUserTaskList(
+  pageNum: number,
+  pageSize?: number,
+): Promise<BaseResponse<PageRespUserTaskVO>> {
+  return request<PageRespUserTaskVO>('/user/task/list', 'get', undefined, {
+    params: {
+      pageNum,
+      pageSize,
+    },
+  }).then((response: Data<PageRespUserTaskVO>) => {
+    return {
+      success: response.success,
+      errorMsg: response.errorMsg,
+      data: response.data,
+      total: response.total,
+      errCode: response.errCode,
+    } as BaseResponse<PageRespUserTaskVO>
+  })
+}
+export const claimTaskReward = (taskId: number) => {
+  return request('/user/task/reward/claim', 'POST', undefined, {
+    params: { taskId },
+  })
 }

@@ -1,7 +1,37 @@
 <template>
   <div class="flex-1 overflow-y-auto p-6 space-y-8 relative custom-scrollbar">
+    <!-- 加载状态 -->
+    <div v-if="isLoading" class="flex items-start gap-4">
+      <div class="relative flex-shrink-0">
+        <div class="w-10 h-10 rounded-full bg-pink-400 flex items-center justify-center shadow-lg">
+          <i class="iconfont icon-ai text-white">&#xe7a2;</i>
+        </div>
+        <div
+          class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-white"
+        ></div>
+      </div>
+      <div class="flex-1 max-w-3xl">
+        <div class="relative">
+          <div
+            class="bg-pink-400/10 rounded-2xl rounded-tl-none p-5 border border-pink-400/20 shadow-xl"
+          >
+            <div class="flex items-center gap-2">
+              <div class="w-3 h-3 bg-pink-400 rounded-full animate-pulse"></div>
+              <div class="w-2 h-2 bg-pink-400 rounded-full animate-pulse delay-150"></div>
+              <div class="w-1.5 h-1.5 bg-pink-400 rounded-full animate-pulse delay-300"></div>
+              <span class="text-sm text-pink-300 ml-2">AI助手正在连接中...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 欢迎消息 -->
-    <WelcomeMessage v-if="showWelcome" :welcome-message="welcomeMessage" :avatar="aiAvatar" />
+    <WelcomeMessage
+      v-if="showWelcome && !isLoading"
+      :welcome-message="welcomeMessage"
+      :avatar="aiAvatar"
+    />
 
     <!-- 消息列表 -->
     <div v-for="msg in messages" :key="msg.id" :class="getMessageAnimationClass(msg)">
@@ -26,6 +56,7 @@ interface Props {
   showWelcome?: boolean
   welcomeMessage?: string
   aiAvatar?: string
+  isLoading?: boolean // 添加加载状态属性
 }
 
 interface Emits {
@@ -39,8 +70,9 @@ interface Emits {
 withDefaults(defineProps<Props>(), {
   showWelcome: true,
   welcomeMessage:
-    '你好！我是AI作词助手，擅长创作各种风格的歌词。你可以告诉我想要的主题、情感、风格，或者上传参考歌词，我会帮你创作出精彩的歌词作品！',
+    '你好呀～我是白昼音流音乐平台的专属AI助手，是懂音乐、有温度的问答伙伴哦！✨\n\n无论是想了解音乐知识，还是需要帮助操作平台功能，我都会尽力为你解答～\n\n希望对你有帮助～有疑问随时喊我呀～',
   aiAvatar: 'https://picsum.photos/id/237/200',
+  isLoading: false,
 })
 
 defineEmits<Emits>()

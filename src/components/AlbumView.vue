@@ -103,16 +103,19 @@ const info = computed(() => {
   const data = props.playlist || props.albumlist || {}
   return {
     title: data.name || data.albumName || '未知标题',
-    cover: data.coverImg || data.coverUrl || data.imgUrl || 'https://placehold.co/400x400/333/FFF?text=No+Cover',
+    cover:
+      data.coverImg ||
+      data.coverUrl ||
+      data.imgUrl ||
+      'https://placehold.co/400x400/333/FFF?text=No+Cover',
     creatorName: data.creator?.name || data?.singerName || data.artist || '未知艺术家',
-    creatorAvatar: data.creator?.avatar || data?.artistAvatar || 'https://placehold.co/100x100/333/FFF?text=A',
+    creatorAvatar:
+      data.creator?.avatar || data?.artistAvatar || 'https://placehold.co/100x100/333/FFF?text=A',
     description: data.description || data.introduction || '暂无简介',
-    count: data.musicCount || data.colletCount || 0
+    count: data.musicCount || data.colletCount || 0,
   }
 })
 </script>
-
-
 
 <style lang="scss" scoped>
 .music-content,

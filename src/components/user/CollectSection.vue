@@ -1,6 +1,6 @@
 <template>
   <div
-    class="grid grid-cols-2 sm:grid-cols-auto-fill md:grid-cols-auto-fill lg:grid-cols-auto-fill gap-6"
+    class="grid grid-cols-2 sm:grid-cols-auto-fill md:grid-cols-auto-fill lg:grid-cols-auto-fill gap-6 y-auto"
     :style="gridStyle"
     key="playlist-grid"
   >
@@ -27,7 +27,7 @@
             class="w-12 h-12 rounded-full bg-pink-500 flex items-center justify-center transform translate-y-4 group-hover:translate-y-0 transition-transform mr-2"
             @click.stop="handlePlay(playlist)"
           >
-            <i class="iconfont icon-play" style="font-size: 20px; color: white">&#xe623;</i>
+            <i class="iconfont" style="font-size: 20px; color: white">&#xe623;</i>
           </div>
         </div>
 
@@ -64,18 +64,20 @@
               <i v-else :class="actionIconClass" class="mr-2"></i>
               {{ loading[playlist.id] ? '处理中...' : actionTitle }}
             </div>
+            <!-- 只有自己创建的歌单才显示编辑信息 -->
             <div
+              v-if="props.actionType === 'delete'"
               class="px-3 py-2 hover:bg-gray-700 cursor-pointer text-sm text-white flex items-center"
               @click="handleEdit(playlist)"
             >
-              <i class="iconfont icon-edit mr-2" style="font-size: 14px">&#xe600;</i>
+              <i class="iconfont icon-edit mr-2" style="font-size: 14px">&#xe7e5;</i>
               编辑信息
             </div>
             <div
               class="px-3 py-2 hover:bg-gray-700 cursor-pointer text-sm text-white flex items-center"
               @click="handleShare(playlist)"
             >
-              <i class="iconfont icon-share mr-2" style="font-size: 14px">&#xe601;</i>
+              <i class="iconfont icon-share mr-2" style="font-size: 14px">&#xe64f;</i>
               分享
             </div>
           </div>
@@ -91,12 +93,14 @@
       <div class="text-gray-500 text-xs mt-1">{{ playlist.playCount }}首歌曲</div>
     </div>
 
-    <div
-      v-if="playlists.length === 0 && !props.searchKeyword"
-      class="col-span-full py-8 text-center"
-    >
-      <el-empty description="暂无歌单数据" class="text-gray-400" />
+    <!-- 加载更多提示 -->
+    <div v-if="isLoadingMore" class="col-span-full py-6 text-center">
+      <i class="iconfont icon-loading animate-spin text-pink-500 mr-2"></i>
+      <span class="text-gray-400">加载更多歌单...</span>
     </div>
+
+    <!-- 无更多数据提示 -->
+
     <UpdatePlayList
       v-if="currentEditPlaylist"
       v-model:isDialogOpen="isDialogOpen"
@@ -107,7 +111,6 @@
     />
   </div>
 </template>
-
 <script setup lang="ts">
 import type { PlaylistVO } from '@/types/personalCenter/index'
 import { ElMessage } from 'element-plus'
@@ -118,20 +121,22 @@ import {
   getCreatePlaylists,
 } from '@/api/personalCenter/index'
 import { usePlaylistStore } from '@/stores/playList.ts'
-const playlistStore = usePlaylistStore()
+import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue'
+import { useRouter } from 'vue-router'
+
 const router = useRouter()
-const handlePlaylistClick = (playlist: PlaylistVO) => {
-  // 把歌单ID（number）转字符串存入Pinia
-  playlistStore.setCurrentPlaylist(playlist.id, playlist)
-  router.push('/User/LikedSongsList')
-  console.log(playlist.id)
-}
+const playlistStore = usePlaylistStore()
+
 // 定义props
 interface Props {
   playlists: PlaylistVO[]
   actionType?: 'collect' | 'delete'
   showActionButton?: boolean
   searchKeyword?: string
+  // 新增：父组件传递分页相关回调
+  onLoadMore?: (pageNum: number) => Promise<PlaylistVO[]>
+  hasMore?: boolean
+  isLoadingMore?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -139,6 +144,8 @@ const props = withDefaults(defineProps<Props>(), {
   actionType: 'collect',
   showActionButton: true,
   searchKeyword: '',
+  hasMore: true,
+  isLoadingMore: false,
 })
 
 // 核心状态
@@ -150,8 +157,12 @@ const loading = ref<{ [key: string | number]: boolean }>({})
 const isDialogOpen = ref(false)
 const isEditMode = ref(false)
 const currentEditPlaylist = ref<PlaylistVO | undefined>(undefined)
+
+// 新增：分页核心状态（如果组件独立使用）
 const playlistsLocal = ref<PlaylistVO[]>([])
-const pageParams = ref({ pageNum: 1, pageSize: 10 })
+const pageParams = ref({ pageNum: 1, pageSize: 20 })
+const hasMore = ref(true) // 是否有更多数据
+const isLoadingMore = ref(false) // 是否正在加载更多
 
 // 清除定时器
 const clearCloseTimer = () => {
@@ -161,13 +172,17 @@ const clearCloseTimer = () => {
   }
 }
 
-// 监听playlists变化
+// 监听父组件传入的playlists变化
 watch(
   () => props.playlists,
-  () => {
+  (newVal) => {
     openMenuId.value = null
+    // 如果父组件传数据，同步到本地
+    if (newVal && newVal.length > 0) {
+      playlistsLocal.value = newVal
+    }
   },
-  { deep: true },
+  { deep: true, immediate: true },
 )
 
 // 定义emits
@@ -178,6 +193,8 @@ const emit = defineEmits<{
   share: [playlist: PlaylistVO]
   collectChange: [playlistId: string | number]
   deleteChange: [playlistId: string | number]
+  // 新增：通知父组件加载更多
+  loadMore: []
 }>()
 
 // 菜单交互方法
@@ -239,6 +256,14 @@ const gridStyle = computed(() => {
   }
 })
 
+// 歌单点击跳转
+const handlePlaylistClick = (playlist: PlaylistVO) => {
+  // 把歌单ID（number）转字符串存入Pinia
+  playlistStore.setCurrentPlaylist(playlist.id, playlist)
+  router.push('/user/liked-songs-list')
+  console.log(playlist.id)
+}
+
 // 取消收藏/删除歌单逻辑
 const handleAction = async (playlist: PlaylistVO) => {
   try {
@@ -274,6 +299,7 @@ const handleAction = async (playlist: PlaylistVO) => {
 
 // 其他事件处理
 const handlePlay = (playlist: PlaylistVO) => {
+  handlePlaylistClick(playlist)
   closeMenuImmediately()
   emit('play', playlist)
 }
@@ -283,7 +309,7 @@ const handleEdit = (playlist: PlaylistVO) => {
   closeMenuImmediately()
   isEditMode.value = true
   currentEditPlaylist.value = playlist
-  console.log(playlist)
+  console.log(playlist?.tagIds)
   isDialogOpen.value = true
   emit('edit', playlist)
 }
@@ -305,7 +331,7 @@ const handleCreateSuccess = async (formData: FormData) => {
     const res = await createPlaylistApi(formData)
     if (res.success) {
       ElMessage.success('歌单创建成功')
-      await fetchPlaylists()
+      await fetchPlaylists() // 创建成功后重新加载列表
     } else {
       ElMessage.error('创建失败')
     }
@@ -317,25 +343,87 @@ const handleCreateSuccess = async (formData: FormData) => {
 // 处理编辑成功
 const handleUpdateSuccess = async (formData: FormData, playlistId: number) => {
   console.log(88)
+  console.log(formData)
   try {
     const res = await updatePlaylistApi(formData)
     console.log(res)
     if (res.success) {
-      await fetchPlaylists()
-      // 新增：通知父组件刷新歌单列表
-      emit('update-success') // 把提示移到这里，确保接口成功后才提示
+      await fetchPlaylists() // 编辑成功后重新加载列表
+      ElMessage.success('歌单修改成功')
     } else {
-      ElMessage.error(res.errorMsg || '修改失败')
+      ElMessage.error('修改失败')
     }
   } catch (error) {
     ElMessage.error('修改失败，请重试')
+    console.log(error)
   }
 }
-// 获取歌单列表
-const fetchPlaylists = async () => {
-  const res = await getCreatePlaylists(pageParams.value)
-  if (res.success && res.data) {
-    playlistsLocal.value = Array.isArray(res.data.records) ? res.data.records : []
+
+// 新增：完整的分页加载逻辑
+const fetchPlaylists = async (isLoadMore = false) => {
+  // 加载更多时标记状态
+  if (isLoadMore) {
+    isLoadingMore.value = true
+  } else {
+    // 首次加载重置页码和数据
+    pageParams.value.pageNum = 1
+    playlistsLocal.value = []
+    hasMore.value = true
+  }
+
+  try {
+    const res = await getCreatePlaylists(pageParams.value)
+    console.log(res)
+    if (res.success && res.data) {
+      // 替换第384行附近的逻辑如下：
+      const newPlaylists = Array.isArray(res.data.records)
+        ? res.data.records.flat() // 若 records 中可能包含数组，则展平
+        : []
+
+      // 确保类型正确后再赋值
+      if (isLoadMore) {
+        playlistsLocal.value = [...playlistsLocal.value, ...(newPlaylists as PlaylistVO[])]
+      } else {
+        playlistsLocal.value = newPlaylists as PlaylistVO[]
+      }
+      // 判断是否有更多数据（当前页码 < 总页数）
+      console.log(pageParams.value.pageNum)
+      console.log(res.data.pages)
+      hasMore.value = pageParams.value.pageNum < (res.data.pages || 0)
+      console.log(hasMore.value)
+    }
+  } catch (error) {
+    ElMessage.error('加载歌单失败，请重试')
+    console.error('加载歌单失败:', error)
+  } finally {
+    isLoadingMore.value = false
+  }
+}
+
+// 新增：加载下一页
+const loadMore = () => {
+  // 防重复请求 + 无更多数据时不请求
+  console.log(22)
+  if (isLoadingMore.value || !hasMore.value) return
+
+  pageParams.value.pageNum++
+  fetchPlaylists(true)
+  // 通知父组件加载更多（如果父组件控制分页）
+  emit('loadMore')
+}
+
+// 新增：滚动监听（组件内独立实现无限滚动）
+const handleScroll = () => {
+  // 搜索状态下不加载更多
+  if (props.searchKeyword) return
+
+  const container = document.querySelector('.grid') // 歌单列表容器
+  if (!container) return
+
+  // 计算滚动位置：距离底部100px时加载更多
+  const { scrollTop, scrollHeight, clientHeight } = container
+  if (scrollTop + clientHeight >= scrollHeight - 100) {
+    loadMore()
   }
 }
 
@@ -349,14 +437,25 @@ const handleClickOutside = (event: MouseEvent) => {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  // 首次加载第一页数据
+  fetchPlaylists()
+  // 绑定滚动监听（如果组件独立使用）
+  const container = document.querySelector('.grid')
+  if (container) {
+    container.addEventListener('scroll', handleScroll)
+  }
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
   clearCloseTimer()
+  // 解绑滚动监听
+  const container = document.querySelector('.grid')
+  if (container) {
+    container.removeEventListener('scroll', handleScroll)
+  }
 })
 </script>
-
 <style lang="scss" scoped>
 /* 优化hover效果 */
 .group {

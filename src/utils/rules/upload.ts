@@ -1,6 +1,6 @@
 import { reactive } from "vue";
 import type { FormRules,FormItemRule } from "element-plus";
-import { lengthRule } from "./base";
+import { lengthRule, requiredRule } from "./base";
 
 export function useUploadtRules(){
   // 标签数量校验
@@ -41,8 +41,16 @@ export function useUploadtRules(){
     tagsIds: tagsRule,
   })
 
+  const albumUploadRule: FormRules = reactive({
+    albumName:inputRule,
+    introduction:descriptionRule,
+    coverFile:fileRule,
+    musicianId:requiredRule,
+  })
+
   return {
     playlistUploadRule,
+    albumUploadRule
   }
 }
 

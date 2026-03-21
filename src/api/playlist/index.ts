@@ -4,15 +4,8 @@ export function getAllTags() {
   return request('/playlist/all-tags', 'get')
 }
 
-export function getPlayListDetail(id: string,pageSize: string,pageNum: string) {
-  return request(
-    `/playlist/detail/${id}`, 
-    'get',
-    {
-      pageSize,
-      pageNum,
-    }
-  )
+export function getPlayListDetail(id: string) {
+  return request(`/playlist/detail/${id}`, 'get')
 }
 
 export function getlistByTags(currentTag: string[], pageNum: string, pageSize: string) {
@@ -44,6 +37,6 @@ export function deletePlaylist(playListId: string) {
 }
 
 // 批量将歌曲添加到歌单
-export function addMusicToPlaylist(data:any) {
-  return request('/playlist/batch-add-song-to-playlist','post',data)
+export function addMusicToPlaylist(data: any) {
+  return request('/playlist/batch-add-song-to-playlist', 'post', data)
 }

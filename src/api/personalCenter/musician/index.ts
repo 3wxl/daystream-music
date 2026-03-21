@@ -6,6 +6,7 @@ import type {
   PageRespListMusicDetailVO,
   GetMyMusicParams,
   GetMyMusicResponse,
+  ApplyMusicianParams,
 } from '@/types/personalCenter/musician/index'
 
 export const getMyMusic = async (params: GetMyMusicParams): Promise<GetMyMusicResponse> => {
@@ -20,4 +21,11 @@ export const getMyMusic = async (params: GetMyMusicParams): Promise<GetMyMusicRe
       },
     },
   )
+}
+
+export const applyMusician = (params: ApplyMusicianParams) => {
+  return request('/applyMusician', 'POST', params)
+}
+export function updateImage(submitData: FormData) {
+  return request('/community/updateImage', 'post', submitData)
 }

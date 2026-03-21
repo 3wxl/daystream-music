@@ -20,7 +20,7 @@
         <button
           class="bg-pink-400 text-black px-8 py-3 rounded-full text-lg font-medium hover:bg-pink-300 transition-all shadow-lg shadow-pink-400/30 overflow-hidden relative"
         >
-          <router-link to="/Musician/MusicianJoin">
+          <router-link to="/musician/musician-join">
             <span class="relative z-10">立即入驻</span>
           </router-link>
         </button>

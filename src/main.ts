@@ -11,6 +11,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import './router/permission'
+import { useFlashSaleReminderStore } from './stores/flashSaleReminder'
 
 
 const pinia = createPinia()
@@ -24,4 +25,14 @@ app.component('QuillEditor', QuillEditor)
 app.use(pinia)
 app.use(router)
 app.use(ElementPlus)
+
+// 全局初始化提醒服务（关键修复）
+const reminderStore = useFlashSaleReminderStore()
+reminderStore.initReminderService() // 调用新增的初始化方法
+
+// 绑定应用卸载事件：仅在页面关闭/刷新时停止轮询
+window.addEventListener('beforeunload', () => {
+  reminderStore.destroyReminderService()
+})
+
 app.mount('#app')
