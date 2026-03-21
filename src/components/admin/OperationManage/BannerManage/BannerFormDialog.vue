@@ -1,6 +1,6 @@
 <template>
   <AdminConfirm
-    :title="isEditMode ? (form.isDefault ? '编辑默认轮播图' : '编辑轮播图') : '添加轮播图'"
+    :title="isEditMode ? '编辑轮播图': '添加轮播图'"
     v-model="isDialogOpen"
     width="600px"
     :close-on-click-modal="false"
@@ -13,73 +13,83 @@
       label-width="100px"
       class="space-y-4"
     >
-      <el-form-item label="轮播图名称" prop="name">
-        <el-input v-model="form.name" placeholder="请输入轮播图名称" class="w-full" />
+      <el-form-item label="轮播图名称" prop="title">
+        <el-input v-model="form.title" placeholder="请输入轮播图名称" class="w-full" />
       </el-form-item>
-      <el-form-item label="轮播图图片" prop="imageUrl">
+      <el-form-item label="权重" prop="sortOrder">
+        <el-input-number
+          v-model="form.sortOrder"
+          :min="0"
+          :max="999"
+          controls-position="right"
+          class="w-[200px]!"
+          placeholder="请输入权重值（0-999）"
+        />
+        <p class="text-xs text-gray-500 mt-1 ml-2">权重值越高，展示优先级越高</p>
+      </el-form-item>
+      <el-form-item label="轮播图图片">
         <div class="flex flex-col gap-2">
           <el-upload
             class="upload-demo"
             :auto-upload="false"
             :on-change="handleImageChange"
+            :on-remove="handleRemove"
             list-type="picture-card"
             :file-list="uploadFileList"
+            :limit="1"
+            accept=".jpg,.jpeg,.png,.gif,.bmp,.webp"
           >
-            <i class="el-icon-plus"></i>
+            <i class="iconfont icon-icon1"></i>
           </el-upload>
           <p class="text-xs text-gray-500">支持 JPG、PNG 格式，建议尺寸 1920×500px</p>
         </div>
-        <div v-if="form.imageUrl" class="mt-3 w-full h-40 bg-gray-50 rounded flex items-center justify-center overflow-hidden">
-          <img :src="form.imageUrl" alt="预览图" class="max-w-full max-h-full object-contain" />
+        <div v-if="imgFile" class="mt-3 w-full h-40 bg-gray-50 rounded flex items-center justify-center overflow-hidden">
+          <img :src="imgFile" alt="预览图" class="max-w-full max-h-full object-contain" />
         </div>
       </el-form-item>
-      <el-form-item label="点击交互" prop="clickType">
+      <el-form-item label="点击交互" prop="actionType">
         <el-select
-          v-model="form.clickType"
+          v-model="form.actionType"
           placeholder="选择点击后行为"
           class="w-full"
           @change="handleClickTypeChange"
         >
-          <el-option key=" " label="无" value=""></el-option>
-          <el-option key="link" label="跳转链接" value="link"></el-option>
-          <el-option key="music" label="播放音乐" value="music"></el-option>
-          <el-option key="playlist" label="播放歌单" value="playlist"></el-option>
+          <el-option key="0" label="无" value="0"></el-option>
+          <el-option key="4" label="跳转链接" value="4"></el-option>
+          <el-option key="2" label="跳转歌曲" value="2"></el-option>
+          <el-option key="1" label="跳转歌单" value="1"></el-option>
+          <el-option key="3" label="跳转秒杀活动" value="3"></el-option>
         </el-select>
         <div class="mt-2">
           <el-button
             type="text"
             @click="$emit('openActionDrawer')"
-            v-if="form.clickType"
+            v-if="form.actionType!='0'&&form.actionType!=null"
             class="text-blue-500 p-0 h-auto"
           >
             <el-icon size="14" class="mr-1"><Setting /></el-icon>
-            {{ form.clickType === 'link' ? '设置链接' : form.clickType === 'music' ? '选择音乐' : '选择歌单' }}
+            {{ clickType[form.actionType] }}
           </el-button>
-          <div v-if="form.clickType && (form.linkUrl || form.musicId || form.playlistId)" class="text-sm text-gray-600 mt-1">
+
+          <div v-if="form.actionType && (form.linkUrl || form.musicId || form.playlistId)" class="text-sm text-gray-600 mt-1">
             当前设置:
             <span class="font-medium">
-              {{ form.clickType === 'link' ? form.linkUrl : form.clickType === 'music' ? form.musicName : form.playlistName }}
+              {{ form.actionType === '4' ? form.linkUrl : form.actionType === '2' ? form.musicName : form.playlistName }}
             </span>
           </div>
+
         </div>
-      </el-form-item>
-      <el-form-item label="开始时间" prop="startTime">
-        <el-date-picker v-model="form.startTime" type="datetime" placeholder="选择开始时间" class="w-full" />
-      </el-form-item>
-      <el-form-item label="结束时间" prop="endTime">
-        <el-date-picker v-model="form.endTime" type="datetime" placeholder="选择结束时间" class="w-full" />
       </el-form-item>
       <el-form-item label="展示规则提示">
         <div class="bg-gray-50 p-3 rounded-md text-sm">
           <p class="text-gray-600">
-            系统将自动维持4个轮播图同时展示。您设置的时间段仅用于优先级排序，
-            最终展示数量由系统自动调节。
+            权重设置最高的前四个轮播图会显示在首页轮播图区域。
           </p>
         </div>
       </el-form-item>
     </el-form>
     <div class="mt-1 flex justify-center gap-12">
-      <el-button @click="handleClose" class="w-25">取消</el-button>
+      <el-button @click="$emit('close')" class="w-25">取消</el-button>
       <el-button
         type="primary"
         @click="handleSubmit"
@@ -93,58 +103,104 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, ref, watch } from 'vue';
-import { ElMessage } from 'element-plus';
-import { Setting } from '@element-plus/icons-vue';
-import AdminConfirm from '@/components/admin/AdminConfirm.vue';
+import { ref, computed } from 'vue'
+import { Setting } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
+// 数据
 const props = defineProps({
-  isEditMode: { type: Boolean, required: true },
-  form: { type: Object, required: true },
-  formRules: { type: Object, required: true },
-  mockMusics: { type: Array, required: true },
-  mockPlaylists: { type: Array, required: true }
+  isEditMode: {
+    type: Boolean,
+    default: false
+  },
+  mockMusics: {
+    type: Array,
+    default: () => []
+  },
+  mockPlaylists: {
+    type: Array,
+    default: () => []
+  }
 });
-let isDialogOpen = defineModel()
-const emit = defineEmits(['submit', 'close', 'openActionDrawer']);
+let form = reactive({
+  title:null,
+  imageUrl:null,
+  linkUrl:null,
+  sortOrder:null,
+  status:null,
+  actionType:null,
+  targetId:null,
+})
+let clickType = {
+  '0': '无',
+  '4': '跳转链接',
+  '2': '跳转歌曲',
+  '1': '跳转歌单',
+  '3': '跳转秒杀活动'
+}
 
-const formRef = ref(null);
+const modelValue = defineModel();
+
+const emit = defineEmits(['submit', 'close', 'openActionDrawer', 'formChange']);
+
+const isDialogOpen = computed({
+  get() {
+    return modelValue.value;
+  },
+  set(value) {
+    modelValue.value = value;
+  }
+});
+
+watch(()=>form, (newForm) => {
+  emit('formChange', newForm);
+}, { deep: true });
+
+// 存储上传的文件
+const imgFile = ref(null);
 const uploadFileList = ref([]);
 const isSubmitting = ref(false);
 
-// 监听form变化，同步上传文件列表
-watch(() => props.form.imageUrl, (newVal) => {
-  if (newVal) uploadFileList.value = [{ url: newVal }];
-}, { immediate: true });
+const handleImageChange = (file, fileList) => {       //
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
+  if (!allowedTypes.includes(file.raw.type)) {
+    ElMessage.error('只能上传图片文件！');
+    if (fileList.length > 0) {
+      fileList.pop();
+    }
+    return;
+  }
+  // 读取文件并更新预览
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    imgFile.value = e.target.result;
+  };
 
-const handleImageChange = (uploadFile) => {
-  props.form.imageUrl = uploadFile.url;
-  uploadFileList.value = [uploadFile];
+  reader.readAsDataURL(file.raw);
 };
 
+// 处理文件移除
+const handleRemove = () => {
+  form.imageUrl = '';
+  if (imgFile.value) {
+    URL.revokeObjectURL(imgFile.value); // 清理内存
+  }
+  imgFile.value = null;
+  uploadFileList.value = [];
+};
+
+// 点击类型变化处理
 const handleClickTypeChange = (value) => {
-  if (value !== 'link') props.form.linkUrl = '';
-  if (value !== 'music') {
-    props.form.musicId = '';
-    props.form.musicName = '';
-  }
-  if (value !== 'playlist') {
-    props.form.playlistId = '';
-    props.form.playlistName = '';
-  }
-};
-
-const handleSubmit = async () => {
-  try {
-    await formRef.value.validate();
-    emit('submit', props.form);
-  } catch (error) {
-    ElMessage.error('表单验证失败，请检查填写内容');
+  // 初始化相关字段
+  if (!value) {
+    form.linkUrl = '';
+    form.musicId = null;
+    form.musicName = '';
+    form.playlistId = null;
+    form.playlistName = '';
   }
 };
-
-const handleClose = () => {
-  emit('update:modelValue', false);
-  emit('close');
-};
+onMounted(()=>{
+  emit('formChange', form);      // 先置空父组件的form
+})
 </script>

@@ -2,45 +2,138 @@
   <transition name="admin-container" appear>
     <div>
       <div class="shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px]">
-        <CommnetsReportHeader></CommnetsReportHeader>
+        <CommnetsReportHeader
+          @search="search"
+          @prePage="skipPage"
+          @nextPage="skipPage"
+          @clickPage="skipPage"
+          :total="total"
+        ></CommnetsReportHeader>
       </div>
       <div class="shadow-md/4 border-[#e4e7ed] bg-white rounded-[10px] p-[15px] mt-3">
         <CommnetsReportContainer
-          :userData="userData"
+          :reportData="reportData"
+          @prePage="skipPage"
+          @nextPage="skipPage"
+          @clickPage="skipPage"
+          :total="total"
+          @refreshW="refreshW"
+          @refresh="refresh"
+          :state="status"
+          :reportType="reportType"
         ></CommnetsReportContainer>
+        <div v-show="isLoading" class="w-full h-full absolute top-0 left-0 z-10 bg-[rgba(255,255,255,0.15)] rounded-[8px] flex items-center justify-center">
+          <svg viewBox="25 25 50 50">
+            <circle r="20" cy="50" cx="50"></circle>
+          </svg>
+        </div>
       </div>
     </div>
   </transition>
 </template>
 
 <script setup lang="ts">
+  import {GetCommentReportListApi} from '@/api/Admin/communtiy/commentReport'     // 获取举报列表
+  import type {getReportListType,xGetReportListType,reportType} from '@/types/admin/community'
   import CommnetsReportHeader from '@/components/Admin/Community/CommunityCommentReport/CommnetsReportHeader.vue'
   import CommnetsReportContainer from '@/components/Admin/Community/CommunityCommentReport/CommnetsReportContainer.vue'
-  let userData = reactive([
-    {
-      id:1,            // 举报评论id
-      commentId:1,     // 评论id
-      reportTime:'2022-03-01 12:00:00',     // 举报时间
-      reportReason:'垃圾评论',     // 举报理由
-      reportType:'1',
-      reportStatus:'1',       // 举报状态，1表示待处理
-      reportComment:'垃圾评论',  // 被举报的评论内容
-      reportFrom:{
-        type:1,       // 来源：1动态 2歌曲 3歌单
-        id:1,           // 动态id、歌单id、歌曲id
-        title:'歌单标题/动态标题/歌曲标题',
-        cover:'https://picsum.photos/200/300?random=1',
-        author:{
-          id:1,
-          nickName:'用户昵称',
-          avatar:'https://picsum.photos/200/300?random=1'
-        }
+  let pageNum = 1                 // 页码
+  const pageSize = 8              // 每页显示的条数
+  let status = 0                  // 默认状态.0-待处理
+  let total = ref(0)              // 总个数
+  let currentTotal = ref(0)       // 当前页的数据个数
+  let key = ''                    // 搜索关键字,默认或者当前，用于比较新搜索的是否为新的，判断是否要重置currentPage
+  let isLoading = ref(true)       // 加载中
+  let reportData:reportType[] = reactive([])
+  let reportType = ref('1')       // 举报类型
+
+  async function getReportList(){
+    let getData:getReportListType = {pageNum,pageSize,key,status,reason:Number(reportType.value)}
+    isLoading.value = true
+    try{
+      let reportListRes:xGetReportListType = (await GetCommentReportListApi(getData)) as xGetReportListType
+      if(reportListRes.success){
+        currentTotal.value = reportListRes.data.records.length
+        reportData.splice(0,reportData.length)
+        reportData.push(...reportListRes.data.records)
+        total.value = reportListRes.data.total
       }
+      isLoading.value = false
     }
-  ])
+    catch(err){
+      isLoading.value = false
+      ElMessage({
+        message: '查找失败',
+        type: 'error',
+      })
+    }
+  }
+  function search(data:any){
+    key = data.key
+    status = data.status
+    reportType.value = data.reportType
+    getReportList()
+  }
+  function skipPage(page:number){       // 跳转的函数
+    pageNum = page
+    getReportList()
+  }
+  function refreshW(){
+    getReportList()
+  }
+  function refresh(){
+    isLoading.value = true
+    setTimeout(() => {
+      getReportList()
+      ElMessage({
+        message: '以刷新为最新数据',
+        type: 'success',
+      })
+    }, 500);
+  }
+  onMounted(()=>{
+    getReportList()
+  })
 </script>
 
 <style scoped>
+  svg {
+  width:5em;
+  transform-origin: center;
+  animation: rotate4 2s linear infinite;
+  }
+
+  circle {
+  fill: none;
+  stroke: hsl(214, 97%, 59%);
+  stroke-width: 2;
+  stroke-dasharray: 1, 200;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  animation: dash4 1.5s ease-in-out infinite;
+  }
+
+  @keyframes rotate4 {
+  100% {
+    transform: rotate(360deg);
+  }
+  }
+
+  @keyframes dash4 {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 90, 200;
+    stroke-dashoffset: -35px;
+  }
+
+  100% {
+    stroke-dashoffset: -125px;
+  }
+  }
   .el-button--primary{
     transition: all 0.2s;
   }

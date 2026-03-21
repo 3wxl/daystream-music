@@ -4,8 +4,8 @@
       <el-carousel-item v-for="item,index in bannerData" :key="item.id">
         <div class="carousel-item-content" :class="`bg-[url(${item.imageUrl})]`" :style="`background-image: url(${item.imageUrl})`">
           <div class="glass-overlay">
-            <h3 class="text-2xl font-bold text-white mb-2">{{ item.name }}</h3>
-            <p class="text-white/80">{{ item.linkUrl ? '' : item.musicId ? item.musicName : item.playlistId ? item.playlistName : '' }}</p>
+            <h3 class="text-2xl font-bold text-white mb-2">{{ item.title }}</h3>
+            <p class="text-white/80">{{ clickType[item.actionType] }}</p>
           </div>
         </div>
       </el-carousel-item>
@@ -16,25 +16,25 @@
 <script setup lang="ts">
   import AdminConfirm from '../AdminConfirm.vue';
 
+
   let isPreview = defineModel<boolean>({
     default: false
   })
-  let {bannerData} = defineProps<{
+  let {bannerData,clickType} = defineProps<{
     bannerData: Array<{
-      id: number,
-      name: string,
-      imageUrl: string,
-      startTime: string,
-      endTime: string,
-      isDefault: boolean, // 标记为默认轮播图
-      clickType: string,
-      linkUrl: string,
-      linkTarget: string,
-      musicId: string,
-      musicName: string,
-      playlistId: string,
-      playlistName: string
-    }>
+      id:number,
+      title:string,
+      imageUrl:string,
+      sortOrder:number;
+      status:number,
+      actionType:string,
+      targetId:number,
+      createTime:string,
+      updateTime:string
+    }>,
+    clickType:{
+      [key:number]:string
+    }
   }>()
 </script>
 

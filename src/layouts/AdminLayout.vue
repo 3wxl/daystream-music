@@ -123,7 +123,7 @@
       </el-scrollbar>
     </el-aside>
     <el-container class="relative left-[220px]">
-      <el-header class="fixed top-0 z-10" style="width: calc(100% - 220px);">
+      <el-header class="fixed top-0 z-10 bg-white" style="width: calc(100% - 220px);">
         <div class="h-[60px] bg-white">
           <el-row class="h-full w-full">
             <el-col :span="4" :offset="10">

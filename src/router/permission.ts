@@ -1,11 +1,11 @@
 import { useUserStore } from '@/stores/user'
-import { getToken, setToken } from '@/utils/request' 
+import { getToken, setToken } from '@/utils/request'
 import router from './index'
 
 const whiteList = ['UserAuth']
 
 router.beforeEach(async (to, from, next) => {
-  
+
   const userStore = useUserStore()
   // 拦截QQ回调的token
   if(to.query.token){
@@ -21,7 +21,7 @@ router.beforeEach(async (to, from, next) => {
     const newQuery ={...to.query}
     delete newQuery.token
     next({ path: to.path,query:newQuery,replace:true})
-    return   
+    return
   }
   const hasToken = getToken()
 
@@ -30,10 +30,16 @@ router.beforeEach(async (to, from, next) => {
       next({ path: '/' })
     } else {
       if (Object.keys(userStore.userInfo).length > 0) {
+        if((to.name as string).startsWith('admin')&&userStore.userInfo.userRole.indexOf('管理员')===-1){
+            next('/UserAuth')
+          }
         next()
       } else {
         try {
           await userStore.getUsersInfo()
+          if((to.name as string).startsWith('admin')&&userStore.userInfo.userRole.indexOf('管理员')===-1){
+            next('/UserAuth')
+          }
           next({ ...to, replace: true })
         } catch (error) {
           console.error('Token失效或获取用户信息失败', error)
