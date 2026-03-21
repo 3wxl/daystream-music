@@ -11,6 +11,7 @@ import { ElLoading, ElMessage } from 'element-plus'
 import JSONBig from 'json-bigint'
 
 let isRelogging = false
+
 const TOKEN_KEY = 'auth_token'
 
 const setToken = (token: string) => {
@@ -130,6 +131,8 @@ service.interceptors.response.use(
     }
 
     const headers = response.headers
+    // 测试是否携带了新的token请求头
+    console.log('响应头',headers)
     const newToken = headers['authorization'] || headers['Authorization']
     const isRefreshed = headers['token-refreshed'] || headers['Token-Refreshed']
     if (newToken && isRefreshed) {
@@ -141,9 +144,21 @@ service.interceptors.response.use(
     }
 
     const res = response.data
-
+// 后端接口设计原因，token失效并不是状态码为401的情况，而是success为false且errMsg为特定值的情况，所以在此处统一进行处理
     if (res.success === false) {
       const msg = res.errorMsg || '请求失败'
+      if (msg === '用户认证失败请重新登录'){
+        if(location.pathname === '/UserAuth') return Promise.reject(new Error(msg))
+        if (!isRelogging) {
+          isRelogging = true
+          removeToken()
+          ElMessage.error('登录已过期，请重新登录')
+          setTimeout(() => {
+            window.location.href = '/UserAuth'
+          }, 500)
+        }
+        return Promise.reject(new Error(msg)) // 拦截掉，不让请求往下走
+      }
       ElMessage.closeAll()
       ElMessage.error(msg)
       return Promise.reject(new Error(msg))

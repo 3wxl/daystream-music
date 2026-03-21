@@ -33,11 +33,9 @@
       <div class="panel tags-panel">
         <div class="panel-header">
           <h2>歌单分类</h2>
-          <router-link to="{path:'/playlist'" class="more-link"
-            >全部</router-link
-          >
+          <router-link to="{ path: '/playlist' }" class="more-link">全部</router-link>
         </div>
-        <TagBar :tags="tagsData" />
+        <TagBar :tags="tagsData"/>
       </div>
 
       <div class="panel list-panel flex flex-col">
@@ -73,12 +71,12 @@
 </template>
 
 <script lang="ts" setup>
+import { getAlbum } from '@/api/album'
 import { getRecommendMusic } from '@/api/home'
+import { getAllTags } from '@/api/playlist'
 import MusicCarousel from '@/components/MusicCarousel.vue'
 import MusicListItem from '@/components/MusicListItem.vue'
 import TagBar from '@/components/TagBar.vue'
-import { getAlbum } from '@/api/album'
-import { getAllTags } from '@/api/playlist'
 
 defineOptions({
   name: 'HomeIndex',
@@ -106,7 +104,13 @@ onMounted(() => {
   getAllTags().then((res) => {
     const flatList = Object.values(res.data).flat()
     console.log(flatList)
-    tagsData.value = [...flatList]
+    tagsData.value = flatList.map((t) => {
+      return {
+        id:t.id,
+        name:t.tagName,
+        path:`/playlist?tagId=${t.id}`
+      }
+    })
   })
 
   getAlbum(1, 30).then((res) => {
@@ -554,6 +558,7 @@ const musicData = [
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 1rem;
 }
+
 
 @media (max-width: 1200px) {
   .main-content {

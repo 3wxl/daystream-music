@@ -42,15 +42,12 @@ export function validateChunk(fileMd5: string, chunk: string, chunkMd5: string) 
 
 // 分片上传接口
 export function uploadChunk(data: FormData) {
-  return request('/file/upload', 'post', data)
+  return request('/mv/uploadMv', 'post', data)
 }
 
 // 合并分片文件接口
-export function mergeChunks(fileMd5: string, fileName: string) {
-  return request('/file/merge', 'post', {
-    fileMd5,
-    fileName,
-  })
+export function mergeChunks(data: FormData) {
+  return request('/mv/merge', 'post', data)
 }
 
 // 获取我的MV列表

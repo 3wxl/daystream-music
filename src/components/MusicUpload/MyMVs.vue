@@ -374,8 +374,10 @@ const calculateFileMD5 = (file: File): Promise<string> => {
       if (currentChunk < chunks) {
         // 继续读取下一块
         const start = currentChunk * chunkSize
+        //计算结束位置，同时放置越界
         const end = Math.min(start + chunkSize, file.size)
         const chunk = file.slice(start, end)
+        // 读取并触发下一次循环
         fileReader.readAsArrayBuffer(chunk)
       } else {
         // 计算完成
@@ -412,13 +414,14 @@ const calculateChunkMD5 = (chunk: Blob): Promise<string> => {
 }
 
 // 3. 检查分片是否已存在
-const checkChunkExists = async (chunkIndex: string, chunkMd5: string) => {
+const checkChunkExists = async (chunkIndex: number, chunkMd5: string) => {
   try {
     addStatusLog(`检查分片 ${chunkIndex + 1}/${totalChunks.value} 是否已存在...`, 'info')
 
-    const res = await validateChunk(fileMd5.value, chunkIndex, chunkMd5)
+    const res = await validateChunk(fileMd5.value, chunkIndex.toString(), chunkMd5)
 
-    return res.success // 返回true表示分片已存在
+    // res.success 只是表示请求成功，res.data 返回的分片是否存在的结果
+    return res.data as boolean
   } catch (error) {
     console.error('检查分片失败:', error)
     addStatusLog(`检查分片 ${chunkIndex + 1} 失败`, 'warning')
@@ -451,22 +454,22 @@ const uploadSingleChunk = async (
       return true
     }
 
-    // 创建FormData
-    const formData = new FormData()
-    formData.append('multipartFile', chunkData, file.name) // 分片文件
-    formData.append('fileMd5', fileMd5.value) // 整个文件的MD5
-    formData.append('chunkMd5', chunkMd5) // 分片的MD5
-    formData.append('chunk', chunkIndex.toString()) // 分片编号
-    formData.append('chunks', totalChunks.value.toString()) // 总分片数
-    formData.append('originalFilename', file.name) // 原始文件名
-    formData.append('operation', 'upload') // 操作类型
-
     // 计算分片在文件中的位置
     const start = chunkIndex * chunkSize
     const end = Math.min(start + chunkSize, file.size)
+
+    // 创建FormData
+    const formData = new FormData()
+    formData.append('file', chunkData, file.name) // 分片文件 (注意key变为file)
+    formData.append('md5Value', fileMd5.value)
+    formData.append('chunk', chunkIndex.toString())
+    formData.append('chunks', totalChunks.value.toString())
     formData.append('start', start.toString())
     formData.append('end', end.toString())
     formData.append('size', file.size.toString())
+    formData.append('chunkMd5', chunkMd5)
+    formData.append('originalFilename', file.name)
+    formData.append('operation', 'upload')
 
     addStatusLog(`开始上传分片 ${chunkIndex + 1}/${totalChunks.value}...`, 'info')
 
@@ -510,7 +513,14 @@ const mergeChunks = async (): Promise<string> => {
   try {
     addStatusLog('开始合并分片文件...', 'info')
 
-    const res = await mergeChunksApi(fileMd5.value, selectedFile.value?.name || '')
+    const formData = new FormData()
+    formData.append('md5Value', fileMd5.value)
+    formData.append('originalFilename', selectedFile.value?.name || '')
+    formData.append('chunks', totalChunks.value.toString())
+    formData.append('size', selectedFile.value?.size.toString() || '0')
+    formData.append('operation', 'merge')
+
+    const res = await mergeChunksApi(formData)
 
     addStatusLog('分片合并成功', 'success')
     return (res.data as string) || '' // 返回文件路径
