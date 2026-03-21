@@ -12,8 +12,16 @@
     "paths": { "@/*": ["src/*"] },
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node"]
   },
-  "include": [],
-  "exclude": ["node_modules"]
+  "include": [
+    // 1. 包含你自定义的 .d.ts（优先级最高）
+    "src/types/**/*.d.ts",
+    // 2. 包含业务代码（确保组件/脚本能关联自定义类型）
+    "src/**/*.vue",
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ],
+  "exclude": ["node_modules", "temp/**/*", "temp/declarations/**/*"]
 }

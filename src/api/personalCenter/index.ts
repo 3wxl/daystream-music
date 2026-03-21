@@ -17,6 +17,7 @@ import type {
   WeeklyTagRatioResp,
   PlaylistDetailResponse,
   PlaylistDetailParams,
+  PlaylistCollectionsResponse,
 } from '@/types/personalCenter/index'
 
 export const getUserInfo = () => {
@@ -31,16 +32,6 @@ export const getUserInfo = () => {
   )
 }
 
-/**
- * 修改个人信息
- * @param params 修改的用户信息参数
- * @returns 操作结果
- */
-/**
- * 修改个人信息
- * @param params 修改的用户信息参数
- * @returns 操作结果
- */
 export const updateUserInfo = (params: UpdateUserInfoParams) => {
   // 构建FormData（兼容文件和普通参数）
   const formData = new FormData()
@@ -92,15 +83,21 @@ export const likeRecord = (params: LikeRecordParams) => {
 export const getCollectPlaylists = async (
   params: CollectPlaylistReq,
 ): Promise<CollectPlaylistResp> => {
-  return request<PlaylistPageResp>(
-    '/user/home/getMyCollectSongLists', // 接口路径正确，保留
-    'POST', // 关键：改为POST（支持Body参数）
-    { ...params }, // Body参数（request.ts会自动放在data里）
+  const res = await request<PlaylistPageResp>(
+    '/user/home/getMyCollectSongLists',
+    'POST',
+    { ...params },
     {
       showLoading: true,
       noToken: false,
     },
   )
+
+  // 类型适配：将 errorMsg 为 null 时转换为 undefined
+  return {
+    ...res,
+    errorMsg: res.errorMsg ?? undefined,
+  }
 }
 /**
  * 获取创建的歌单（页码分页，按创建时间降序）
@@ -109,7 +106,7 @@ export const getCollectPlaylists = async (
 export const getCreatePlaylists = async (
   params: CreatePlaylistReq,
 ): Promise<CreatePlaylistResp> => {
-  return request<PlaylistPageResp>(
+  const res = await request<PlaylistPageResp>(
     '/playlist/query-my-playlist-by-time', // url
     'GET', // method
     { ...params }, // submitData（GET请求会自动转为params）
@@ -118,6 +115,12 @@ export const getCreatePlaylists = async (
       noToken: false, // 需要携带token
     },
   )
+
+  // 类型适配：将 errorMsg 为 null 时转换为 undefined
+  return {
+    ...res,
+    errorMsg: res.errorMsg ?? undefined,
+  }
 }
 
 export const cancelCollectPlaylist = (targetId: string | number) => {
@@ -213,17 +216,23 @@ export const collectAlbum = (targetId: string | number, targetType: 1 | 2 = 2) =
 export const updatePlaylistApi = (
   formData: FormData,
 ): Promise<{ success: boolean; errorMsg?: string }> => {
-  return request<{ success: boolean; errorMsg?: string }>(
-    '/playlist/playList/update-playList', // 修改歌单接口地址
-    'POST', // 请求方法
-    formData, // FormData格式
+  return request<{ success: boolean; errorMsg: string | null }>(
+    '/playlist/playList/update-playList',
+    'POST',
+    formData,
     {
       headers: {
-        'Content-Type': 'multipart/form-data', // 必须指定
+        'Content-Type': 'multipart/form-data',
       },
-      showLoading: true, // 显示加载动画
+      showLoading: true,
     },
-  )
+  ).then((res) => {
+    // 类型适配：将 null 转为 undefined
+    return {
+      ...res.data,
+      errorMsg: res.data?.errorMsg ?? undefined,
+    }
+  })
 }
 export const getPlaylistDetail = (params: PlaylistDetailParams) => {
   const { playlistId, ...queryParams } = params
@@ -235,6 +244,21 @@ export const getPlaylistDetail = (params: PlaylistDetailParams) => {
       showLoading: true,
       returnFullResponse: false,
       params: queryParams, // 查询参数：pageNum/pageSize
+    },
+  )
+}
+export function getPlaylistCollections(
+  playlistId: string | number,
+  params?: { pageNum?: number; pageSize?: number },
+) {
+  return request(
+    `/playlist/collectors/${playlistId}`, // 路径参数：歌单ID
+    'GET', // 请求方法
+    undefined, // GET无请求体
+    {
+      showLoading: true, // 显示加载动画
+      returnFullResponse: false, // 只返回data部分
+      params: params, // 查询参数：pageNum/pageSize
     },
   )
 }

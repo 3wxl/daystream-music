@@ -29,11 +29,14 @@ const removeToken = () => {
 // 响应数据通用类型
 export type Data<T = unknown> = {
   success: boolean
-  errorMsg: string
+  errorMsg: string | null // 兼容后端返回null的情况
   data: T
-  total?: number
-  errCode?: number
+  total?: number | null
+  errCode?: number | string | null // 兼容字符串类型的errCode
 }
+
+// 宽松的提交数据类型（解决接口参数类型不匹配问题）
+type SubmitData = Record<string, unknown> | FormData | object | undefined
 
 // Axios 请求配置接口
 interface RequestConfig<T = unknown> extends AxiosRequestConfig {
@@ -61,10 +64,8 @@ const service = axios.create({
           // 如果转换成功则返回转换的数据结果
           return JSONBig.parse(data)
         } catch (err) {
-          // 如果转换失败，则包装为统一数据格式并返回
-          return {
-            data,
-          }
+          // 如果转换失败，则直接返回原始数据
+          return data
         }
       }
       return data
@@ -92,7 +93,7 @@ function convertBigNumbersToString(obj: any): any {
   }
 
   // 处理普通对象
-  if (typeof obj === 'object') {
+  if (typeof obj === 'object' && obj !== null) {
     const result: any = {}
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
@@ -171,45 +172,68 @@ service.interceptors.response.use(
 
     if (error.response) {
       const status = error.response.status
-      if (status === 401) {
-        if (!isRelogging) {
-          isRelogging = true
-          removeToken()
-          ElMessage.error('登录已过期，请重新登录')
-          setTimeout(() => {
-            window.location.href = '/UserAuth'
-          }, 500)
+      // 增强错误提示：优先使用后端返回的errorMsg
+      const errorData = error.response.data as Data<unknown>
+      if (errorData?.errorMsg) {
+        msg = errorData.errorMsg
+      } else {
+        switch (status) {
+          case 401:
+            if (!isRelogging) {
+              isRelogging = true
+              removeToken()
+              ElMessage.error('登录已过期，请重新登录')
+              setTimeout(() => {
+                window.location.href = '/UserAuth'
+              }, 500)
+            }
+            break
+          case 400:
+            msg = '请求参数错误，请检查后重试'
+            break
+          case 404:
+            msg = '请求的接口不存在'
+            break
+          case 500:
+            msg = '服务器内部错误，请稍后重试'
+            break
+          default:
+            msg = `请求失败（${status}）`
         }
-        return Promise.reject(error)
       }
-      if (status === 404) msg = '接口不存在'
-      if (status === 500) msg = '服务器错误'
     } else if (error.message.includes('timeout')) {
-      msg = '请求超时'
+      msg = '请求超时，请检查网络或稍后重试'
     }
-    ElMessage.error(msg)
+
+    // 避免重复提示
+    if (!error.message.includes('cancel')) {
+      ElMessage.error(msg)
+    }
     return Promise.reject(error)
   },
 )
 
+// 重载1：不返回完整响应
 async function request<T = unknown>(
   url: string,
   method?: Method,
-  submitData?: Record<string, unknown> | FormData,
+  submitData?: SubmitData, // 使用宽松类型
   config?: RequestConfig<T> & { returnFullResponse?: false },
 ): Promise<Data<T>>
 
+// 重载2：返回完整响应
 async function request<T = unknown>(
   url: string,
   method?: Method,
-  submitData?: Record<string, unknown> | FormData,
+  submitData?: SubmitData, // 使用宽松类型
   config?: RequestConfig<T> & { returnFullResponse: true },
 ): Promise<AxiosResponse<Data<T>>>
 
+// 核心实现
 async function request<T = unknown>(
   url: string,
   method: Method = 'get',
-  submitData?: Record<string, unknown> | FormData,
+  submitData?: SubmitData, // 使用宽松类型
   config?: RequestConfig<T>,
 ): Promise<Data<T> | AxiosResponse<Data<T>>> {
   let loading: LoadingInstance | undefined
@@ -221,42 +245,56 @@ async function request<T = unknown>(
     })
   }
 
+  // 🔥 核心修复：区分 GET/DELETE 用 params，其他用 data
   let axiosConfig: AxiosRequestConfig = {
     url,
     method,
-    [method.toLowerCase() === 'get' ? 'params' : 'data']: submitData,
     ...config,
   }
 
+  // 判断请求类型：GET/DELETE 用 params，POST/PUT/PATCH 用 data
+  const isGetOrDelete = ['get', 'delete'].includes(method.toLowerCase())
+  if (submitData) {
+    if (isGetOrDelete) {
+      axiosConfig.params = submitData // GET/DELETE 放到 Query 参数
+    } else {
+      axiosConfig.data = submitData // 其他方法放到 Body 参数
+      // 如果是FormData，确保axios自动设置Content-Type
+      if (submitData instanceof FormData) {
+        // 移除默认的Content-Type，让axios自动设置为multipart/form-data
+        delete axiosConfig.headers?.['Content-Type']
+      }
+    }
+  }
+
+  // 执行请求拦截器
   if (config?.interceptors?.requestInterceptor) {
     axiosConfig = config.interceptors.requestInterceptor(axiosConfig)
   }
 
-  return service
-    .request<Data<T>>(axiosConfig)
-    .then((response) => {
-      let res: AxiosResponse<Data<T>> = response
+  try {
+    const response = await service.request<Data<T>>(axiosConfig)
 
-      if (config?.interceptors?.responseInterceptor) {
-        res = config.interceptors.responseInterceptor(res)
-      }
+    // 执行响应拦截器
+    let res: AxiosResponse<Data<T>> = response
+    if (config?.interceptors?.responseInterceptor) {
+      res = config.interceptors.responseInterceptor(res)
+    }
 
-      loading?.close()
-      if (config?.returnFullResponse) {
-        return res
-      }
-      return res.data
-    })
-    .catch((err: AxiosError) => {
-      loading?.close()
+    loading?.close()
+    return config?.returnFullResponse ? res : res.data
+  } catch (err: any) {
+    loading?.close()
 
-      if (config?.interceptors?.responseInterceptorCatch) {
-        return config.interceptors.responseInterceptorCatch(err)
-      }
+    // 执行响应错误拦截器
+    if (config?.interceptors?.responseInterceptorCatch) {
+      return config.interceptors.responseInterceptorCatch(err)
+    }
 
-      return Promise.reject(err)
-    })
+    return Promise.reject(err)
+  }
 }
 
 export default request
 export { getToken, removeToken, setToken }
+

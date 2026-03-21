@@ -1,17 +1,29 @@
-// 消息类型
+// 在 lyricAssistant.ts 中添加
+export interface Session {
+  id: string
+  createdAt: string
+  updatedAt: string
+  messageCount: number
+}
+
+// 修改 Message 接口，添加会话ID
 export interface Message {
   id: number
+  sessionId?: string // 添加会话ID字段
   type: 'ai' | 'user'
   content: string
   timestamp: string
   avatar: string
   status?: '在线' | '离线'
+  isAnimation?: boolean
   lyrics?: {
     title: string
+    style?: string
     sections: Array<{
       type: string
       content: string
     }>
+    creationIdea?: string
   }
   analysis?: {
     title: string
@@ -23,9 +35,9 @@ export interface Message {
 export interface Theme {
   id: number
   title: string
-  description: string
-  icon: string
-  iconCode: string
+  description?: string
+  icon?: string
+  iconCode?: string
 }
 
 // 快捷短语类型

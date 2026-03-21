@@ -94,7 +94,6 @@ export const useCheckInStore = defineStore('checkIn', () => {
   const doCheckIn = async (): Promise<BaseResponse<string> | null> => {
     // 前端预检查
     if (isCheckedIn.value) {
-      ElMessage.warning('今天已经签到过了')
       return null
     }
 
@@ -108,23 +107,7 @@ export const useCheckInStore = defineStore('checkIn', () => {
         const responseMsg = response.data || ''
         lastCheckInResult.value = response
         lastCheckInTime.value = new Date().toISOString()
-
-        // 根据后端消息判断
-        if (responseMsg.includes('已签到') || responseMsg.includes('明日再来')) {
-          // 已签到过的情况
-          isCheckedIn.value = true
-          ElMessage.info(responseMsg)
-        } else if (responseMsg.includes('成功')) {
-          // 签到成功的情况
-          isCheckedIn.value = true
-          // 重新获取最新状态
-          await loadCheckInStatus()
-          ElMessage.success(responseMsg)
-        } else {
-          // 其他成功消息
-          isCheckedIn.value = true
-          ElMessage.success(responseMsg)
-        }
+        await loadCheckInStatus()
 
         localStorage.setItem(
           'checkIn_status',

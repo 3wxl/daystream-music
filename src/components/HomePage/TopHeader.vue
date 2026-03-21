@@ -14,21 +14,21 @@
 
     <!-- 右侧：功能按钮 -->
     <div class="flex items-center space-x-3 ml-4">
-      <router-link to="/VipExchangePage">
+      <router-link to="/vip-exchange-page">
         <button
           class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors hidden md:block"
         >
           商城
         </button>
       </router-link>
-      <router-link to="/CheckIn">
+      <router-link to="/check-in">
         <button
           class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors hidden md:block"
         >
           {{ isCheckedIn ? '已签到 ' : '签到' }}
         </button>
       </router-link>
-      <router-link to="/musician/MusicianSettleIn">
+      <router-link to="/musician/musician-settle-in">
         <button
           class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors hidden md:block"
         >

@@ -134,7 +134,7 @@
 
       <!-- 统计数据 -->
       <div class="grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-6 mt-6 md:mt-10">
-        <router-link to="/User/FollowList">
+        <router-link to="/user/follow-list">
           <div
             class="stat-item text-center p-2 hover:scale-105 transition-all duration-300 hover:text-[#FFD1DC] cursor-pointer"
           >
@@ -144,7 +144,7 @@
             <div class="text-gray-300 text-xs md:text-sm mt-1">关注</div>
           </div>
         </router-link>
-        <router-link to="/User/FollowerList">
+        <router-link to="/user/follower-list">
           <div
             class="stat-item text-center p-2 hover:scale-105 transition-all duration-300 hover:text-[#FFD1DC] cursor-pointer"
           >
@@ -184,13 +184,17 @@
 
     <!-- 编辑资料弹窗 -->
     <div v-if="showEditDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <!-- 蒙层 -->
       <div class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40" @click="closeEditDialog"></div>
+
+      <!-- 弹窗主体：修复 max-h、h-18 等非法属性 -->
       <div
-        class="relative z-50 w-full max-w-2xl bg-[#1E1E1E] rounded-xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-100 max-h-160"
+        class="relative z-50 w-full max-w-2xl bg-[#1E1E1E] rounded-xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-100 max-h-[90vh]"
       >
-        <div class="relative h-18 w-full">
+        <!-- 弹窗头部：修复 h-18 为合法值 -->
+        <div class="relative h-[72px] w-full">
           <div
-            class="bg-[#121212] h-18 w-full px-6 py-4 flex justify-between items-center border-b border-white/10 absolute inset-0"
+            class="bg-[#121212] h-[72px] w-full px-6 py-4 flex justify-between items-center border-b border-white/10 absolute inset-0"
           >
             <div class="flex items-center gap-3">
               <img src="../../assets/logo.jpg" alt="" class="w-10 h-10 rounded-full" />
@@ -204,175 +208,203 @@
             </button>
           </div>
         </div>
-        <div class="p-6 overflow-y-auto overflow-y-auto max-h-[calc(85vh-4.5rem)] scrollbar-custom">
-          <!-- 核心修改：添加 el-form 容器，绑定规则和 ref -->
-          <el-form
-            ref="editFormRef"
-            :model="editForm"
-            :rules="userInfoRules"
-            label-width="80px"
-            class="space-y-6"
-          >
-            <div class="space-y-4">
-              <el-form-item label="昵称 " prop="name" style="margin-bottom: 25px">
-                <input
-                  type="text"
-                  id="nickname"
-                  class="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#FF2E93] transition-all"
-                  v-model="editForm.name"
-                />
-              </el-form-item>
-              <el-form-item label="签名" prop="signature" style="margin-bottom: 25px">
-                <textarea
-                  id="signature"
-                  rows="3"
-                  class="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#FF2E93] transition-all"
-                  v-model="editForm.signature"
-                  placeholder="选填，最多30个字"
-                ></textarea>
-              </el-form-item>
-              <el-form-item label="手机号码" prop="phone" style="margin-bottom: 25px">
-                <input
-                  type="text"
-                  id="phone"
-                  class="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#FF2E93] transition-all"
-                  v-model="editForm.phone"
-                  placeholder="选填，11位有效手机号"
-                />
-              </el-form-item>
-              <div>
-                <label class="block text-sm text-[#8A8A8A] mb-1">性别</label>
-                <div class="flex gap-6 py-2">
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="gender"
-                      class="accent-[#FF2E93]"
-                      value="男"
-                      v-model="editForm.gender"
-                    />
-                    <span>男</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="gender"
-                      class="accent-[#FF2E93]"
-                      value="女"
-                      v-model="editForm.gender"
-                    />
-                    <span>女</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="gender"
-                      class="accent-[#FF2E93]"
-                      value="未知"
-                      v-model="editForm.gender"
-                    />
-                    <span>未知</span>
-                  </label>
-                </div>
-              </div>
-            </div>
 
-            <div class="pt-4 border-t border-white/10">
-              <h3 class="text-lg font-medium mb-4">账户信息</h3>
+        <!-- 弹窗内容区：拆分滚动区域，按钮移出滚动区 -->
+        <div class="p-6">
+          <!-- 可滚动的表单内容：限制高度，按钮不在此区域内 -->
+          <div class="overflow-y-auto max-h-[calc(90vh-14rem)] scrollbar-custom mb-6 pr-6">
+            <el-form
+              ref="editFormRef"
+              :model="editForm"
+              :rules="userInfoRules"
+              label-width="80px"
+              label-position="left"
+              class="space-y-6"
+            >
               <div class="space-y-4">
+                <el-form-item label="昵称 " prop="name" style="margin-bottom: 25px">
+                  <input
+                    type="text"
+                    id="nickname"
+                    class="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#FF2E93] transition-all"
+                    v-model="editForm.name"
+                  />
+                </el-form-item>
+                <el-form-item label="签名" prop="signature" style="margin-bottom: 25px">
+                  <textarea
+                    id="signature"
+                    rows="3"
+                    class="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#FF2E93] transition-all"
+                    v-model="editForm.signature"
+                    placeholder="选填，最多30个字"
+                  ></textarea>
+                </el-form-item>
+                <el-form-item label="手机号码" prop="phone" style="margin-bottom: 25px">
+                  <input
+                    type="text"
+                    id="phone"
+                    class="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#FF2E93] transition-all"
+                    v-model="editForm.phone"
+                    placeholder="选填，11位有效手机号"
+                  />
+                </el-form-item>
+                <div>
+                  <label class="block text-sm text-[#8A8A8A] mb-1">性别</label>
+                  <div class="flex gap-6 py-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="gender"
+                        class="peer sr-only"
+                        value="男"
+                        v-model="editForm.gender"
+                      />
+                      <span
+                        class="w-4 h-4 rounded-full border border-[#8A8A8A] peer-checked:border-[#FF2E93] peer-checked:bg-[#FF2E93] relative flex items-center justify-center"
+                      >
+                        <span
+                          class="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100"
+                        ></span>
+                      </span>
+                      <span>男</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="gender"
+                        class="peer sr-only"
+                        value="女"
+                        v-model="editForm.gender"
+                      />
+                      <span
+                        class="w-4 h-4 rounded-full border border-[#8A8A8A] peer-checked:border-[#FF2E93] peer-checked:bg-[#FF2E93] relative flex items-center justify-center"
+                      >
+                        <span
+                          class="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100"
+                        ></span>
+                      </span>
+                      <span>女</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="gender"
+                        class="peer sr-only"
+                        value="未知"
+                        v-model="editForm.gender"
+                      />
+                      <span
+                        class="w-4 h-4 rounded-full border border-[#8A8A8A] peer-checked:border-[#FF2E93] peer-checked:bg-[#FF2E93] relative flex items-center justify-center"
+                      >
+                        <span
+                          class="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100"
+                        ></span>
+                      </span>
+                      <span>未知</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-4 border-t border-white/10">
+                <h3 class="text-lg font-medium mb-4">账户信息</h3>
+                <div class="space-y-4">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label for="wallet_balance" class="block text-sm text-[#8A8A8A] mb-1"
+                        >音浪数量</label
+                      >
+                      <input
+                        type="number"
+                        id="wallet_balance"
+                        class="w-full bg-[#121212]/50 border border-white/5 rounded-lg px-4 py-2 text-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#FF2E93]/50 transition-all"
+                        :value="editForm.walletBalance"
+                        step="0.01"
+                        readonly
+                      />
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label for="vip_expire_time" class="block text-sm text-[#8A8A8A] mb-1"
+                        >VIP到期时间</label
+                      >
+                      <input
+                        type="datetime-local"
+                        id="vip_expire_time"
+                        class="w-full bg-[#121212]/50 border border-white/5 rounded-lg px-4 py-2 text-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#FF2E93]/50 transition-all"
+                        :value="editForm.vipExpireTime"
+                        readonly
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-4 border-t border-white/10">
+                <h3 class="text-lg font-medium mb-4">系统信息</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label for="wallet_balance" class="block text-sm text-[#8A8A8A] mb-1"
-                      >音浪数量</label
-                    >
+                    <label class="block text-sm text-[#8A8A8A] mb-1">注册时间</label>
                     <input
-                      type="number"
-                      id="wallet_balance"
+                      type="text"
+                      :value="editForm.createdTime"
                       class="w-full bg-[#121212]/50 border border-white/5 rounded-lg px-4 py-2 text-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#FF2E93]/50 transition-all"
-                      :value="editForm.walletBalance"
-                      step="0.01"
                       readonly
                     />
                   </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label for="vip_expire_time" class="block text-sm text-[#8A8A8A] mb-1"
-                      >VIP到期时间</label
-                    >
+                    <label class="block text-sm text-[#8A8A8A] mb-1">最后登录时间</label>
                     <input
-                      type="datetime-local"
-                      id="vip_expire_time"
+                      type="text"
+                      :value="editForm.lastLoginTime"
                       class="w-full bg-[#121212]/50 border border-white/5 rounded-lg px-4 py-2 text-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#FF2E93]/50 transition-all"
-                      :value="editForm.vipExpireTime"
+                      readonly
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm text-[#8A8A8A] mb-1">最后签到时间</label>
+                    <input
+                      type="text"
+                      :value="editForm.lastCheckinTime || '暂未签到'"
+                      class="w-full bg-[#121212]/50 border border-white/5 rounded-lg px-4 py-2 text-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#FF2E93]/50 transition-all"
+                      readonly
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm text-[#8A8A8A] mb-1">信息更新时间</label>
+                    <input
+                      type="text"
+                      :value="editForm.updatedTime"
+                      class="w-full bg-[#121212]/50 border border-white/5 rounded-lg px-4 py-2 text-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#FF2E93]/50 transition-all"
                       readonly
                     />
                   </div>
                 </div>
               </div>
-            </div>
+            </el-form>
+          </div>
 
-            <div class="pt-4 border-t border-white/10">
-              <h3 class="text-lg font-medium mb-4">系统信息</h3>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm text-[#8A8A8A] mb-1">注册时间</label>
-                  <input
-                    type="text"
-                    :value="editForm.createdTime"
-                    class="w-full bg-[#121212]/50 border border-white/5 rounded-lg px-4 py-2 text-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#FF2E93]/50 transition-all"
-                    readonly
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm text-[#8A8A8A] mb-1">最后登录时间</label>
-                  <input
-                    type="text"
-                    :value="editForm.lastLoginTime"
-                    class="w-full bg-[#121212]/50 border border-white/5 rounded-lg px-4 py-2 text-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#FF2E93]/50 transition-all"
-                    readonly
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm text-[#8A8A8A] mb-1">最后签到时间</label>
-                  <input
-                    type="text"
-                    :value="editForm.lastCheckinTime || '暂未签到'"
-                    class="w-full bg-[#121212]/50 border border-white/5 rounded-lg px-4 py-2 text-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#FF2E93]/50 transition-all"
-                    readonly
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm text-[#8A8A8A] mb-1">信息更新时间</label>
-                  <input
-                    type="text"
-                    :value="editForm.updatedTime"
-                    class="w-full bg-[#121212]/50 border border-white/5 rounded-lg px-4 py-2 text-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#FF2E93]/50 transition-all"
-                    readonly
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
-              <button
-                type="button"
-                class="px-6 py-2 border border-white/10 rounded-lg text-white hover:bg-white/10 transition-colors"
-                @click="closeEditDialog"
-              >
-                取消
-              </button>
-              <button
-                type="button"
-                class="px-6 py-2 bg-gradient-to-r from-[#e2036f] to-[#b277bb] rounded-lg text-white hover:opacity-90 transition-opacity flex items-center gap-2"
-                @click="handleSaveEdit"
-              >
-                <span>保存修改</span>
-                <i class="fa fa-check"></i>
-              </button>
-            </div>
-          </el-form>
+          <!-- 按钮区域：移出滚动区，固定在弹窗底部，确保始终可见 -->
+          <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
+            <button
+              type="button"
+              class="px-6 py-2 border border-white/10 rounded-lg text-white hover:bg-white/10 transition-colors"
+              @click="closeEditDialog"
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              class="px-6 py-2 bg-gradient-to-r from-[#e2036f] to-[#b277bb] rounded-lg text-white hover:opacity-90 transition-opacity flex items-center gap-2"
+              @click="handleSaveEdit"
+            >
+              <span>保存修改</span>
+              <i class="fa fa-check"></i>
+            </button>
+          </div>
         </div>
+
         <div class="h-1 w-full bg-gradient-to-r from-[#FF2E93] via-[#d46ab5] to-[#b481bc]"></div>
       </div>
     </div>

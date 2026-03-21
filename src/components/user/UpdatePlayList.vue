@@ -338,6 +338,7 @@ const props = defineProps<{
   editPlaylist?: PlaylistVO
 }>()
 console.log('props', props.isEditMode)
+console.log('props', props.editPlaylist?.tagIds)
 // 扩展Emit
 const emit = defineEmits<{
   'update:isDialogOpen': [value: boolean]
@@ -612,16 +613,26 @@ const updatePlaylist = async () => {
     formData.append('id', props.editPlaylist.id.toString())
     formData.append('name', newPlaylistName.value.trim())
     formData.append('description', newPlaylistDesc.value.trim())
-    formData.append('coverFile', newPlaylistCover.value)
     formData.append('isPublic', playlistPrivacy.value === 'public' ? '1' : '0')
     selectedTagIds.value.forEach((tagId, index) => {
       formData.append(`tagIds[${index}]`, tagId.toString())
     })
     console.log(333)
-    if (coverFile.value) {
+    if (coverFile.value && coverFile.value instanceof File) {
       formData.append('coverFile', coverFile.value)
     }
-
+    console.log('===== FormData 完整内容 =====')
+    // 方式1：forEach遍历（推荐，兼容性好）
+    formData.forEach((value, key) => {
+      // 区分文件类型和普通值
+      if (value instanceof File) {
+        console.log(
+          `键：${key} → 值：[文件] ${value.name} (大小：${(value.size / 1024).toFixed(2)}KB)`,
+        )
+      } else {
+        console.log(`键：${key} → 值：${value}`)
+      }
+    })
     emit('update-success', formData, props.editPlaylist.id)
     resetAndClose()
     ElMessage.success('歌单修改成功')

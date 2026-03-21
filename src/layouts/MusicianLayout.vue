@@ -19,7 +19,7 @@
 
           <div class="space-x-10 mr-auto">
             <router-link
-              to="/MusicianSettleIn"
+              to="/musician/musician-settle-in"
               class="text-white text-base hover:text-gray-200 transition-colors duration-300"
             >
               首页
@@ -37,7 +37,7 @@
               关于我们
             </router-link>
             <router-link
-              to="/musician/AiChat"
+              to="/musician/ai-chat"
               class="text-white text-base hover:text-gray-200 transition-colors duration-300 relative"
             >
               创作实验室
@@ -91,9 +91,12 @@
       </div>
     </footer>
   </div>
+  <AiChatWindow />
 </template>
 
 <script setup>
+import AiChatWindow from '@/components/musicianCenter/AI/AiChatWindow.vue'
+
 const navOpacity = ref(0)
 const scrollThreshold = 2000
 const handleScroll = () => {

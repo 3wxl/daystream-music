@@ -31,7 +31,16 @@
 
       <!-- 倒计时 -->
       <div class="w-full md:w-auto hidden lg:flex items-center">
-        <div
+        <div class="flex justify-end mt-4 mr-5">
+          <router-link
+            to="/flash-sale-detail"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-pink-300 text-white font-medium rounded-lg shadow-md hover:shadow-lg hover:shadow-pink-500/20 transition-all duration-300 text-sm"
+          >
+            <i class="iconfont icon-show"></i>
+            查看所有
+          </router-link>
+        </div>
+        <!-- <div
           class="bg-gray-900/90 backdrop-blur-md rounded-lg p-3 border border-white/5 shadow-xl shadow-pink-500/5 transition-all duration-300 hover:border-pink-500/20 w-full md:w-auto"
         >
           <div class="flex items-center gap-1 mb-1">
@@ -66,12 +75,12 @@
               <span class="text-xs text-gray-500 mt-0.5">秒</span>
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
 
     <!-- 秒杀商品网格 -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" v-if="flashSales.length > 0">
       <div
         v-for="(flash, index) in flashSales"
         :key="flash.id"
@@ -241,14 +250,14 @@
           </button>
 
           <!-- 底部提示 -->
-          <div v-if="flash.remaining > 0" class="mt-3.5 text-center">
+          <!-- <div v-if="flash.remaining > 0" class="mt-3.5 text-center">
             <div
               class="inline-flex items-center gap-1 text-xs text-gray-400 bg-gray-800/50 px-2 py-0.5 rounded-full"
             >
               <i class="iconfont icon-user text-pink-400 text-xs"></i>
               <span>{{ Math.min(flash.remaining * 3, 99) }}+ 人正在抢购</span>
             </div>
-          </div>
+          </div> -->
         </div>
 
         <!-- 卡片底部分割线 -->
@@ -258,6 +267,19 @@
       </div>
     </div>
 
+    <!-- 秒杀商品网格 - 空状态 -->
+    <div
+      v-else
+      class="text-center py-16 bg-gray-900/50 backdrop-blur-sm rounded-xl border border-white/5"
+    >
+      <div
+        class="w-16 h-16 bg-gray-800/50 rounded-full mx-auto mb-4 flex items-center justify-center"
+      >
+        <i class="iconfont text-2xl text-pink-500" style="font-size: 26px">&#xe8b6;</i>
+      </div>
+      <h3 class="text-lg font-bold text-white mb-2">暂无正在进行的秒杀</h3>
+      <p class="text-gray-400 text-sm">敬请期待更多秒杀活动</p>
+    </div>
     <!-- 底部说明 -->
     <div class="mt-6 text-center">
       <div

@@ -42,13 +42,6 @@
     </div>
 
     <!-- 趋势指示器 -->
-    <div
-      class="trend-indicator flex items-center text-xs ml-2 px-3 py-1 rounded-full font-bold transition-all duration-300"
-      :class="[getTrendClass(singer.trend.type), { 'scale-110': isHovered }]"
-    >
-      <span>{{ singer.trend.value > 0 ? '+' : '' }}{{ singer.trend.value }}</span>
-      <span class="trend-icon ml-1">{{ getTrendIcon(singer.trend.type) }}</span>
-    </div>
 
     <!-- 热门歌曲 -->
     <div
@@ -58,12 +51,15 @@
       <h4 class="text-xs mb-2 text-pink-300 font-semibold">热门歌曲</h4>
       <div class="song-list flex flex-wrap gap-2">
         <span
-          v-for="song in singer.topSongs"
-          :key="song"
+          v-for="(song, idx) in singer.topSongs"
+          :key="`${singer.id}-${idx}`"
           class="song-tag px-2 py-1 text-xs rounded-lg border border-pink-500/40 bg-pink-500/20 text-pink-200 transition-colors duration-300 hover:bg-pink-500/30"
         >
           {{ song }}
         </span>
+        <span v-if="!singer.topSongs || singer.topSongs.length === 0" class="text-xs text-gray-400"
+          >暂无歌曲</span
+        >
       </div>
     </div>
   </div>
@@ -84,7 +80,8 @@ const props = defineProps({
     required: true,
   },
 })
-
+console.log('SingerItem singer:', props.singer)
+console.log('SingerItem topSongs:', props.singer.topSongs)
 // 响应式数据
 const isHovered = ref(false)
 

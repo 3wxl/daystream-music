@@ -55,18 +55,6 @@
           <!-- </div> -->
         </div>
       </div>
-
-      <!-- 音浪变化动画 -->
-      <transition name="fade">
-        <div v-if="showCoinChange" class="mt-4 text-center">
-          <div
-            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-green-500/20 to-green-400/10 border border-green-500/30"
-          >
-            <i class="iconfont icon-coin text-green-400"></i>
-            <span class="text-green-300 text-sm font-medium">+{{ lastReward }} 音浪</span>
-          </div>
-        </div>
-      </transition>
     </div>
   </div>
 </template>
