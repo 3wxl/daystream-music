@@ -1,49 +1,47 @@
 <template>
-  <teleport :to="Teleport">
-    <transition name="mask-fade">
-      <div
-        v-if="isShow"
-        class="w-[100vw] h-[100vh] fixed top-0 left-0 bg-[rgba(0,0,0,0.15)] flex justify-center items-center z-[10]"
-        @click="isShow=false"
-      >
-        <transition name="dialog-fade" appear>
-          <div
-            v-show="isShow"
-            :style="`width: ${width}`"
-            class="min-h-10 rounded-[14px] bg-white p-[15px] px-[20px] shadow-lg"
-            @click.stop
-          >
-            <div class="flex items-center">
-              <IconFontSymbol :name="iconName" :color="iconColor" class="font-[600]" :size="iconSize"></IconFontSymbol>
-              <span class="ml-2 font-[600] text-[20px]">{{ title }}</span>
-            </div>
-            <div class="mt-3">
-              <p class="px-2" v-if="!isCustom">{{ content }}</p>
-              <slot v-if="isCustom"></slot>
-            </div>
-            <div class="my-5" v-if="!isCustom">
-              <div class="flex justify-end gap-5 mt-10">
-                <button
-                  type="button"
-                  @click="isShow=false"
-                  class="cancel-btn"
-                >
-                  取消
-                </button>
-                <button
-                  type="button"
-                  class="mr-14"
-                  @click="emit('confirmClick')"
-                >
-                  确定
-                </button>
-              </div>
+  <transition name="mask-fade">
+    <div
+      v-if="isShow"
+      class="w-[100vw] h-[100vh] fixed top-0 left-0 bg-[rgba(0,0,0,0.15)] flex justify-center items-center z-[999]"
+      @click="isShow=false"
+    >
+      <transition name="dialog-fade" appear>
+        <div
+          v-show="isShow"
+          :style="`width: ${width}`"
+          class="min-h-10 rounded-[14px] bg-white p-[15px] px-[20px] shadow-lg"
+          @click.stop
+        >
+          <div class="flex items-center">
+            <IconFontSymbol :name="iconName" :color="iconColor" class="font-[600]" :size="iconSize"></IconFontSymbol>
+            <span class="ml-2 font-[600] text-[20px]">{{ title }}</span>
+          </div>
+          <div class="mt-3">
+            <p class="px-2" v-if="!isCustom">{{ content }}</p>
+            <slot v-if="isCustom"></slot>
+          </div>
+          <div class="my-5" v-if="!isCustom">
+            <div class="flex justify-end gap-5 mt-10">
+              <button
+                type="button"
+                @click="isShow=false"
+                class="cancel-btn"
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                class="mr-14"
+                @click="emit('confirmClick')"
+              >
+                确定
+              </button>
             </div>
           </div>
-        </transition>
-      </div>
-    </transition>
-  </teleport>
+        </div>
+      </transition>
+    </div>
+  </transition>
 </template>
 
 <script setup lang="ts">

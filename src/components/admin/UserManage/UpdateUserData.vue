@@ -178,7 +178,7 @@
       }
       let updateRes =  await UpdateUserAPI(updateInfo)
       if(updateRes.success){
-        ElMessage.success('修改用户信息成功')
+        // ElMessage.success('修改用户信息成功')
         isAddLoading.value = false
         isShowUpdate.value = false
         emit('refresh')

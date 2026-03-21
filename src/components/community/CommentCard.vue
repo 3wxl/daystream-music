@@ -1,7 +1,7 @@
 <template>
   <div class="flex gap-4 items-start mb-8 group">
     <div>
-      <img :src="avatar" alt="我的头像" class="w-[44px] h-[44px] rounded-[38px] ml-2 flex-shrink-0 cursor-pointer" :id="userId">
+      <img :src="avatar" alt="我的头像" class="w-[44px] h-[44px] rounded-[38px] ml-2 flex-shrink-0 cursor-pointer object-cover" :id="userId">
     </div>
     <div style="width:calc(100% - 60px)">
       <div class="flex justify-between">
@@ -45,10 +45,9 @@
           <div class="-mt-4" v-if="!hasMoreSonComment">
             <span class="text-[#e5e7eb] text-[14px]">没有更多子评论了</span>
           </div>
-          <!-- 上面这一部分是子评论区 -->
         </div>
       </transition>
-      <transition name="el-zoom-in-top">      <!-- 回复输入框 -->
+      <transition name="el-zoom-in-top">
         <div class="text-[#e5e7eb]" v-show="isSpradInput">
           <div class="flex-grow-1 rounded-[10px] p-[15px] border-[1px] border-gray-800 bg-[#212533]">
             <div class="">

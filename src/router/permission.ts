@@ -61,10 +61,16 @@ router.beforeEach(async (to, from, next) => {
       next({ path: '/' })
     } else {
       if (Object.keys(userStore.userInfo).length > 0) {
+        if((to.name as string).startsWith('admin')&&userStore.userInfo.userRole.indexOf('管理员')===-1){
+            next('/UserAuth')
+          }
         next()
       } else {
         try {
           await userStore.getUsersInfo()
+          if((to.name as string).startsWith('admin')&&userStore.userInfo.userRole.indexOf('管理员')===-1){
+            next('/UserAuth')
+          }
           next({ ...to, replace: true })
         } catch (error) {
           console.error('Token失效或获取用户信息失败', error)
