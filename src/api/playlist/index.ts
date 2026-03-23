@@ -38,5 +38,15 @@ export function deletePlaylist(playListId: string) {
 
 // 批量将歌曲添加到歌单
 export function addMusicToPlaylist(data: any) {
-  return request('/playlist/batch-add-song-to-playlist', 'post', data)
+  return request('/playlist/batch-add-song-to-playlist', 'post', data,{isParams:true})
+}
+
+// 批量将歌曲从歌单中删除
+export function deleteMusicsFromPlaylist(data: any) {
+  return request('/playlist/batch-remove-song-from-playlist', 'post', data, { isParams: true })
+}
+
+// 将歌曲从指定歌单删除
+export function deleteMusicFromPlaylist(data: any) {
+  return request('/playlist/batch-remove-song-from-playlist', 'post', data, { isParams: true })
 }

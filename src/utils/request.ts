@@ -49,6 +49,7 @@ interface RequestConfig<T = unknown> extends AxiosRequestConfig {
   showLoading?: boolean
   returnFullResponse?: boolean
   noToken?: boolean
+  isParams?: boolean // 新增：是否将数据强制作为 query 参数
 }
 
 // 配置 JSONBig 将大数字转为字符串
@@ -245,18 +246,20 @@ async function request<T = unknown>(
     })
   }
 
-  // 🔥 核心修复：区分 GET/DELETE 用 params，其他用 data
+  // 核心修复：区分 GET/DELETE 用 params，其他用 data
   let axiosConfig: AxiosRequestConfig = {
     url,
     method,
     ...config,
   }
 
-  // 判断请求类型：GET/DELETE 用 params，POST/PUT/PATCH 用 data
+  // 判断请求类型：GET/DELETE 默认用 params，其他用 data
   const isGetOrDelete = ['get', 'delete'].includes(method.toLowerCase())
+  const isParams = config?.isParams // 新置：是否强制作为 query 参数
+
   if (submitData) {
-    if (isGetOrDelete) {
-      axiosConfig.params = submitData // GET/DELETE 放到 Query 参数
+    if (isParams || isGetOrDelete) {
+      axiosConfig.params = submitData // 强制或默认作为 Query 参数
     } else {
       axiosConfig.data = submitData // 其他方法放到 Body 参数
       // 如果是FormData，确保axios自动设置Content-Type

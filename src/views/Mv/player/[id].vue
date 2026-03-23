@@ -44,19 +44,19 @@
 
         <!-- MV信息 -->
         <div class="mt-4">
-          <h1 class="text-2xl font-bold mb-2">{{ mvDetail.name }}</h1>
+          <h1 class="text-2xl font-bold mb-2">{{ mvDetail.mvName || mvDetail.name }}</h1>
           <div class="flex items-center text-gray-400 text-sm gap-4 mb-4">
             <span
               class="text-pink-500 cursor-pointer hover:underline"
-              @click="goArtist(mvDetail.artistId)"
+              @click="goArtist(mvDetail.musicianId || mvDetail.artistId)"
             >
-              {{ mvDetail.artistName }}
+              {{ mvDetail.musicianName || mvDetail.artistName }}
             </span>
-            <span>发布时间: {{ mvDetail.publishTime }}</span>
+            <span>发布时间: {{ mvDetail.releaseTime || mvDetail.publishTime }}</span>
             <span>播放次数: {{ mvDetail.playCount }}</span>
           </div>
           <p class="text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">
-            {{ mvDetail.desc || '暂无简介' }}
+            {{ mvDetail.description || mvDetail.desc || '暂无简介' }}
           </p>
         </div>
       </div>
