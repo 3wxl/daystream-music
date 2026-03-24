@@ -11,7 +11,8 @@
             class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"
           ></div>
 
-          <p class="leading-relaxed relative z-10 whitespace-pre-line">
+          <p class="leading-relaxed relative z-10 whitespace-pre-line text-white">
+            <!-- 显示用户消息内容 -->
             {{ message.content }}
           </p>
 

@@ -95,6 +95,7 @@ export interface SeckillActivityVO {
   endTime: string
   status: number
   message: string
+  productName?: string // 可选字段，兜底用
 }
 
 // 分页响应结构

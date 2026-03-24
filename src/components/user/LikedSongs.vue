@@ -7,7 +7,7 @@
   <div class="song-list">
     <div
       v-for="(song, index) in likedSongsList"
-      :key="song.id"
+      :key="String(song.id)"
       class="relative flex items-center px-5 py-3 hover:bg-gray-800/30 transition-colors group cursor-pointer justify-between"
       :class="{ 'playing-song': playerStore.currentSong && playerStore.currentSong.id === song.id }"
     >
@@ -65,26 +65,42 @@
       <div class="flex items-center w-[500px]">
         <div class="flex items-center gap-6 opacity-0 group-hover:opacity-100 transition-opacity">
           <el-tooltip content="下载" placement="top" custom-class="tooltip-small">
-            <el-button
-              type="text"
-              class="text-gray-400 hover:text-white transition-colors p-0 text-sm"
-              style="
-                width: 20px;
-                height: 20px;
-                display: flex;
-                alignment-baseline: center;
-                justify-content: center;
-              "
-            >
-              <i class="iconfont text-sm">&#xe605;</i>
-            </el-button>
+            <el-dropdown trigger="hover" @command="handleDownload">
+              <el-button
+                link
+                class="text-gray-400 hover:text-white transition-colors p-0 text-sm"
+                style="
+                  width: 20px;
+                  height: 20px;
+                  display: flex;
+                  alignment-baseline: center;
+                  justify-content: center;
+                "
+              >
+                <i class="iconfont text-sm">&#xe605;</i>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu style="background-color: #2c2c2c">
+                  <el-dropdown-item
+                    v-for="(quality, index) in song.audioList || []"
+                    :key="index"
+                    :command="{ songId: song.id, quality: quality }"
+                  >
+                    {{ quality }}
+                  </el-dropdown-item>
+                  <el-dropdown-item v-if="!(song.audioList && song.audioList.length > 0)" disabled>
+                    暂无下载选项
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </el-tooltip>
 
           <el-tooltip content="添加到歌单" placement="top">
             <button
               class="flex items-center justify-center w-5 h-5 transition-colors"
               :class="song.isLiked ? 'text-amber-400' : 'text-gray-400 hover:text-amber-400'"
-              @click.stop="handleLike(Number(song.id))"
+              @click.stop="handleLike(String(song.id))"
             >
               <i class="iconfont text-sm">&#xe6cb;</i>
             </button>
@@ -137,6 +153,8 @@ import { likeRecord } from '@/api/personalCenter'
 // 新增：导入播放状态
 import { usePlayerStore } from '@/stores/player'
 import { ElMessage } from 'element-plus'
+// 导入下载音乐API
+import { downloadMusic } from '@/api/music/download'
 
 const playerStore = usePlayerStore() // 初始化播放状态
 
@@ -150,7 +168,7 @@ const loadingIds = ref<string[]>([])
 const likedSongsList = computed(() => {
   return Array.isArray(props.likedSongs) ? props.likedSongs : []
 })
-
+console.log('likedSongsList.value', likedSongsList.value)
 // 新增：播放歌曲方法
 const handlePlaySong = async (song: MusicVO) => {
   try {
@@ -219,6 +237,94 @@ const handleLike = async (songId: string) => {
     loadingIds.value = loadingIds.value.filter((id) => id !== songId)
   }
 }
+
+// 音质映射表
+const qualityMap = {
+  标清: 1,
+  高清: 2,
+  无损: 3,
+  空间音频: 4,
+}
+
+const mimeTypeMap = {
+  标清: 'audio/mpeg',
+  高清: 'audio/mpeg',
+  无损: 'audio/flac',
+  空间音频: 'audio/mpeg',
+}
+
+const downloading = ref(false)
+
+// 处理下载操作
+const handleDownload = async (command: { songId: number; quality: string }) => {
+  if (downloading.value) return
+  downloading.value = true
+  try {
+    console.log('下载歌曲:', command.songId, '音质:', command.quality)
+
+    // 映射音质名称到quality值
+    const qualityValue = qualityMap[command.quality] || 1
+    console.log('映射后的quality值:', qualityValue)
+
+    // 调用下载API
+    console.log('开始调用下载API')
+
+    ElMessage.success(`开始下载 ${command.quality} 音质的歌曲`)
+    const response = await downloadMusic(String(command.songId), qualityValue)
+    console.log('下载响应:', response)
+    ElMessage.success(`正在下载 ${command.quality} 音质的歌曲,请耐心等待...`)
+    // 检查响应类型
+    const contentType = response.headers['content-type'] || response.headers['Content-Type']
+    console.log('响应类型:', contentType)
+    console.log('响应大小:', response.data.size)
+
+    // 处理响应
+    if (contentType.includes('application/json')) {
+      // 如果是JSON，尝试解析错误信息
+      const text = await response.data.text()
+      try {
+        const errorData = JSON.parse(text)
+        console.error('下载失败:', errorData)
+        ElMessage.error(errorData.errorMsg || '下载失败，请重试')
+      } catch (e) {
+        console.error('下载失败，无法解析错误信息:', text)
+        ElMessage.error('下载失败，请重试')
+      }
+    } else {
+      // 处理二进制流文件下载
+      const blob = response.data
+      const url = window.URL.createObjectURL(blob)
+
+      // 创建下载链接
+      const link = document.createElement('a')
+      link.href = url
+
+      // 设置文件名（使用歌曲名称和音质）
+      const song = likedSongsList.value.find((item) => item.id === command.songId)
+      if (!song) {
+        ElMessage.warning('未找到该歌曲')
+        return
+      }
+      const fileName = `${song.musicName || '未知歌曲'}-${command.quality}.${contentType.includes('flac') ? 'flac' : 'mp3'}`
+      link.download = fileName
+
+      // 触发下载
+      document.body.appendChild(link)
+      link.click()
+
+      // 清理
+      setTimeout(() => {
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      }, 100)
+    }
+  } catch (error) {
+    console.error('下载歌曲失败:', error)
+    ElMessage.error('下载失败，请重试')
+  } finally {
+    downloading.value = false
+  }
+}
 </script>
 <style lang="scss" scoped>
 ::v-deep .text-\[\#FF4D4F\] {
@@ -271,5 +377,30 @@ img[alt='歌曲封面']:error {
     opacity: 0.7;
     transform: scale(1.05);
   }
+}
+::v-deep .el-dropdown-menu {
+  background-color: #2c2c2c !important; // 菜单背景色（深色系示例）
+  border: 1px solid #444 !important; // 菜单边框色
+  border-radius: 6px !important; // 菜单圆角
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important; // 阴影（可选）
+}
+
+// 2. 下拉菜单项默认样式（字体色、内边距）
+::v-deep .el-dropdown-menu__item {
+  color: #f5f5f5 !important; // 菜单项字体色（浅白色）
+  padding: 8px 16px !important; // 菜单项内边距（调整高度）
+  font-size: 12px !important; // 字体大小
+}
+
+// 3. 菜单项 hover 样式（鼠标悬浮时）
+::v-deep .el-dropdown-menu__item:hover {
+  background-color: rgba(128, 128, 128, 0.2) !important; // hover 背景色（粉色系，和你项目风格统一）
+  color: #ffffff !important; // hover 字体色
+}
+
+// 4. 禁用状态的菜单项（比如「暂无下载选项」）
+::v-deep .el-dropdown-menu__item.is-disabled {
+  color: #888888 !important; // 禁用字体色（灰色）
+  background-color: transparent !important; // 禁用背景色（透明）
 }
 </style>

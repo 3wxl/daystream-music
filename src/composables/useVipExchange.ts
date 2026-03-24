@@ -605,7 +605,7 @@ export function useFlashSales() {
         // 如果是第一页或未提供页码，则替换数据，否则追加数据
         const mappedOngoingRecords = records.map((record) => ({
           id: record.activityId.toString(),
-          title: record.activityName || '', // 兜底空字符串
+          title: record.productName || '', // 兜底空字符串
           subtitle: record.message || '', // 兜底空字符串，避免undefined
           originalPrice: record.originalPrice,
           flashPrice: record.seckillPrice,
@@ -656,7 +656,7 @@ export function useFlashSales() {
         const { records, total: totalCount, pages } = response.data
         const mappedUpcomingRecords = records.map((record) => ({
           id: record.activityId.toString(),
-          title: record.activityName || '',
+          title: record.productName || '',
           subtitle: record.message || '', // 兜底空字符串
           originalPrice: record.originalPrice,
           flashPrice: record.seckillPrice,

@@ -100,9 +100,9 @@
         <div
           class="tabs-content"
           v-infinite-scroll="loadMoreSongs"
-          v-infinite-scroll-distance="100"
-          v-infinite-scroll-disabled="activeTab !== 'songs' || !hasMore || isLoadingMore"
-          v-infinite-scroll-immediate-check="true"
+          infinite-scroll-distance="100"
+          infinite-scroll-disabled="activeTab !== 'songs' || !hasMore || isLoadingMore"
+          infinite-scroll-immediate-check="true"
         >
           <div v-if="activeTab === 'songs'" class="tab-pane">
             <!-- 1. 加载中状态：添加加载提示 -->
