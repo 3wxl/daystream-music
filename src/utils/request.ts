@@ -48,6 +48,7 @@ interface RequestConfig<T = unknown> extends AxiosRequestConfig {
   showLoading?: boolean
   returnFullResponse?: boolean
   noToken?: boolean
+  isParams?: boolean // 新增：是否将数据强制作为 query 参数
 }
 
 // 配置 JSONBig 将大数字转为字符串
@@ -131,6 +132,8 @@ service.interceptors.response.use(
     }
 
     const headers = response.headers
+    // 测试是否携带了新的token请求头
+    console.log('响应头', headers)
     const newToken = headers['authorization'] || headers['Authorization']
     const isRefreshed = headers['token-refreshed'] || headers['Token-Refreshed']
     if (newToken && isRefreshed) {
@@ -142,9 +145,21 @@ service.interceptors.response.use(
     }
 
     const res = response.data
-
+    // 后端接口设计原因，token失效并不是状态码为401的情况，而是success为false且errMsg为特定值的情况，所以在此处统一进行处理
     if (res.success === false) {
       const msg = res.errorMsg || '请求失败'
+      if (msg === '用户认证失败请重新登录') {
+        if (location.pathname === '/UserAuth') return Promise.reject(new Error(msg))
+        if (!isRelogging) {
+          isRelogging = true
+          removeToken()
+          ElMessage.error('登录已过期，请重新登录')
+          setTimeout(() => {
+            window.location.href = '/UserAuth'
+          }, 500)
+        }
+        return Promise.reject(new Error(msg)) // 拦截掉，不让请求往下走
+      }
       ElMessage.closeAll()
       ElMessage.error(msg)
       return Promise.reject(new Error(msg))
@@ -230,18 +245,20 @@ async function request<T = unknown>(
     })
   }
 
-  // 🔥 核心修复：区分 GET/DELETE 用 params，其他用 data
+  // 核心修复：区分 GET/DELETE 用 params，其他用 data
   let axiosConfig: AxiosRequestConfig = {
     url,
     method,
     ...config,
   }
 
-  // 判断请求类型：GET/DELETE 用 params，POST/PUT/PATCH 用 data
+  // 判断请求类型：GET/DELETE 默认用 params，其他用 data
   const isGetOrDelete = ['get', 'delete'].includes(method.toLowerCase())
+  const isParams = config?.isParams // 新置：是否强制作为 query 参数
+
   if (submitData) {
-    if (isGetOrDelete) {
-      axiosConfig.params = submitData // GET/DELETE 放到 Query 参数
+    if (isParams || isGetOrDelete) {
+      axiosConfig.params = submitData // 强制或默认作为 Query 参数
     } else {
       axiosConfig.data = submitData // 其他方法放到 Body 参数
       // 如果是FormData，确保axios自动设置Content-Type

@@ -118,7 +118,7 @@ declare module 'vue' {
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     ElUpload: typeof import('element-plus/es')['ElUpload']
     EmptyState: typeof import('./components/user/follow/EmptyState.vue')['default']
-    ExchageRecords: typeof import('./components/Vip/ExchageRecords.vue')['default']
+    ExchageRecords: typeof import('./components/vip/ExchageRecords.vue')['default']
     ExchangeRecords: typeof import('./components/vip/ExchangeRecords.vue')['default']
     FAQ: typeof import('./components/musician-join/FAQ.vue')['default']
     FlashSale: typeof import('./components/vip/FlashSale.vue')['default']
@@ -135,6 +135,7 @@ declare module 'vue' {
     GuessSong: typeof import('./components/MusicGame/GuessSong.vue')['default']
     HeaderBar: typeof import('./components/musicianCenter/AI/HeaderBar.vue')['default']
     HeroSection: typeof import('./components/musicianCenter/HeroSection.vue')['default']
+    HotSearchList: typeof import('./components/HomePage/HotSearchList.vue')['default']
     IconFontSymbol: typeof import('./components/IconFontSymbol.vue')['default']
     LeftMenu: typeof import('./components/HomePage/LeftMenu.vue')['default']
     LikedSongs: typeof import('./components/user/LikedSongs.vue')['default']
@@ -149,6 +150,7 @@ declare module 'vue' {
     MusicCardContainer: typeof import('./components/musicianCenter/MusicCardContainer.vue')['default']
     MusicCardItem: typeof import('./components/musicianCenter/MusicCardItem.vue')['default']
     MusicCarousel: typeof import('./components/MusicCarousel.vue')['default']
+    MusicDetailTemplate: typeof import('./components/common/MusicDetailTemplate.vue')['default']
     MusicianApplyCard: typeof import('./components/admin/MusicianManage/MusicianList/MusicianApplyCard.vue')['default']
     MusicianCard: typeof import('./components/musicianCenter/MusicianCard.vue')['default']
     MusicianCardContainer: typeof import('./components/musicianCenter/MusicianCardContainer.vue')['default']
@@ -221,7 +223,7 @@ declare module 'vue' {
     VipPackages: typeof import('./components/vip/VipPackages.vue')['default']
     VipPrivileges: typeof import('./components/vip/VipPrivileges.vue')['default']
     VipProgress: typeof import('./components/CheckIn/VipProgress.vue')['default']
-    WavesExchage: typeof import('./components/Vip/WavesExchage.vue')['default']
+    WavesExchage: typeof import('./components/vip/WavesExchage.vue')['default']
     WelcomeMessage: typeof import('./components/musicianCenter/AI/chat/WelcomeMessage.vue')['default']
   }
   export interface GlobalDirectives {

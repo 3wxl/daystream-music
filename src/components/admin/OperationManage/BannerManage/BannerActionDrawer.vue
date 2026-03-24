@@ -3,14 +3,15 @@
     title="点击行为设置"
     v-model="visible"
     direction="rtl"
-    size="50%"
-    :close-on-click-modal="false"
+    size="45%"
+    :close-on-click-modal="true"
   >
     <div class="h-full flex flex-col">
       <el-tabs v-model="activeTab" type="card" class="mb-4">
-        <el-tab-pane label="链接设置" name="link" v-if="form.clickType === 'link' || form.clickType === ''" />
-        <el-tab-pane label="音乐选择" name="music" v-if="form.clickType === 'music' || form.clickType === ''" />
-        <el-tab-pane label="歌单选择" name="playlist" v-if="form.clickType === 'playlist' || form.clickType === ''" />
+        <el-tab-pane label="链接设置" name="link" v-if="form.actionType === '4' || form.actionType === ''" />
+        <el-tab-pane label="音乐选择" name="music" v-if="form.actionType === '2' || form.actionType === ''" />
+        <el-tab-pane label="歌单选择" name="playlist" v-if="form.actionType === '1' || form.actionType === ''" />
+        <!-- <el-tab-pane label="秒杀活动选择" name="seckill" v-if="form.actionType === '3' || form.actionType === ''" /> -->
       </el-tabs>
 
       <div class="flex-1 overflow-auto">
@@ -113,97 +114,102 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, ref, computed, watch } from 'vue';
-import { ElMessage } from 'element-plus';
-import AdminInput from '@/components/admin/AdminInput.vue';
+  import { ref, watch, computed , defineProps , defineModel} from 'vue'
+  let visible = defineModel();
+  const props = defineProps({
+    form:{
+      type: Object,
+      required: true
+    }
+  })
 
-// 1. 接收父组件传递的 modelValue（控制抽屉显隐）
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  form: { type: Object, required: true },
-  mockMusics: { type: Array, required: true },
-  mockPlaylists: { type: Array, required: true }
-});
+  let activeTab = ref('link');    // 当前激活的标签页
+  let Data = ref(null);           // 列表数据
 
-// 2. 定义事件（更新 modelValue + 确认事件）
-const emit = defineEmits(['update:modelValue', 'confirm']);
+  watch(()=>props.form.actionType, (newVal) => {
+    if(newVal === '4') activeTab.value = 'link';
+    else if(newVal === '2') activeTab.value = 'music';
+    else if(newVal === '1') activeTab.value = 'playlist';
+    // else if(newVal === '3') activeTab.value = 'seckill';
+  }, { immediate: true });
 
-// 3. 核心修复：定义内部响应式变量，同步 props.modelValue
-const visible = ref(props.modelValue);
-
-// 4. 监听内部 visible 变化，同步给父组件
-watch(visible, (newVal) => {
-  emit('update:modelValue', newVal);
-});
-
-// 5. 监听父组件 modelValue 变化，同步到内部 visible（双向同步）
-watch(() => props.modelValue, (newVal) => {
-  visible.value = newVal;
-});
-
-// 其他原有逻辑
-const activeTab = ref('link');
-const musicSearchKeyword = ref('');
-const playlistSearchKeyword = ref('');
-
-// 过滤音乐/歌单
-const filteredMusics = computed(() => {
-  if (!musicSearchKeyword.value) return props.mockMusics;
-  const keyword = musicSearchKeyword.value.toLowerCase();
-  return props.mockMusics.filter(m =>
-    m.name.toLowerCase().includes(keyword) ||
-    m.singer.toLowerCase().includes(keyword) ||
-    m.album.toLowerCase().includes(keyword)
-  );
-});
-
-const filteredPlaylists = computed(() => {
-  if (!playlistSearchKeyword.value) return props.mockPlaylists;
-  const keyword = playlistSearchKeyword.value.toLowerCase();
-  return props.mockPlaylists.filter(p =>
-    p.name.toLowerCase().includes(keyword) ||
-    p.description.toLowerCase().includes(keyword)
-  );
-});
-
-// 监听点击类型切换tab
-watch(() => props.form.clickType, (newVal) => {
-  if (newVal) activeTab.value = newVal;
-}, { immediate: true });
-
-// 选择音乐/歌单
-const selectMusic = (music) => {
-  props.form.musicId = music.id;
-  props.form.musicName = music.name;
-};
-
-const selectPlaylist = (playlist) => {
-  props.form.playlistId = playlist.id;
-  props.form.playlistName = playlist.name;
-};
-
-// 确认/取消
-const handleConfirm = () => {
-  if (props.form.clickType === 'link' && !props.form.linkUrl) {
-    return ElMessage.warning('请输入跳转链接');
+  // 事件处理
+  function handleCancel(){
+    visible.value = false;
   }
-  if (props.form.clickType === 'music' && !props.form.musicId) {
-    return ElMessage.warning('请选择音乐');
-  }
-  if (props.form.clickType === 'playlist' && !props.form.playlistId) {
-    return ElMessage.warning('请选择歌单');
-  }
-  emit('confirm', props.form);
-  visible.value = false; // 确认后关闭抽屉
-};
 
-const handleCancel = () => {
-  visible.value = false; // 取消后关闭抽屉
-};
+  onMounted(()=>{
+
+  })
 </script>
 
 <style scoped>
 :deep(.el-table__row.bg-blue-50) { background-color: #eff6ff !important; }
 :deep(.el-table__row.bg-blue-50:hover > td) { background-color: #eff6ff !important; }
 :deep(.gedanSelect .el-table__row) { height: 70px; }
+::v-deep(.el-table__row){
+    height: 60px;
+  }
+  ::v-deep .admin-page .btn-prev{
+    border: 1px solid #cecece;
+    border-radius: 8px;
+    color: #8e8e8e;
+    background-color: rgb(255, 255, 255);
+    font-family: Microsoft Yahei, Helvetica Neue, Helvetica, Arial, sans-serif;
+    width: 35px;
+    height: 35px;
+    text-align: center;
+  }
+  ::v-deep .admin-page .btn-prev:hover{
+    border-color: #0084ff;
+  }
+  ::v-deep .admin-page .btn-prev .el-icon{
+    font-size: 16px;
+    position: relative;
+    left: 5px;
+  }
+  ::v-deep .admin-page .btn-next{
+    border: 1px solid #cecece;
+    border-radius: 8px;
+    color: #8e8e8e;
+    background-color: rgb(255, 255, 255);
+    font-family: Microsoft Yahei, Helvetica Neue, Helvetica, Arial, sans-serif;
+    width: 35px;
+    height: 35px;
+    text-align: center;
+  }
+  ::v-deep .admin-page .btn-next:hover{
+    border-color: #0084ff;
+  }
+  ::v-deep .admin-page .btn-next .el-icon{
+    font-size: 16px;
+    position: relative;
+    left: 5px;
+  }
+  ::v-deep .admin-page .el-pager .number{
+    border: 1px solid #cecece;
+    border-radius: 8px;
+    color: #8e8e8e;
+    background-color: rgb(255, 255, 255);
+    font-family: Microsoft Yahei, Helvetica Neue, Helvetica, Arial, sans-serif;
+    width: 35px;
+    height: 35px;
+    text-align: center;
+  }
+  ::v-deep .admin-page .el-pager .number:hover{
+    border-color: #0084ff;
+  }
+  ::v-deep .admin-page .el-pager .more{
+    border: 1px solid #cecece;
+    border-radius: 8px;
+    color: #8e8e8e;
+    background-color: rgb(255, 255, 255);
+    font-family: Microsoft Yahei, Helvetica Neue, Helvetica, Arial, sans-serif;
+    width: 35px;
+    height: 35px;
+    text-align: center;
+  }
+  ::v-deep .admin-page .el-pager .more:hover{
+    border-color: #0084ff;
+  }
 </style>

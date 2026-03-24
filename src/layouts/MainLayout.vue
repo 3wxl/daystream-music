@@ -2,7 +2,7 @@
   <div class="h-screen flex flex-col overflow-hidden bg-gray-900 relative">
     <div class="flex-1 flex overflow-hidden min-h-0">
       <transition name="slide-fade">
-        <left-menu v-show="isSidebarVisible" class="shrink-0 !h-full" />
+        <left-menu v-show="isSidebarVisible" class="shrink-0 h-full！" />
       </transition>
 
       <div class="flex flex-col flex-1 min-h-0 min-w-0">
@@ -15,7 +15,7 @@
       </div>
     </div>
 
-    <PlayerControls class="static! w-full! z-40 shrink-0" />
+    <PlayerControls class="static! w-full! z-40 shrink-0 player-height" />
 
     <!-- 悬浮按钮 -->
     <div
@@ -60,6 +60,7 @@
         </svg>
       </div>
     </div>
+
   </div>
 </template>
 
@@ -67,6 +68,8 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { useChatStore } from '@/stores/chat'
+
+
 
 const userStore = useUserStore()
 const chatStore = useChatStore()

@@ -20,10 +20,10 @@
             >
               {{musician.name}}
             </span>
-            <span
+            <!-- <span
               class="cursor-pointer inline-block duration-[0.2s] mx-2 text-[#e5e7eb] text-[14px] py-2 px-4 bg-[rgba(255,255,255,0.1)] rounded-[20px] hover:bg-[rgba(255,255,255,0.15)]">
               <IconFontSymbol name="sandian"></IconFontSymbol>
-            </span>
+            </span> -->
           </el-scrollbar>
         </div>
       </el-header>
@@ -107,101 +107,7 @@
     {
       name:'全部',
       id:0
-    },
-    {
-      name:'张杰',
-      id:1
-    },
-    {
-      name:'张学友',
-      id:2
-    },
-    {
-      name:'周杰伦',
-      id:3
-    },
-    {
-      name:'林俊杰',
-      id:4
-    },
-    {
-      name:'王力宏',
-      id:5
-    },
-    {
-      name:'atif',
-      id:6
-    },
-    {
-      name:'张杰',
-      id:7
-    },
-    {
-      name:'张学友',
-      id:8
-    },
-    {
-      name:'周杰伦',
-      id:9
-    },
-    {
-      name:'林俊杰',
-      id:10
-    },
-    {
-      name:'王力宏',
-      id:11
-    },
-    {
-      name:'atif',
-      id:12
-    },{
-      name:'张杰',
-      id:13
-    },
-    {
-      name:'张学友',
-      id:14
-    },
-    {
-      name:'周杰伦',
-      id:15
-    },
-    {
-      name:'林俊杰',
-      id:16
-    },
-    {
-      name:'王力宏',
-      id:17
-    },
-    {
-      name:'atif',
-      id:18
-    },{
-      name:'张杰',
-      id:19
-    },
-    {
-      name:'张学友',
-      id:20
-    },
-    {
-      name:'周杰伦',
-      id:21
-    },
-    {
-      name:'林俊杰',
-      id:22
-    },
-    {
-      name:'王力宏',
-      id:23
-    },
-    {
-      name:'atif',
-      id:24
-    },
+    }
   ])
   let dymamicList = reactive([
   ])

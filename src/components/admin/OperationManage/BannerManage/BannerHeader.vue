@@ -34,27 +34,12 @@
           预览
         </el-button>
       </div>
-      <div class="w-[250px]">
-        <AdminInput
-          v-model="searchKeyword"
-          placeholder="搜索轮播图名称"
-          prefix="&#xe65c;"
-          width="250px"
-          @input="$emit('searchChange', $event)"
-        ></AdminInput>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import AdminInput from '@/components/admin/AdminInput.vue';
 import { defineProps, defineEmits, ref } from 'vue';
 
-const props = defineProps({
-  searchKeyword: { type: String, default: '' }
-});
-
-const emit = defineEmits(['openAddDialog', 'refreshData', 'preview', 'searchChange']);
-const searchKeyword = ref(props.searchKeyword);
+const emit = defineEmits(['openAddDialog', 'refreshData', 'preview']);
 </script>

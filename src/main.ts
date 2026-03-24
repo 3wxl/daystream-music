@@ -13,6 +13,7 @@ import router from './router'
 import './router/permission'
 import { useFlashSaleReminderStore } from './stores/flashSaleReminder'
 
+
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
 

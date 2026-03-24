@@ -33,11 +33,9 @@
       <div class="panel tags-panel">
         <div class="panel-header">
           <h2>歌单分类</h2>
-          <router-link to="{path:'/playlist'" class="more-link"
-            >全部</router-link
-          >
+          <router-link to="{ path: '/playlist' }" class="more-link">全部</router-link>
         </div>
-        <TagBar :tags="tagsData" />
+        <TagBar :tags="tagsData"/>
       </div>
 
       <div class="panel list-panel flex flex-col">
@@ -46,7 +44,7 @@
           <button class="action-btn">播放全部</button>
         </div>
         <div class="list-wrapper flex-1">
-          <MusicListItem :items="listData" />
+          <MusicListItem :items="listData" @click-music="handlePlayHotMusic" />
         </div>
       </div>
 
@@ -73,12 +71,14 @@
 </template>
 
 <script lang="ts" setup>
+import { getAlbum } from '@/api/album'
 import { getRecommendMusic } from '@/api/home'
+import { getAllTags } from '@/api/playlist'
 import MusicCarousel from '@/components/MusicCarousel.vue'
 import MusicListItem from '@/components/MusicListItem.vue'
 import TagBar from '@/components/TagBar.vue'
-import { getAlbum } from '@/api/album'
-import { getAllTags } from '@/api/playlist'
+import { usePlayerStore } from '@/stores/player'
+import { ElMessage } from 'element-plus'
 
 defineOptions({
   name: 'HomeIndex',
@@ -94,10 +94,11 @@ onMounted(() => {
     rawData.value = [...res.data]
     listData.value = rawData.value.map((item) => {
       return {
-        id: item.id,
+        id: item.itemId, // 根据真实的返回数据，这里使用 itemId
         title: item.songName,
         image: item.coverUrl,
         desc: item.singer,
+        raw: item
       }
     })
     console.log(listData.value)
@@ -106,7 +107,13 @@ onMounted(() => {
   getAllTags().then((res) => {
     const flatList = Object.values(res.data).flat()
     console.log(flatList)
-    tagsData.value = [...flatList]
+    tagsData.value = flatList.map((t) => {
+      return {
+        id:t.id,
+        name:t.tagName,
+        path:`/playlist?tagId=${t.id}`
+      }
+    })
   })
 
   getAlbum(1, 30).then((res) => {
@@ -114,6 +121,50 @@ onMounted(() => {
     albumData.value = [...res.data.records]
   })
 })
+
+// 点击本周最热音乐列表触发播放
+const playerStore = usePlayerStore()
+const handlePlayHotMusic = async (item: any) => {
+  if (!item.raw) return
+  
+  const data = item.raw
+  // 将接口返回结构适配成播放器需要的 MusicVO
+  const songToPlay = {
+    id: data.itemId, // 根据真实数据修改为 itemId
+    musicName: data.songName,
+    albumId: 0,
+    albumName: '',
+    bpm: 0,
+    commentCount: 0,
+    coverUrl: data.coverUrl,
+    duration: '03:30',
+    isLiked: 0,
+    isVip: 0,
+    likeCount: 0,
+    musicianId: 0,
+    musicianName: data.singer,
+  }
+
+  // 构造播放列表，支持切歌
+  const currentList = rawData.value.map((d: any) => ({
+    id: d.itemId, // 同样修改为 itemId
+    musicName: d.songName,
+    albumId: 0,
+    albumName: '',
+    bpm: 0,
+    commentCount: 0,
+    coverUrl: d.coverUrl,
+    duration: '03:30',
+    isLiked: 0,
+    isVip: 0,
+    likeCount: 0,
+    musicianId: 0,
+    musicianName: d.singer,
+  }))
+
+  await playerStore.playSong(songToPlay as any, currentList as any)
+  ElMessage.success(`正在播放: ${songToPlay.musicName}`)
+}
 
 // recommend模拟数据
 const recommendData =
@@ -554,6 +605,7 @@ const musicData = [
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 1rem;
 }
+
 
 @media (max-width: 1200px) {
   .main-content {

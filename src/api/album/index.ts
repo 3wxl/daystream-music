@@ -7,10 +7,9 @@ export const getAlbum = (pageNum:string, pageSize:string) => {
   })
 }
 
-
-export const getAlbumDetail = (albumId: string) => {
-  return request(`/musician/home/getAlbumDetail/${albumId}`, 'get')
-}
+// export const getAlbumDetail = (albumId: string) => {
+//   return request(`/musician/home/getAlbumDetail/${albumId}`, 'get')
+// }
 
 // 创建歌单
 export const createAlbum = (album: any) => {
@@ -36,4 +35,9 @@ export const getMyAlbum = (pageNum:string, pageSize:string) => {
     pageNum,
     pageSize,
   })
+}
+
+// 查询专辑的详细内容
+export const getAlbumDetail = (albumId: string) => {
+  return request('/api/album/get-album-detail', 'get', { albumId })
 }

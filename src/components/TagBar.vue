@@ -3,9 +3,9 @@
   <router-link
     v-for="tag in tags"
     :key="tag.id"
-    :to="{ path: '/playlist', query: { tagId: tag.id } }"
+    :to="tag.path"
     class="tag-item"
-    >{{ tag.tagName }}
+    >{{ tag.name }}
   </router-link>
 </template>
 
@@ -16,6 +16,7 @@ defineProps({
     required: true,
   },
 })
+
 </script>
 
 <style lang="scss" scoped>
@@ -34,14 +35,8 @@ defineProps({
 }
 
 .tag-item:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-}
-
-/* Vue Router 会自动给当前激活的链接添加 "router-link-active" 类 */
-.tag-item.router-link-active {
-  background-color: rgb(219, 39, 119); /* 粉色，与主题一致 */
-  color: #ffffff;
+  background-color: rgb(219, 39, 119);
+  color: #fff;
   font-weight: bold;
 }
 </style>
