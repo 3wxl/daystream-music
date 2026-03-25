@@ -690,7 +690,7 @@ const handleDelete = async (id: string) => {
 const getMvList = async () => {
   try {
     const res = await getHotMv('1', '40')
-    mvs.value = (res.data.records as any[]) || []
+    mvs.value = ((res.data as any).records as any[]) || []
 
     if (mvs.value.length === 0) {
       // 没有任何MV时，保留一个示例方便展示 (可选)
@@ -705,6 +705,13 @@ const getMvList = async () => {
 
 onMounted(() => {
   getMvList()
+})
+
+watch(showCreateMvDialog, (val) => {
+  if (!val && !isUploading.value) {
+    // 弹窗关闭，且不再上传过程中，清空表单
+    resetForm()
+  }
 })
 </script>
 

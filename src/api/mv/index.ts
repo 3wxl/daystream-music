@@ -31,13 +31,16 @@ export function getMvDetail(mvid: string) {
 
 // 检验分片文件是否已经上传到MinIO
 export function validateChunk(fileMd5: string, chunk: string, chunkMd5: string) {
-  return request('/file/check', 'post', undefined, {
-    params: {
+  return request(
+    '/file/check',
+    'post',
+    {
       fileMd5,
       chunk,
       chunkMd5,
     },
-  })
+    { isParams: true },
+  )
 }
 
 // 分片上传接口
