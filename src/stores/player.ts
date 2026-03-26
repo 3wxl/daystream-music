@@ -1,8 +1,8 @@
-import { defineStore } from 'pinia'
-import { ref, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
 import { getMusicPlayUrl } from '@/api/music'
 import type { MusicPlayVO, MusicVO } from '@/types/personalCenter'
+import { ElMessage } from 'element-plus'
+import { defineStore } from 'pinia'
+import { onMounted, ref } from 'vue'
 
 export const usePlayerStore = defineStore(
   'player',

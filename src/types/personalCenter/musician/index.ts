@@ -60,3 +60,20 @@ export interface ApplyMusicianParams {
   avatar: string
   tags: number[]
 }
+
+export interface MusicUploadRequest {
+  albumId?: number
+  bpm?: number
+  cover: string | File
+  highDefinition?: string | File
+  isVip?: number
+  licenseType?: string
+  lossless?: string | File
+  lyric?: string | File
+  musicName?: string
+  price?: string
+  spatialAudio?: string | File
+  standard?: string | File
+  tags?: number[]
+  [property: string]: any
+}
