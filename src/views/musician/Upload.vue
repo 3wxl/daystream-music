@@ -209,8 +209,14 @@
             </div>
           </div>
 
-          <el-form :model="audioForm" label-position="top" size="large">
-            <el-form-item label="歌曲名">
+          <el-form
+            ref="musicFormRef"
+            :rules="musicUploadRule"
+            :model="audioForm"
+            label-position="top"
+            size="large"
+          >
+            <el-form-item label="歌曲名" prop="musicName">
               <el-input
                 v-model="audioForm.musicName"
                 placeholder="给你的作品起个名字"
@@ -252,7 +258,7 @@
             </div>
 
             <div class="grid grid-cols-2 gap-4">
-              <el-form-item v-if="audioForm.isVip === 1" label="单价（音浪）">
+              <el-form-item v-if="audioForm.isVip === 1" label="单价（音浪）" prop="price">
                 <el-input
                   v-model="audioForm.price"
                   placeholder="输入所需音浪币"
@@ -260,7 +266,7 @@
                 />
               </el-form-item>
 
-              <el-form-item label="节奏 (BPM)">
+              <el-form-item label="节奏 (BPM)" prop="bpm">
                 <el-input-number
                   v-model="audioForm.bpm"
                   :min="1"
@@ -271,7 +277,7 @@
             </div>
 
             <div class="grid grid-cols-2 gap-4">
-              <el-form-item label="版权类型">
+              <el-form-item label="版权类型" prop="licenseType">
                 <el-select
                   v-model="audioForm.licenseType"
                   placeholder="选择版权类型"
@@ -283,7 +289,7 @@
                 </el-select>
               </el-form-item>
 
-              <el-form-item label="专辑ID (可选)">
+              <el-form-item label="专辑ID (可选)" prop="albumId">
                 <el-input v-model="audioForm.albumId" placeholder="所属专辑ID" class="dark-input" />
               </el-form-item>
             </div>
@@ -337,10 +343,14 @@
 
 <script lang="ts" setup>
 import { uploadMusic } from '@/api/music'
+import { useUploadtRules } from '@/utils/rules/upload'
+import type { FormInstance } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { onMounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
+const { musicUploadRule } = useUploadtRules()
+const musicFormRef = ref<FormInstance>()
 const route = useRoute()
 const showUploadDialog = ref(false)
 
@@ -406,14 +416,20 @@ const handleUpload = async () => {
   if (!audioFile.value) {
     return ElMessage.warning('请选择音频文件')
   }
-  if (!audioForm.musicName) {
-    return ElMessage.warning('请输入歌曲名')
-  }
   if (!coverFile.value) {
-    return ElMessage.warning('请选择歌曲封面')
+    ElMessage.warning('请选择歌曲封面')
+    return
   }
   if (!lyricFile.value) {
-    return ElMessage.warning('请上传 LRC 歌词文件')
+    ElMessage.warning('请上传 LRC 歌词文件')
+    return
+  }
+
+  // 开始元数据校验
+  if (!musicFormRef.value) return
+  const valid = await musicFormRef.value.validate().catch(() => false)
+  if (!valid) {
+    return ElMessage.warning('请补全表单必填信息')
   }
 
   try {

@@ -58,11 +58,10 @@
       :close-on-click-modal="!isUploading"
       :show-close="!isUploading"
     >
-      <el-form ref="createMvFormRef" :model="mvForm" label-position="top">
+      <el-form ref="createMvFormRef" :model="mvForm" :rules="mvUploadRule" label-position="top">
         <el-form-item
           label="MV标题"
           prop="title"
-          :rules="[{ required: true, message: '请输入MV标题', trigger: 'blur' }]"
         >
           <el-input placeholder="请输入MV标题" class="dark-input" v-model="mvForm.title" />
         </el-form-item>
@@ -185,9 +184,10 @@
 </template>
 
 <script lang="ts" setup>
+import { useUploadtRules } from '@/utils/rules/upload'
 import type { FormInstance } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 // @ts-ignore
 // @ts-ignore
 import {
@@ -199,6 +199,8 @@ import {
   validateChunk,
 } from '@/api/mv'
 import SparkMD5 from 'spark-md5'
+
+const { mvUploadRule } = useUploadtRules()
 
 // 数据定义
 const showCreateMvDialog = ref(false)
