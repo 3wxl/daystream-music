@@ -460,7 +460,8 @@ const uploadSingleChunk = async (
 
     // 创建FormData
     const formData = new FormData()
-    formData.append('file', chunkData, file.name) // 分片文件 (注意key变为file)
+    formData.append('file', chunkData, (chunkIndex+1).toString()) // 改为使用索引作为文件名，防止后端覆盖
+    // formData.append('file', chunkData, file.name) // 分片文件 (注意key变为file)
     formData.append('md5Value', fileMd5.value)
     formData.append('chunk', chunkIndex.toString())
     formData.append('chunks', totalChunks.value.toString())
@@ -472,6 +473,16 @@ const uploadSingleChunk = async (
     formData.append('operation', 'upload')
 
     addStatusLog(`开始上传分片 ${chunkIndex + 1}/${totalChunks.value}...`, 'info')
+    
+    // 调试---------------打印 FormData 内容
+    console.log(`--- 分片 ${chunkIndex + 1} 上传数据检查 ---`)
+    formData.forEach((value, key) => {
+      if (value instanceof Blob) {
+        console.log(`${key}: [Blob] size=${value.size}, name=${(value as any).name || 'n/a'}`)
+      } else {
+        console.log(`${key}: ${value}`)
+      }
+    })
 
     // 上传分片
     const startTime = Date.now()
@@ -519,6 +530,12 @@ const mergeChunks = async (): Promise<string> => {
     formData.append('chunks', totalChunks.value.toString())
     formData.append('size', selectedFile.value?.size.toString() || '0')
     formData.append('operation', 'merge')
+
+    // 【调试日志】打印 FormData 内容
+    console.log('--- 合并分片数据检查 ---')
+    formData.forEach((value, key) => {
+      console.log(`${key}: ${value}`)
+    })
 
     const res = await mergeChunksApi(formData)
 

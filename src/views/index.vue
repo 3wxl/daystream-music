@@ -45,6 +45,11 @@
         </div>
         <div class="list-wrapper flex-1">
           <MusicListItem :items="listData" @click-music="handlePlayHotMusic" />
+          <div v-if="listData.length === 0" class="empty-state">
+            <i class="fa fa-music empty-icon"></i>
+            <p class="empty-text">暂无数据</p>
+            <p class="empty-sub">热门音乐正在路上，请稍后再来~</p>
+          </div>
         </div>
       </div>
 
@@ -90,9 +95,9 @@ const tagsData = ref([])
 let albumData = ref([])
 
 onMounted(() => {
-  getRecommendMusic().then((res) => {
+  getRecommendMusic().then((res: any) => {
     rawData.value = [...res.data]
-    listData.value = rawData.value.map((item) => {
+    listData.value = (rawData.value as any[]).map((item: any) => {
       return {
         id: item.itemId, // 根据真实的返回数据，这里使用 itemId
         title: item.songName,
@@ -116,7 +121,7 @@ onMounted(() => {
     })
   })
 
-  getAlbum(1, 30).then((res) => {
+  getAlbum(1, 30).then((res: any) => {
     console.log(res)
     albumData.value = [...res.data.records]
   })
@@ -604,6 +609,37 @@ const musicData = [
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 1rem;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  min-height: 200px;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1rem;
+  opacity: 0.6;
+}
+
+.empty-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.25rem;
+}
+
+.empty-sub {
+  font-size: 0.8rem;
+  color: rgba(148, 163, 184, 0.6);
 }
 
 

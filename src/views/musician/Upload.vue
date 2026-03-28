@@ -253,7 +253,11 @@
 
             <div class="grid grid-cols-2 gap-4">
               <el-form-item v-if="audioForm.isVip === 1" label="单价（音浪）">
-                <el-input v-model="audioForm.price" placeholder="输入所需音浪币" class="dark-input" />
+                <el-input
+                  v-model="audioForm.price"
+                  placeholder="输入所需音浪币"
+                  class="dark-input"
+                />
               </el-form-item>
 
               <el-form-item label="节奏 (BPM)">
@@ -268,7 +272,11 @@
 
             <div class="grid grid-cols-2 gap-4">
               <el-form-item label="版权类型">
-                <el-select v-model="audioForm.licenseType" placeholder="选择版权类型" class="w-full">
+                <el-select
+                  v-model="audioForm.licenseType"
+                  placeholder="选择版权类型"
+                  class="w-full"
+                >
                   <el-option label="原创" value="original" />
                   <el-option label="翻唱" value="cover" />
                   <el-option label="伴奏" value="instrumental" />
@@ -310,7 +318,6 @@
             </el-form-item>
           </el-form>
         </div>
-
       </div>
       <template #footer>
         <div class="dialog-footer flex justify-end gap-3">
@@ -411,23 +418,37 @@ const handleUpload = async () => {
 
   try {
     const formData = new FormData()
-    
-    // 根据文档平铺参数
-    formData.append('musicName', audioForm.musicName)
-    if (audioForm.albumId) {
-      formData.append('albumId', Number(audioForm.albumId).toString())
+
+    // 构造元数据 musicDTO
+    const musicMetadata = {
+      musicName: audioForm.musicName,
+      albumId: audioForm.albumId ? Number(audioForm.albumId) : null,
+      bpm: Number(audioForm.bpm),
+      licenseType: audioForm.licenseType,
+      isVip: Number(audioForm.isVip),
+      price: Number(audioForm.price || 0),
+      tags: [],
     }
-    formData.append('bpm', Number(audioForm.bpm).toString())
-    formData.append('licenseType', audioForm.licenseType)
-    formData.append('isVip', Number(audioForm.isVip).toString())
-    formData.append('price', audioForm.isVip === 1 ? audioForm.price : '0')
-    // 文档显示包含 tags 数组，前端目前暂传空数组
-    formData.append('tags', JSON.stringify([]))
-    
-    // 上传文件
-    formData.append('standard', audioFile.value)
+
+    // 调试：在控制台打印发送的具体内容，方便核对类型
+    console.log('Sending musicDTO:', JSON.stringify(musicMetadata, null, 2))
+
+    // 显式声明 musicDTO 的 Content-Type 为 application/json
+    formData.append(
+      'musicDTO',
+      new Blob([JSON.stringify(musicMetadata)], { type: 'application/json' }),
+    )
+
+    // 独立文件部分
     formData.append('cover', coverFile.value)
-    formData.append('lyric', lyricFile.value)
+    if (audioFile.value) {
+      formData.append('standard', audioFile.value)
+    }
+    if (lyricFile.value) {
+      // 歌词文件封装
+      const lyricBlob = new Blob([lyricFile.value], { type: 'text/plain' })
+      formData.append('lyric', lyricBlob, lyricFile.value.name)
+    }
 
     const res = await uploadMusic(formData)
     if (res.success) {
