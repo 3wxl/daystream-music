@@ -283,14 +283,28 @@
                   placeholder="选择版权类型"
                   class="w-full"
                 >
-                  <el-option label="原创" value="original" />
-                  <el-option label="翻唱" value="cover" />
-                  <el-option label="伴奏" value="instrumental" />
+                  <el-option label="CC-BY (署名即可免费使用)" value="CC-BY" />
+                  <el-option label="CC-BY-NC (署名 + 非商用)" value="CC-BY-NC" />
+                  <el-option label="CC-BY-SA (相同方式共享)" value="CC-BY-SA" />
+                  <el-option label="CC-BY-ND (禁止演绎)" value="CC-BY-ND" />
                 </el-select>
               </el-form-item>
 
-              <el-form-item label="专辑ID (可选)" prop="albumId">
-                <el-input v-model="audioForm.albumId" placeholder="所属专辑ID" class="dark-input" />
+              <el-form-item label="所属专辑 (可选)" prop="albumId">
+                <el-select
+                  v-model="audioForm.albumId"
+                  placeholder="选择所属专辑"
+                  class="w-full"
+                  clearable
+                  :loading="loadingAlbums"
+                >
+                  <el-option
+                    v-for="album in myAlbums"
+                    :key="album.id"
+                    :label="album.albumName"
+                    :value="album.id"
+                  />
+                </el-select>
               </el-form-item>
             </div>
 
@@ -315,11 +329,29 @@
                 />
                 <button
                   v-if="lyricFile"
-                  @click="lyricFile = null"
-                  class="text-xs text-red-400 hover:text-red-300 transition-colors"
+                  @click.stop="lyricFile = null"
+                  class="ml-2 px-2 py-1 text-[10px] bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 transition-colors"
                 >
-                  重选
+                  清除
                 </button>
+              </div>
+            </el-form-item>
+
+            <el-form-item label="音乐标签 (最多选择3个)" prop="tags">
+              <div class="flex flex-wrap gap-2">
+                <div
+                  v-for="tag in availableTags"
+                  :key="tag.id"
+                  @click="toggleTag(tag)"
+                  class="px-3 py-1.5 rounded-full border text-xs cursor-pointer transition-all"
+                  :class="
+                    audioForm.tags.includes(tag.id)
+                      ? 'bg-pink-600 border-pink-600 text-white'
+                      : 'bg-white/5 border-gray-700 text-gray-400 hover:border-pink-500/50'
+                  "
+                >
+                  {{ tag.tagName }}
+                </div>
               </div>
             </el-form-item>
           </el-form>
@@ -342,7 +374,8 @@
 </template>
 
 <script lang="ts" setup>
-import { uploadMusic } from '@/api/music'
+import { getMyAlbums, uploadMusic } from '@/api/music'
+import { getAllTags } from '@/api/playlist'
 import { useUploadtRules } from '@/utils/rules/upload'
 import type { FormInstance } from 'element-plus'
 import { ElMessage } from 'element-plus'
@@ -360,9 +393,14 @@ const audioForm = reactive({
   isVip: 0,
   price: '',
   bpm: 120,
-  licenseType: 'original',
+  licenseType: 'CC-BY',
   albumId: '',
+  tags: [] as any[],
 })
+
+const availableTags = ref<any[]>([])
+const myAlbums = ref<any[]>([])
+const loadingAlbums = ref(false)
 
 const audioInput = ref<HTMLInputElement | null>(null)
 const coverInput = ref<HTMLInputElement | null>(null)
@@ -376,7 +414,47 @@ onMounted(() => {
   if (route.query.type === 'audio') {
     showUploadDialog.value = true
   }
+  fetchTags()
+  fetchAlbums()
 })
+
+const fetchTags = async () => {
+  try {
+    const res = await getAllTags()
+    if (res.success && res.data) {
+      // 提取扁平化的标签列表
+      availableTags.value = Object.values(res.data).flat()
+    }
+  } catch (error) {
+    console.error('获取标签失败:', error)
+  }
+}
+
+const fetchAlbums = async () => {
+  loadingAlbums.value = true
+  try {
+    const res = await getMyAlbums()
+    if (res.success && res.data) {
+      myAlbums.value = res.data
+    }
+  } catch (error) {
+    console.error('获取专辑失败:', error)
+  } finally {
+    loadingAlbums.value = false
+  }
+}
+
+const toggleTag = (tag: any) => {
+  const index = audioForm.tags.indexOf(tag.id)
+  if (index > -1) {
+    audioForm.tags.splice(index, 1)
+  } else {
+    if (audioForm.tags.length >= 3) {
+      return ElMessage.warning('最多只能选择 3 个标签')
+    }
+    audioForm.tags.push(tag.id)
+  }
+}
 
 const triggerFileSelect = () => {
   audioInput.value?.click()
@@ -443,27 +521,30 @@ const handleUpload = async () => {
       licenseType: audioForm.licenseType,
       isVip: Number(audioForm.isVip),
       price: Number(audioForm.price || 0),
-      tags: [],
+      tags: audioForm.tags,
     }
 
-    // 调试：在控制台打印发送的具体内容，方便核对类型
-    console.log('Sending musicDTO:', JSON.stringify(musicMetadata, null, 2))
+    // 调试 调试 调试 调试  此处显示参数有误 有误
+    console.log('musicDTO:', JSON.stringify(musicMetadata, null, 2))
 
     // 显式声明 musicDTO 的 Content-Type 为 application/json
     formData.append(
       'musicDTO',
-      new Blob([JSON.stringify(musicMetadata)], { type: 'application/json' }),
+      new Blob([JSON.stringify(musicMetadata)], { type: 'application/json' })
     )
 
-    // 独立文件部分
+    // 2. 封面部分
     formData.append('cover', coverFile.value)
+
+    // 3. 音频部分 (将原本写死的 standard 改为 highDefinition，320kbps 音频在 standard 通道会被后端拒绝)
+    // 后续需要补充音质下拉框-------------
     if (audioFile.value) {
-      formData.append('standard', audioFile.value)
+      formData.append('highDefinition', audioFile.value, audioFile.value.name)
     }
+
+    // 4. 歌词部分
     if (lyricFile.value) {
-      // 歌词文件封装
-      const lyricBlob = new Blob([lyricFile.value], { type: 'text/plain' })
-      formData.append('lyric', lyricBlob, lyricFile.value.name)
+      formData.append('lyric', lyricFile.value)
     }
 
     const res = await uploadMusic(formData)

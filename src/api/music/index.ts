@@ -43,5 +43,19 @@ export const getMusicDetail = (musicId: string) => {
 
 // 上传音乐
 export function uploadMusic(data: FormData) {
-  return request('/music/upload', 'post', data, { showLoading: true })
+  return request('/music/upload', 'post', data, { showLoading: true,timeout:350000 })
+}
+
+
+// 分页查询我的音乐作品 
+export function getMyMusicList(pageNum: number, pageSize: number) {
+  return request<any>('/musician/home/getMyMusic', 'post', {
+    pageNum,
+    pageSize,
+  })
+}
+
+// 获取我的专辑列表
+export function getMyAlbums() {
+  return request<any[]>('/music/albums', 'get')
 }

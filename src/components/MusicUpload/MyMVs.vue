@@ -66,6 +66,22 @@
           <el-input placeholder="请输入MV标题" class="dark-input" v-model="mvForm.title" />
         </el-form-item>
 
+        <el-form-item label="关联我的音乐 (必填)" prop="musicId">
+          <el-select 
+            v-model="mvForm.musicId" 
+            placeholder="请选择此 MV 关联的歌曲" 
+            class="w-full"
+            :loading="loadingSongs"
+          >
+            <el-option
+              v-for="song in mySongs"
+              :key="song.id"
+              :label="song.musicName"
+              :value="song.id"
+            />
+          </el-select>
+        </el-form-item>
+
         <el-form-item label="MV描述" prop="description">
           <el-input
             type="textarea"
@@ -73,6 +89,52 @@
             placeholder="请输入MV描述"
             class="dark-input"
             v-model="mvForm.description"
+          />
+        </el-form-item>
+
+        <div class="grid grid-cols-2 gap-4">
+          <el-form-item label="MV封面">
+            <div class="flex items-center gap-4">
+              <div
+                class="w-32 h-20 rounded border-2 border-dashed border-gray-700 flex items-center justify-center cursor-pointer hover:border-pink-500/50 bg-[#0f1014]"
+                @click="triggerCoverSelect"
+              >
+                <img
+                  v-if="coverPreview"
+                  :src="coverPreview"
+                  class="w-full h-full object-cover rounded"
+                />
+                <i v-else class="fa fa-image text-gray-500 text-xl"></i>
+              </div>
+              <input
+                type="file"
+                ref="coverInput"
+                class="hidden"
+                accept="image/*"
+                @change="onCoverChange"
+              />
+              <div class="text-xs text-gray-500">
+                <p>点击选择封面</p>
+                <p class="mt-1">比例 16:9 效果最佳</p>
+              </div>
+            </div>
+          </el-form-item>
+
+          <el-form-item label="VIP 专属">
+            <el-radio-group v-model="mvForm.isVip" class="custom-radio">
+              <el-radio :label="0" border>免费</el-radio>
+              <el-radio :label="1" border>VIP</el-radio>
+            </el-radio-group>
+          </el-form-item>
+        </div>
+
+        <el-form-item label="上架状态">
+          <el-switch
+            v-model="mvForm.status"
+            :active-value="1"
+            :inactive-value="0"
+            active-text="立即上架"
+            inactive-text="下架暂存"
           />
         </el-form-item>
 
@@ -190,6 +252,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 // @ts-ignore
 // @ts-ignore
+// @ts-ignore
+import { getMyMusicList } from '@/api/music'
 import {
   createMv as createMvApi,
   deleteMv, // Use the new API
@@ -206,7 +270,10 @@ const { mvUploadRule } = useUploadtRules()
 const showCreateMvDialog = ref(false)
 const createMvFormRef = ref<FormInstance>()
 const fileInput = ref<HTMLInputElement>()
+const coverInput = ref<HTMLInputElement | null>(null)
 const selectedFile = ref<File | null>(null)
+const coverFile = ref<File | null>(null)
+const coverPreview = ref('')
 const isUploading = ref(false)
 const isCalculating = ref(false) //添加：是否正在计算md5
 
@@ -224,7 +291,14 @@ const mvs = ref<any[]>([])
 const mvForm = reactive({
   title: '',
   description: '',
+  isVip: 0,
+  status: 1,
+  coverUrl: '',
+  musicId: '' as string | number, // 初始化为选中的音乐ID
 })
+
+const mySongs = ref<any[]>([])
+const loadingSongs = ref(false)
 
 // 进度相关数据
 const showProgress = ref(false)
@@ -302,13 +376,47 @@ const updateProgress = () => {
 const resetForm = () => {
   mvForm.title = ''
   mvForm.description = ''
+  mvForm.isVip = 0
+  mvForm.status = 1
+  mvForm.coverUrl = ''
   selectedFile.value = null
+  coverFile.value = null
+  coverPreview.value = ''
   if (fileInput.value) fileInput.value.value = ''
+  if (coverInput.value) coverInput.value.value = ''
   showProgress.value = false
   totalProgress.value = 0
   uploadStatus.value = []
   fileMd5.value = ''
   uploadedChunks.value = 0
+}
+
+const triggerCoverSelect = () => {
+  coverInput.value?.click()
+}
+
+const onCoverChange = (e: Event) => {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (file) {
+    coverFile.value = file
+    coverPreview.value = URL.createObjectURL(file)
+  }
+}
+
+// 获取我的音频列表以供关联
+const fetchMySongs = async () => {
+  loadingSongs.value = true
+  try {
+    const res: any = await getMyMusicList(1, 100)
+    if (res.success && res.data?.records) {
+      // 如果后端返回的是 [[{...}]] 嵌套数组，则需要扁平化
+      mySongs.value = res.data.records.flat()
+    }
+  } catch (error) {
+    console.error('获取歌曲列表失败:', error)
+  } finally {
+    loadingSongs.value = false
+  }
 }
 
 // 交互方法
@@ -550,28 +658,32 @@ const mergeChunks = async (): Promise<string> => {
   }
 }
 
-// 6. 创建MV记录 (调用业务接口)
+// 6. 创建MV记录 
 const createMvRecord = async (filePath: string) => {
   try {
     addStatusLog('正在创建MV记录...', 'info')
 
     const payload = {
       mvName: mvForm.title,
-      musicId: null, // 暂时没有关联音乐的逻辑，传null或0
+      musicId: Number(mvForm.musicId) || 0, // 使用选中的真实的音乐ID
       duration: videoDuration.value || 0,
-      coverUrl: '', // 暂时没有封面上传逻辑，传空或默认图
-      isVip: 0, // 默认非VIP
-      status: 1, // 默认上架
+      coverUrl: mvForm.coverUrl || '', // 如果封面已通过其他途径上传，这里是URL
+      releaseTime: new Date().toISOString(), // 对应后端 releaseTime: "string"
+      isVip: mvForm.isVip,
+      status: mvForm.status,
       qualityList: [
         {
-          qualityType: 2, // 假设默认为 720P (2-高清720P)
-          mvUrl: filePath, // 合并接口返回的文件路径/URL
+          qualityType: 2, // 对应后端 qualityType: 2 (高清720P)
+          mvUrl: filePath, // 合并接口返回的文件路径
           fileSize: selectedFile.value?.size || 0,
           isVipLimit: 0,
         },
       ],
     }
 
+    // 注意：如果后端封面也需要这次一起上传，则这里需要改造成 FormData
+    // 但鉴于你提供的是纯 JSON 结构体，这里先按 JSON 发送
+    console.log('--- 创建MV接口参数预览 ---', JSON.stringify(payload, null, 2))
     const res = await createMvApi(payload)
 
     addStatusLog('MV记录创建成功', 'success')
@@ -724,6 +836,7 @@ const getMvList = async () => {
 
 onMounted(() => {
   getMvList()
+  fetchMySongs()
 })
 
 watch(showCreateMvDialog, (val) => {
