@@ -11,6 +11,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import './router/permission'
+import stomp from './utils/stomp';
 
 
 const pinia = createPinia()
@@ -18,7 +19,10 @@ pinia.use(piniaPluginPersistedstate)
 
 const app = createApp(App)
 
+app.provide('$stomp', stomp);
 app.config.globalProperties.$echarts = echarts
+
+// stomp.init();     // 项目启动时初始化stomp
 
 app.component('QuillEditor', QuillEditor)
 app.use(pinia)

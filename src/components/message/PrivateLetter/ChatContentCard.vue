@@ -1,4 +1,4 @@
-<!-- 聊天内容区 -->
+<!-- 聊天内容区的一个一个信息模板 -->
 <template>
   <transition name="chat-in-ri" appear>
     <div v-if="type===1&&isSelf" class="flex">

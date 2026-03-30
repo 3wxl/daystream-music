@@ -8,10 +8,10 @@
   >
     <div class="h-full flex flex-col">
       <el-tabs v-model="activeTab" type="card" class="mb-4">
-        <el-tab-pane label="链接设置" name="link" v-if="form.actionType === '4' || form.actionType === ''" />
-        <el-tab-pane label="音乐选择" name="music" v-if="form.actionType === '2' || form.actionType === ''" />
-        <el-tab-pane label="歌单选择" name="playlist" v-if="form.actionType === '1' || form.actionType === ''" />
-        <!-- <el-tab-pane label="秒杀活动选择" name="seckill" v-if="form.actionType === '3' || form.actionType === ''" /> -->
+        <el-tab-pane label="链接设置" name="link"/>
+        <el-tab-pane label="音乐选择" name="music" />
+        <el-tab-pane label="歌单选择" name="playlist"/>
+        <el-tab-pane label="秒杀活动" name="activity"/>
       </el-tabs>
 
       <div class="flex-1 overflow-auto">
@@ -26,12 +26,12 @@
             ></AdminInput>
             <p class="text-xs text-gray-500 mt-1">示例：https://www.example.com</p>
           </el-form-item>
-          <el-form-item label="打开方式">
+          <!-- <el-form-item label="打开方式">
             <el-radio-group v-model="form.linkTarget">
               <el-radio label="_blank">新窗口打开</el-radio>
               <el-radio label="_self">当前窗口打开</el-radio>
             </el-radio-group>
-          </el-form-item>
+          </el-form-item> -->
         </div>
 
         <!-- 音乐选择 -->
@@ -42,6 +42,7 @@
               placeholder="搜索音乐名称或歌手"
               prefix="&#xe65c;"
               width="100%"
+              type="url"
             ></AdminInput>
           </div>
           <div class="rounded-md overflow-hidden">
@@ -115,29 +116,40 @@
 
 <script setup>
   import { ref, watch, computed , defineProps , defineModel} from 'vue'
+  import {useBannerStore} from '@/stores/admin/banner'
   let visible = defineModel();
-  const props = defineProps({
-    form:{
-      type: Object,
-      required: true
-    }
-  })
+  let form = useBannerStore()?.form
 
   let activeTab = ref('link');    // 当前激活的标签页
   let Data = ref(null);           // 列表数据
 
-  watch(()=>props.form.actionType, (newVal) => {
-    if(newVal === '4') activeTab.value = 'link';
-    else if(newVal === '2') activeTab.value = 'music';
-    else if(newVal === '1') activeTab.value = 'playlist';
-    // else if(newVal === '3') activeTab.value = 'seckill';
+  watch(()=>form.actionType, (newVal) => {
+    if(newVal === 4) activeTab.value = 'link';
+    else if(newVal === 2) activeTab.value = 'music';
+    else if(newVal === 1) activeTab.value = 'playlist';
+    else if(newVal === 3) activeTab.value = 'activity';
   }, { immediate: true });
-
+  watch(activeTab, (newVal) => {
+    if(newVal === 'link'){
+      changeActionType(4)
+    }
+    else if(newVal === 'music'){
+      changeActionType(2)
+    }
+    else if(newVal === 'playlist'){
+      changeActionType(1)
+    }
+    else if(newVal === 'activity'){
+      changeActionType(3)
+    }
+  })
   // 事件处理
   function handleCancel(){
     visible.value = false;
   }
-
+  function changeActionType(val){
+    form.actionType = val;
+  }
   onMounted(()=>{
 
   })

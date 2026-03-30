@@ -131,8 +131,9 @@
 
 <script lang="ts" setup>
 import { useUserStore } from '@/stores/user'
-import { ref } from 'vue'
+import { ref  } from 'vue'
 import { useRouter } from 'vue-router'
+const $stomp:any = inject('$stomp');        // 引入stomp
 const router = useRouter()
 const isCheckedIn = ref(window.localStorage.getItem('checkIn_status.isCheckedIn'))
 const currentWaves = ref(window.localStorage.getItem('checkIn_status.currentWaves'))
@@ -159,6 +160,10 @@ const goToAdmin = () => {
 //   createdTime: '',
 //   userRole: [] as string[],
 // })
+onMounted(() => {
+  $stomp.init()
+})
+
 </script>
 
 <style lang="scss" scoped>

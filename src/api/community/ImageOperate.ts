@@ -1,7 +1,7 @@
 // 图片操作
 import request from '@/utils/request'
 
-//下载图片
+//图片上传
 export function updateImage(submitData:{"file":FormData}) {
   return request(
     '/community/updateImage',

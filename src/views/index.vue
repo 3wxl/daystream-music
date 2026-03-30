@@ -100,17 +100,17 @@ onMounted(() => {
         desc: item.singer,
       }
     })
-    console.log(listData.value)
+    // console.log(listData.value)
   })
 
   getAllTags().then((res) => {
     const flatList = Object.values(res.data).flat()
-    console.log(flatList)
+    // console.log(flatList)
     tagsData.value = [...flatList]
   })
 
   getAlbum(1, 30).then((res) => {
-    console.log(res)
+    // console.log(res)
     albumData.value = [...res.data.records]
   })
 })

@@ -5,8 +5,11 @@ import router from './index'
 const whiteList = ['UserAuth']
 
 router.beforeEach(async (to, from, next) => {
-
   const userStore = useUserStore()
+  if(to.path.startsWith('/ws')){  // 更精确的匹配
+    next()
+    return
+  }
   // 拦截QQ回调的token
   if(to.query.token){
     const accessToken = to.query.token as string
@@ -37,7 +40,8 @@ router.beforeEach(async (to, from, next) => {
       } else {
         try {
           await userStore.getUsersInfo()
-          if((to.name as string).startsWith('admin')&&userStore.userInfo.userRole.indexOf('管理员')===-1){
+          const toName = (to.name || '') as string
+          if((toName as string).startsWith('admin')&&userStore.userInfo.userRole.indexOf('管理员')===-1){
             next('/UserAuth')
           }
           next({ ...to, replace: true })

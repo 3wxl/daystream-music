@@ -9,3 +9,12 @@ export function GetBannerListAPI(page:number,pageSize:number) {
     'get'
   )
 }
+
+// 添加轮播图
+export function AddBannerAPI(data:any) {
+  return request(
+    '/operations/banner',
+    'post',
+    data
+  )
+}

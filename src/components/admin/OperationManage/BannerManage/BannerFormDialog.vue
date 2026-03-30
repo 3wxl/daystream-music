@@ -44,7 +44,7 @@
           <p class="text-xs text-gray-500">支持 JPG、PNG 格式，建议尺寸 1920×500px</p>
         </div>
         <div v-if="imgFile" class="mt-3 w-full h-40 bg-gray-50 rounded flex items-center justify-center overflow-hidden">
-          <img :src="imgFile" alt="预览图" class="max-w-full max-h-full object-contain" />
+          <img :src="imgFileUrl" alt="预览图" class="max-w-full max-h-full object-contain" />
         </div>
       </el-form-item>
       <el-form-item label="点击交互" prop="actionType">
@@ -54,11 +54,11 @@
           class="w-full"
           @change="handleClickTypeChange"
         >
-          <el-option key="0" label="无" value="0"></el-option>
-          <el-option key="4" label="跳转链接" value="4"></el-option>
-          <el-option key="2" label="跳转歌曲" value="2"></el-option>
-          <el-option key="1" label="跳转歌单" value="1"></el-option>
-          <el-option key="3" label="跳转秒杀活动" value="3"></el-option>
+          <el-option key="0" label="无" :value="0"></el-option>
+          <el-option key="4" label="跳转链接" :value="4"></el-option>
+          <el-option key="2" label="跳转歌曲" :value="2"></el-option>
+          <el-option key="1" label="跳转歌单" :value="1"></el-option>
+          <el-option key="3" label="跳转秒杀活动" :value="3"></el-option>
         </el-select>
         <div class="mt-2">
           <el-button
@@ -74,7 +74,7 @@
           <div v-if="form.actionType && (form.linkUrl || form.musicId || form.playlistId)" class="text-sm text-gray-600 mt-1">
             当前设置:
             <span class="font-medium">
-              {{ form.actionType === '4' ? form.linkUrl : form.actionType === '2' ? form.musicName : form.playlistName }}
+              {{ form.actionType === 4 ? form.linkUrl : form.targetNameName }}
             </span>
           </div>
 
@@ -106,6 +106,9 @@
 import { ref, computed } from 'vue'
 import { Setting } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import {useBannerStore} from '@/stores/admin/banner'
+import {updateImage} from '@/api/community/ImageOperate'
+import {AddBannerAPI} from '@/api/Admin/operation/banner'
 
 // 数据
 const props = defineProps({
@@ -122,26 +125,18 @@ const props = defineProps({
     default: () => []
   }
 });
-let form = reactive({
-  title:null,
-  imageUrl:null,
-  linkUrl:null,
-  sortOrder:null,
-  status:null,
-  actionType:null,
-  targetId:null,
-})
+let form = useBannerStore()?.form;
 let clickType = {
-  '0': '无',
-  '4': '跳转链接',
-  '2': '跳转歌曲',
-  '1': '跳转歌单',
-  '3': '跳转秒杀活动'
+  0: '无',
+  4: '跳转链接',
+  2: '跳转歌曲',
+  1: '跳转歌单',
+  3: '跳转秒杀活动'
 }
 
 const modelValue = defineModel();
 
-const emit = defineEmits(['submit', 'close', 'openActionDrawer', 'formChange']);
+const emit = defineEmits(['submit', 'close', 'openActionDrawer']);
 
 const isDialogOpen = computed({
   get() {
@@ -152,12 +147,10 @@ const isDialogOpen = computed({
   }
 });
 
-watch(()=>form, (newForm) => {
-  emit('formChange', newForm);
-}, { deep: true });
 
 // 存储上传的文件
-const imgFile = ref(null);
+let imgFile;
+const imgFileUrl = ref(null);
 const uploadFileList = ref([]);
 const isSubmitting = ref(false);
 
@@ -170,10 +163,11 @@ const handleImageChange = (file, fileList) => {       //
     }
     return;
   }
+  imgFile = file.raw;
   // 读取文件并更新预览
   const reader = new FileReader();
   reader.onload = (e) => {
-    imgFile.value = e.target.result;
+    imgFileUrl.value = e.target.result;
   };
 
   reader.readAsDataURL(file.raw);
@@ -182,10 +176,10 @@ const handleImageChange = (file, fileList) => {       //
 // 处理文件移除
 const handleRemove = () => {
   form.imageUrl = '';
-  if (imgFile.value) {
+  if (imgFile) {
     URL.revokeObjectURL(imgFile.value); // 清理内存
   }
-  imgFile.value = null;
+  imgFile = null;
   uploadFileList.value = [];
 };
 
@@ -200,7 +194,31 @@ const handleClickTypeChange = (value) => {
     form.playlistName = '';
   }
 };
+
+// 提交
+async function handleSubmit(){
+  let formData = new FormData();
+  formData.append('file', imgFile);
+  let imgUpdateRes = await updateImage(formData);
+  let subForm = toRaw(useBannerStore().form);
+  subForm.imageUrl = imgUpdateRes.data;
+  subForm.status = 0;
+  if(props.isEditMode){
+
+  }else{
+    delete subForm.targetName
+    console.log(subForm)
+    let addRes = await AddBannerAPI(subForm)
+    console.log(addRes)
+    if(addRes.success){
+      ElMessage.success('添加成功！');
+      emit('submit');
+    }else{
+      ElMessage.error('添加失败！');
+    }
+  }
+}
 onMounted(()=>{
-  emit('formChange', form);      // 先置空父组件的form
+
 })
 </script>

@@ -55,11 +55,25 @@ export default defineConfig({
     },
     server: {
         port: 5173,
+        hmr:true,
         proxy: {
-            '/api': {
-                target: 'http://39.96.214.163:8080',
+            '/ws/chat': {
+                target: 'ws://39.96.214.163:8080',
                 changeOrigin: true,
-                rewrite: (path) => path.replace(/^\/api/, ''),
+                ws: true,
+                // configure: (proxy, options) => {
+                //   proxy.on('proxyReqWs', (proxyReq, req, socket, options, head) => {
+                //       console.log('WebSocket headers:', req.headers);
+                //   });
+                //   proxy.on('error', (err, req, res) => {
+                //       console.log('Proxy error:', err);
+                //   });
+                // }
+            },
+            '/api': {
+              target: 'http://39.96.214.163:8080',
+              changeOrigin: true,
+              rewrite: (path) => path.replace(/^\/api/, ''),
             },
         },
     },

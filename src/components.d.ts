@@ -166,6 +166,7 @@ declare module 'vue' {
     PlaylistSection: typeof import('./components/User/PlaylistSection.vue')['default']
     PopupFont: typeof import('./components/PopupFont.vue')['default']
     PrivateLetterLeftBar: typeof import('./components/Message/PrivateLetter/PrivateLetterLeftBar.vue')['default']
+    PrivateManageBar: typeof import('./components/Message/PrivateLetter/PrivateManageBar.vue')['default']
     ProcessSection: typeof import('./components/MusicianCenter/ProcessSection.vue')['default']
     PurchaseDialog: typeof import('./components/Vip/PurchaseDialog.vue')['default']
     RecommendGd: typeof import('./components/Admin/OperationManage/RecommendManage/RecommendGd.vue')['default']
