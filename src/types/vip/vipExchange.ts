@@ -5,9 +5,20 @@ export interface UserData {
   vipDays: number
   username: string
 }
-
-// 倒计时类型
+export interface BaseFlashSale {
+  id: string
+  title: string
+  subtitle: string // 改为必传，避免undefined
+  originalPrice: number
+  flashPrice: number
+  total: number
+  sold: number
+  remaining: number
+  timeLeft: number
+  unit: '音浪' // 固定为字面量类型
+}
 export interface Countdown {
+  days?: string
   hours: string
   minutes: string
   seconds: string
@@ -33,7 +44,7 @@ export interface VipPackageOption {
 // VIP套餐类型
 export interface VipPackage {
   id: string
-  type: 'month' | 'quarter' | 'year' | 'permanent'
+  type: 'BASIC' | 'SECKILL'
   title: string
   description: string
   price: string // 音浪数值字符串（如"180"）
@@ -55,28 +66,54 @@ export interface ExchangeOption {
 }
 
 export interface ExchangeRecord {
-  id?: string
-  date?: string
-  status?: 'success' | 'failed'
-  type: string
-  amount: number
-  unit: string
-  waves?: number
-  price?: string // ✅ 新增这一行允许 price 字段存在
+  orderNo: string
+  orderType: string
+  productName: string
+  totalAmount: string
+  payAmount: string
+  price: string
+  quantity: number
+  statusDesc: string
+  createdTime: string
+  effectiveTime: string
+  expireTime: string
+  payTime: string
+}
+export type FlashSale = UpcomingFlashSale | OngoingFlashSale
+
+// 后端返回的秒杀活动VO
+export interface SeckillActivityVO {
+  activityId: number
+  activityName: string
+  productType: number
+  productId: number
+  originalPrice: number
+  seckillPrice: number
+  totalStock: number
+  remainingStock: number
+  startTime: string
+  endTime: string
+  status: number
+  message: string
+  productName?: string // 可选字段，兜底用
 }
 
-// 秒杀活动类型（价格统一为音浪）
-export interface FlashSale {
-  id: string
-  title: string
-  subtitle: string
-  originalPrice: number // 音浪数值
-  flashPrice: number // 音浪数值
+// 分页响应结构
+export interface PageRespSeckillActivityVO {
+  records: SeckillActivityVO[]
   total: number
-  sold: number
-  remaining: number
-  timeLeft: number
-  unit: '音浪' // 新增：明确单位为音浪
+  size: number
+  current: number
+  pages: number
+}
+
+// API响应结构（与request.ts中的Data<T>保持一致）
+export interface ApiResponse<T> {
+  success: boolean
+  errorMsg?: string
+  data: T
+  total?: number
+  errCode?: string
 }
 
 // 快捷操作类型
@@ -126,4 +163,35 @@ export interface FlashSaleEvent {
 
 export interface QuickActionEvent {
   action: QuickAction
+}
+
+// 订单详情类型
+export interface OrderDetailVO {
+  orderNo: string
+  orderType: string
+  productName: string
+  totalAmount: string
+  payAmount: string
+  price: string
+  quantity: number
+  statusDesc: string
+  createdTime: string
+  effectiveTime: string
+  expireTime: string
+  payTime: string
+}
+
+// 分页响应结构
+export interface PageRespOrderDetailVO {
+  records: OrderDetailVO[]
+  total: number
+  size: number
+  current: number
+  pages: number
+}
+export interface OngoingFlashSale extends BaseFlashSale {}
+
+// 3. 即将秒杀：有startTime
+export interface UpcomingFlashSale extends BaseFlashSale {
+  startTime: string
 }

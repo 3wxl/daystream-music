@@ -11,19 +11,39 @@
           background-size: 200% auto;
         "
       >
-        You
+        {{ songDetail?.musicName || '未知歌曲' }}
       </h1>
       <p class="text-xs text-pink-300/70 mt-2 flex items-center justify-center gap-2 flex-wrap">
         <span
+          v-for="tag in songDetail?.tags?.slice(0, 3)"
+          :key="tag.id"
           class="px-2 py-0.5 rounded-full bg-pink-500/10 border border-pink-400/30 text-pink-400"
-          >千坂</span
         >
+          {{ tag.tagName }}
+        </span>
         <span class="text-pink-300/80">/</span>
         <span
           class="px-2 py-0.5 rounded-full bg-pink-400/10 border border-pink-300/30 text-pink-300"
-          >N2V</span
         >
+          {{ songDetail?.musicianName || '未知歌手' }}
+        </span>
       </p>
+
+      <!-- 歌曲统计信息 -->
+      <div class="flex items-center justify-center gap-4 mt-3 text-xs text-pink-300/70">
+        <span class="flex items-center gap-1">
+          <i class="iconfont text-xs">&#xe83f;</i>
+          {{ songDetail?.likeCount || 0 }}
+        </span>
+        <span class="flex items-center gap-1">
+          <i class="iconfont icon-comment text-xs">&#xe663;</i>
+          {{ songDetail?.commentCount || 0 }}
+        </span>
+        <span class="flex items-center gap-1">
+          <i class="iconfont text-xs">&#xe61e;</i>
+          {{ formatDuration(songDetail?.duration || '00:00') }}
+        </span>
+      </div>
     </div>
 
     <!-- 标签切换 -->
@@ -62,6 +82,16 @@
       <!-- 歌词区域 -->
       <div v-if="activeTab === 'lyric'" class="p-4">
         <div
+          v-if="props.isRawTextLyric"
+          class="absolute top-0 left-0 right-0 flex justify-center z-10"
+        >
+          <span
+            class="text-xs text-pink-400/90 bg-pink-500/10 px-3 py-1 rounded-full border border-pink-400/30 mb-10"
+          >
+            此段歌词是纯文本，无自动翻滚
+          </span>
+        </div>
+        <div
           class="lyric-container h-84 relative overflow-y-auto scrollbar-hide"
           ref="lyricContainer"
           @wheel="handleLyricWheel"
@@ -69,11 +99,12 @@
           @mouseup="resetAutoScrollTimer"
           @mousedown="clearAutoScrollTimer"
         >
-          <!-- 歌词容器（固定每行高度，便于计算） -->
+          <!-- 纯文本歌词提示 -->
+
           <div class="lyric-wrapper" ref="lyricWrapper">
             <div
               v-for="(item, index) in lyricList"
-              :key="`lyric-${index}-${item.time}`"
+              :key="`lyric-${index}-${item.time || index}`"
               class="lyric-item py-4 text-center transition-all duration-300 relative"
               :class="{
                 'lyric-highlight': index === highlightedLyricIndex,
@@ -81,12 +112,10 @@
               }"
               @click="handleLyricClick(timeToSeconds(item.time))"
             >
-              <!-- 歌词文本 -->
               <div class="lyric-text-container inline-block">
                 <span class="lyric-text">
                   {{ item.text }}
                 </span>
-                <!-- 时间标签（使用绝对定位，不影响歌词布局） -->
                 <span
                   v-if="index === highlightedLyricIndex && isLyricHovered"
                   class="lyric-time absolute -right-15 top-1/2 transform -translate-y-1/2 text-xs text-pink-400/90 bg-pink-500/10 px-2 py-0.5 rounded-full ml-2 whitespace-nowrap"
@@ -97,10 +126,13 @@
             </div>
           </div>
 
-          <!-- 高亮区域参考线（已移除虚线方框） -->
-          <div
-            class="highlight-marker absolute left-0 right-0 top-1/2 transform -translate-y-1/2 h-12 z-0 pointer-events-none opacity-0"
-          ></div>
+          <!-- 空状态 -->
+          <div v-if="!lyricList.length" class="h-full flex items-center justify-center">
+            <div class="text-center">
+              <i class="iconfont icon-music-note text-4xl text-pink-400/50 mb-2">&#xe61f;</i>
+              <p class="text-pink-300/50">暂无歌词</p>
+            </div>
+          </div>
         </div>
 
         <!-- 底部当前播放提示 -->
@@ -123,7 +155,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-48 overflow-y-auto scrollbar-hide">
           <div
             v-for="(song, index) in similarSongs"
-            :key="`song-${index}-${song.title}`"
+            :key="`song-${index}-${song.id}`"
             @click="$emit('play-similar-song', song)"
             class="group flex items-center gap-3 p-3 rounded-lg bg-pink-500/5 hover:bg-pink-500/10 transition-all duration-300 hover:-translate-y-0.5 cursor-pointer border border-transparent hover:border-pink-400/20"
           >
@@ -158,11 +190,9 @@
         </div>
       </div>
 
-      <!-- 百科 -->
+      <!-- 歌曲信息 -->
       <div v-if="activeTab === 'encyclopedia'" class="p-4">
-        <div
-          class="space-y-4 max-h-48 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-        >
+        <div class="space-y-4 max-h-48 overflow-y-auto scrollbar-hide">
           <div
             class="p-3 rounded-lg bg-gradient-to-br from-pink-500/10 to-pink-400/10 border border-pink-400/20"
           >
@@ -172,16 +202,16 @@
             </h3>
             <div class="space-y-1 text-xs">
               <p>
-                <span class="text-pink-300/70">专辑名：</span
-                ><span class="text-pink-100">You - Single</span>
+                <span class="text-pink-300/70">专辑名：</span>
+                <span class="text-pink-100">{{ songDetail?.albumName || '未收录专辑' }}</span>
               </p>
               <p>
-                <span class="text-pink-300/70">发行时间：</span
-                ><span class="text-pink-100">2018-08-20</span>
+                <span class="text-pink-300/70">BPM：</span>
+                <span class="text-pink-100">{{ songDetail?.bpm || '--' }}</span>
               </p>
               <p>
-                <span class="text-pink-300/70">发行平台：</span
-                ><span class="text-pink-100">全网音乐平台</span>
+                <span class="text-pink-300/70">音频格式：</span>
+                <span class="text-pink-100">{{ songDetail?.audioList?.join('、') || 'MP3' }}</span>
               </p>
             </div>
           </div>
@@ -189,9 +219,22 @@
           <div class="space-y-2">
             <h4 class="text-sm font-bold text-pink-300">歌曲介绍</h4>
             <p class="text-xs text-pink-300/80 leading-relaxed">
-              《You》是由中国电子音乐制作人千坂（Chisa）与N2V合作制作的一首Future Bass风格单曲，
-              发行于2018年8月20日。歌曲以轻快的节奏、明亮的旋律和甜美的电子音效为特点。
+              {{ songDetail?.introduction || '暂无歌曲介绍' }}
             </p>
+          </div>
+
+          <!-- 标签 -->
+          <div v-if="songDetail?.tags && songDetail.tags.length > 0" class="space-y-2">
+            <h4 class="text-sm font-bold text-pink-300">歌曲标签</h4>
+            <div class="flex flex-wrap gap-1">
+              <span
+                v-for="tag in songDetail.tags"
+                :key="tag.id"
+                class="px-2 py-1 text-xs rounded-full bg-pink-500/10 border border-pink-400/20 text-pink-300"
+              >
+                {{ tag.tagName }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -199,7 +242,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 
 // 接收父组件props
@@ -207,6 +250,10 @@ const props = defineProps({
   activeTab: {
     type: String,
     default: 'lyric',
+  },
+  isPlaying: {
+    type: Boolean,
+    default: false,
   },
   currentLyricIndex: {
     type: Number,
@@ -217,8 +264,26 @@ const props = defineProps({
     default: '00:00.00',
   },
   similarSongs: {
-    type: Array,
+    type: Array as () => Array<{
+      id: number | string
+      cover: string
+      title: string
+      singer: string
+      similarity: number
+    }>,
     default: () => [],
+  },
+  songDetail: {
+    type: Object as () => any,
+    default: null,
+  },
+  lyricList: {
+    type: Array as () => Array<{ time: string; text: string }>,
+    default: () => [],
+  },
+  isRawTextLyric: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -226,115 +291,96 @@ const props = defineProps({
 const emit = defineEmits(['update:active-tab', 'seek-to-lyric', 'play-similar-song'])
 
 // 核心引用
-const lyricContainer = ref(null)
-const lyricWrapper = ref(null)
+const lyricContainer = ref<HTMLElement | null>(null)
+const lyricWrapper = ref<HTMLElement | null>(null)
 
 // 状态管理
-const isLyricHovered = ref(false) // 鼠标是否悬停在歌词区域
-const highlightedLyricIndex = ref(0) // 当前高亮的歌词索引（视图中间）
-const autoScrollTimer = ref(null) // 自动回滚计时器
-const lyricItemHeight = ref(72) // 每行歌词高度（py-4 = 2rem = 32px + 上下内边距）
-const isUserInteracting = ref(false) // 用户是否正在交互
-
-// 歌词数据
-const lyricList = ref([
-  { time: '00:00.00', text: '前奏' },
-  { time: '00:15.20', text: '君のことを ずっと ずっと 考えている' },
-  { time: '00:20.50', text: '夜も昼も 眠れないほど' },
-  { time: '00:25.80', text: 'You are the only one for me' },
-  { time: '00:31.10', text: '永遠に 一緒に いたい' },
-  { time: '00:36.40', text: '君の笑顔 輝いて 僕の世界を照らす' },
-  { time: '00:41.70', text: 'どんな困難でも 乗り越えられる' },
-  { time: '00:47.00', text: 'Because of you' },
-  { time: '00:52.30', text: '君の声 柔らかく 僕の心を包む' },
-  { time: '00:57.60', text: 'どんな時でも 側にいるから' },
-  { time: '01:02.90', text: 'You are my everything' },
-  { time: '01:08.20', text: '時が流れても 変わらない想い' },
-  { time: '01:13.50', text: '君との約束 忘れない' },
-  { time: '01:18.80', text: 'Every day every night I miss you' },
-  { time: '01:24.10', text: '胸の中に 君がいる限り' },
-  { time: '01:29.40', text: '何も怖くない' },
-  { time: '01:34.70', text: '星が降る夜に 君を想う' },
-  { time: '01:40.00', text: '願いが叶うなら もう一度逢いたい' },
-  { time: '01:45.30', text: 'Your smile is like the sunshine' },
-  { time: '01:50.60', text: '暖かく 僕の心を包む' },
-  { time: '01:55.90', text: 'ずっと ずっと 側にいて' },
-  { time: '02:01.20', text: 'この気持ち 伝えたい' },
-  { time: '02:06.50', text: 'ありがとう 君がいてくれたこと' },
-  { time: '02:11.80', text: '未来も 一緒に 歩いていこう' },
-  { time: '02:17.10', text: 'You are the light in my life' },
-  { time: '02:22.40', text: '終わり' },
-])
+const isLyricHovered = ref(false)
+const highlightedLyricIndex = ref(0)
+const autoScrollTimer = ref<NodeJS.Timeout | null>(null)
+const lyricItemHeight = ref(72)
+const isUserInteracting = ref(false)
 
 // 标签数据
 const tabs = [
   { name: 'lyric', label: '歌词', icon: 'lyric' },
   { name: 'similar', label: '相似歌曲', icon: 'similar' },
-  { name: 'encyclopedia', label: '百科', icon: 'encyclopedia' },
+  { name: 'encyclopedia', label: '信息', icon: 'encyclopedia' },
 ]
 
 // ========== 核心方法 ==========
-// 格式化时间
-const formatTime = (timeStr) => {
-  if (!timeStr) return '00:00'
+// 格式化时间显示（修复：容错）
+const formatTime = (timeStr: string) => {
+  if (!timeStr || !timeStr.includes(':')) return '00:00'
   return timeStr.split('.')[0]
 }
 
-// 时间转秒数
-const timeToSeconds = (timeStr) => {
+// 时间转秒数（修复：容错）
+const timeToSeconds = (timeStr: string) => {
+  if (!timeStr || !timeStr.includes(':')) return 0
   const [min, sec] = timeStr.split(':')
-  return parseInt(min) * 60 + parseFloat(sec)
+  return parseInt(min || '0') * 60 + parseFloat(sec || '0')
 }
 
-// 计算当前视图中间的歌词索引
+// 格式化时长显示
+const formatDuration = (durationStr: string) => {
+  if (!durationStr) return '00:00'
+  return durationStr
+}
+
+// 修复：计算当前视图中间的歌词索引
 const calculateHighlightedIndex = () => {
-  if (!lyricContainer.value || !lyricWrapper.value) return
+  if (!lyricContainer.value || !lyricWrapper.value || !props.lyricList.length) return
 
   const container = lyricContainer.value
-  const wrapper = lyricWrapper.value
-
-  // 容器中间位置（相对容器顶部）
-  const containerCenter = container.clientHeight / 2
-  // 滚动条位置
+  const containerRect = container.getBoundingClientRect()
+  const containerCenter = containerRect.height / 2
   const scrollTop = container.scrollTop
-  // 绝对中间位置（相对歌词列表顶部）
   const absoluteCenter = scrollTop + containerCenter
 
-  // 计算当前中间位置对应的歌词索引
+  // 计算可见区域中间的歌词索引
   const index = Math.floor(absoluteCenter / lyricItemHeight.value)
-  // 边界处理
-  const validIndex = Math.max(0, Math.min(index, lyricList.value.length - 1))
+  const validIndex = Math.max(0, Math.min(index, props.lyricList.length - 1))
 
   highlightedLyricIndex.value = validIndex
 }
 
-// 滚动到指定索引的歌词（居中）
-const scrollToLyricIndex = (index, isSmooth = true) => {
-  if (!lyricContainer.value || !lyricWrapper.value) return
+// 修复：滚动到指定索引的歌词（边界值）
+const scrollToLyricIndex = (index: number, isSmooth = true) => {
+  if (!lyricContainer.value || !lyricWrapper.value || props.lyricList.length === 0) return
 
+  // 边界值校验
+  const targetIndex = Math.max(0, Math.min(index, props.lyricList.length - 1))
   const container = lyricContainer.value
-  const targetTop =
-    index * lyricItemHeight.value - container.clientHeight / 2 + lyricItemHeight.value / 2
+  const containerHeight = container.clientHeight
 
+  // 计算目标滚动位置
+  const targetTop = Math.max(
+    0,
+    targetIndex * lyricItemHeight.value - containerHeight / 2 + lyricItemHeight.value / 2,
+  )
+
+  // 滚动
   container.scrollTo({
     top: targetTop,
     behavior: isSmooth ? 'smooth' : 'auto',
   })
 
-  // 强制更新高亮索引
-  highlightedLyricIndex.value = index
+  highlightedLyricIndex.value = targetIndex
 }
 
-// 重置自动回滚计时器（停留3秒后回到播放位置）
+// 重置自动回滚计时器（修复：防抖）
 const resetAutoScrollTimer = () => {
   clearAutoScrollTimer()
 
-  // 3秒后自动回到正在播放的歌词
-  autoScrollTimer.value = setTimeout(() => {
-    if (!isUserInteracting.value) {
-      scrollToLyricIndex(props.currentLyricIndex)
-    }
-  }, 3000)
+  // 只有播放中、非用户交互且非纯文本歌词时才自动回滚
+  if (props.isPlaying && !isUserInteracting.value && !props.isRawTextLyric) {
+    autoScrollTimer.value = setTimeout(() => {
+      if (!isUserInteracting.value) {
+        scrollToLyricIndex(props.currentLyricIndex)
+      }
+    }, 3000)
+  }
 }
 
 // 清除自动回滚计时器
@@ -346,72 +392,100 @@ const clearAutoScrollTimer = () => {
 }
 
 // ========== 事件处理 ==========
-// 歌词点击事件（跳转播放）
-const handleLyricClick = (seconds) => {
+// 歌词点击事件（修复：交互标记）
+const handleLyricClick = (seconds: number) => {
   isUserInteracting.value = true
   emit('seek-to-lyric', seconds)
-  // 点击后立即回到该歌词位置，并重置计时器
-  const targetIndex = lyricList.value.findIndex((item) => timeToSeconds(item.time) === seconds)
+
+  const targetIndex = props.lyricList.findIndex((item) => timeToSeconds(item.time) === seconds)
   if (targetIndex !== -1) {
     scrollToLyricIndex(targetIndex)
   }
+
   clearAutoScrollTimer()
-  // 延迟标记交互结束，避免频繁触发
+  // 延长交互标记时间，避免快速自动回滚
   setTimeout(() => {
     isUserInteracting.value = false
-  }, 100)
+    resetAutoScrollTimer()
+  }, 1000)
 }
 
-// 滚轮事件（标记用户交互）
+// 滚轮事件（修复：交互标记）
 const handleLyricWheel = () => {
   isUserInteracting.value = true
   clearAutoScrollTimer()
-  // 延迟标记交互结束，避免频繁触发
   setTimeout(() => {
     isUserInteracting.value = false
     resetAutoScrollTimer()
+  }, 1500)
+}
+
+// 滚动事件（修复：性能优化）
+const handleLyricScroll = () => {
+  // 防抖处理，避免频繁计算
+  clearTimeout((window as any).lyricScrollTimer)
+  ;(window as any).lyricScrollTimer = setTimeout(() => {
+    calculateHighlightedIndex()
+    if (!isUserInteracting.value) {
+      resetAutoScrollTimer()
+    }
   }, 100)
 }
 
-// 滚动事件（实时更新高亮索引）
-const handleLyricScroll = () => {
-  calculateHighlightedIndex()
-  // 如果用户正在滚动，重置自动回滚计时器
-  if (!isUserInteracting.value) {
-    resetAutoScrollTimer()
-  }
-}
-
 // ========== 监听与生命周期 ==========
-// 监听当前播放歌词索引变化
+// 监听当前播放歌词索引变化（修复：简化条件，确保播放时歌词始终滚动）
 watch(
   () => props.currentLyricIndex,
   (newIndex) => {
-    // 只有用户没有手动滚动时，才自动同步播放位置
-    if (!autoScrollTimer.value && !isUserInteracting.value) {
+    if (props.isPlaying && !props.isRawTextLyric) {
       scrollToLyricIndex(newIndex)
     }
   },
 )
 
-// 初始化
+// 监听播放状态变化（新增）
+watch(
+  () => props.isPlaying,
+  (isPlaying) => {
+    if (isPlaying && !props.isRawTextLyric) {
+      resetAutoScrollTimer()
+    } else {
+      clearAutoScrollTimer()
+    }
+  },
+)
+
+// 监听歌词列表变化
+watch(
+  () => props.lyricList,
+  () => {
+    nextTick(() => {
+      scrollToLyricIndex(props.currentLyricIndex, false)
+    })
+  },
+  { deep: true },
+)
+
+// 初始化（修复：歌词高度计算）
 onMounted(() => {
   nextTick(() => {
-    // 计算实际歌词行高
+    // 实际计算歌词行高
     if (lyricWrapper.value && lyricWrapper.value.children[0]) {
-      lyricItemHeight.value = lyricWrapper.value.children[0].offsetHeight || 72
+      const firstItem = lyricWrapper.value.children[0] as HTMLElement
+      lyricItemHeight.value = firstItem.offsetHeight || 72
     }
-    // 初始滚动到播放位置
     scrollToLyricIndex(props.currentLyricIndex, false)
     calculateHighlightedIndex()
-    // 初始化自动回滚计时器
-    resetAutoScrollTimer()
+    if (props.isPlaying) {
+      resetAutoScrollTimer()
+    }
   })
 })
 
-// 组件卸载清理
+// 组件卸载清理（修复：完整清理）
 onUnmounted(() => {
   clearAutoScrollTimer()
+  clearTimeout((window as any).lyricScrollTimer)
 })
 </script>
 

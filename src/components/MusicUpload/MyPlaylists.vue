@@ -19,7 +19,7 @@
             :src="playlistItem.cover"
             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
-          <div class="absolute top-2 right-2">
+          <div class="absolute top-2 right-2 flex">
             <button
               class="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center hover:bg-pink-500/80 transition-colors mr-2"
               @click.stop="openDetailDrawer(playlistItem)"
@@ -123,7 +123,7 @@ const loading = ref(false)
 const imageUrl = ref('')
 const tagsData = ref<any[]>([])
 const checkAll = ref(false)
-const playlist = ref([])
+const playlist = ref<any[]>([])
 const isIndeterminate = ref(true)
 const creatPlaylistRef = ref<FormInstance>()
 const showDetailDrawer = ref(false)
@@ -151,10 +151,10 @@ const handleAvatarChange: UploadProps['onChange'] = (uploadFile) => {
 
 const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
   if (rawFile.type !== 'image/jpeg' && rawFile.type !== 'image/png') {
-    ElMessage.error('头像图片必须为JPG或PNG格式')
+    ElMessage.error('歌单封面必须为JPG或PNG格式')
     return false
   } else if (rawFile.size / 1024 / 1024 > 2) {
-    ElMessage.error('头像图片大小不能超过2MB')
+    ElMessage.error('歌单封面大小不能超过2MB')
     return false
   }
   return true

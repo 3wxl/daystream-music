@@ -9,13 +9,16 @@
       <p class="text-gray-400 text-sm">完成任务获取更多音浪</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 v-infinite-scroll">
       <!-- 任务卡片 -->
       <div
         v-for="task in tasks"
         :key="task.id"
         class="bg-gray-800 border border-gray-700 rounded-xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-pink-500/10 relative"
-        :class="{ 'opacity-70': task.completed, 'neon-border': !task.completed }"
+        :class="{
+          'neon-border': !task.completed,
+          'border-green-500/30': task.completed && !task.rewardClaimed, // 待领取卡片加绿色边框提示
+        }"
         @click="handleTaskClick(task)"
       >
         <div class="flex items-start justify-between mb-4">
@@ -41,20 +44,24 @@
             "
           >
             <span>+{{ task.reward }}</span>
-            <i class="fas fa-music text-xs"></i>
+            <i class="iconfont text-xs">&#xe6e0;</i>
           </div>
         </div>
 
         <button
           class="w-full py-2 rounded-lg text-sm font-medium transition-all duration-300"
-          :class="
+          :class="[
             task.completed
-              ? 'bg-gray-700 text-gray-400 cursor-default'
-              : 'bg-gradient-to-r from-pink-500 to-pink-300 text-white hover:shadow-lg hover:shadow-pink-500/25'
-          "
-          :disabled="task.completed"
+              ? task.rewardClaimed
+                ? 'bg-gray-700 text-gray-400 cursor-default' // 已领取
+                : 'bg-gradient-to-r from-green-500 to-green-300 text-white hover:shadow-lg hover:shadow-green-500/25' // 待领取
+              : 'bg-gradient-to-r from-pink-500 to-pink-300 text-white hover:shadow-lg hover:shadow-pink-500/25', // 立即完成
+          ]"
+          :disabled="task.completed && task.rewardClaimed"
         >
-          {{ task.completed ? '已完成' : '立即完成' }}
+          <template v-if="!task.completed">立即完成</template>
+          <template v-else-if="!task.rewardClaimed">待领取</template>
+          <template v-else>已领取</template>
         </button>
       </div>
     </div>
@@ -78,7 +85,7 @@ const emit = defineEmits<{
 }>()
 
 const handleTaskClick = (task: Task) => {
-  if (task.completed) return
+  if (task.completed && task.rewardClaimed) return
   emit('complete-task', task)
 }
 </script>
@@ -109,5 +116,10 @@ const handleTaskClick = (task: Task) => {
 
 .neon-border:hover::before {
   opacity: 1;
+}
+
+/* 待领取卡片边框样式 */
+.border-green-500\/30 {
+  border-color: rgba(34, 197, 94, 0.3);
 }
 </style>

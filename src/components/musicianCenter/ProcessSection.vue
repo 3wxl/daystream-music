@@ -334,7 +334,7 @@
           <div
             class="absolute inset-0 bg-gradient-to-r from-[#FF80AB] to-[#FF4081] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
           ></div>
-          <router-link to="/Musician/MusicianJoin">
+          <router-link to="/musician/musician-join">
             <span class="relative z-10">开始音乐发行之旅</span>
           </router-link>
           <svg

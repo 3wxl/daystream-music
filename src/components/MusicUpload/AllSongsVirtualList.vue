@@ -8,16 +8,7 @@
     append-to-body
   >
     <div class="flex flex-col h-[500px]">
-      <!-- 顶部搜索工具栏 -->
-      <div class="flex justify-between items-center mb-4 gap-4">
-        <el-input
-          placeholder="搜索歌曲 / 歌手 / 专辑"
-          prefix-icon="Search"
-          class="dark-input flex-1"
-          clearable
-        />
-        <el-checkbox label="过滤已添加歌曲" size="small" class="!mr-0" />
-      </div>
+
 
       <!-- 虚拟列表区域 -->
       <!-- 说明: 这里使用 el-table-v2 -->

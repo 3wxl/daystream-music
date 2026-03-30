@@ -61,3 +61,15 @@ export function getQQLoginCallback(code:string,state:string) {
     { noToken: true }
   )
 }
+
+// 通过tempCode获取token
+export function getTokenByTempCode(tempCode:string) {
+  return request<string>(
+    '/login/getToken',
+    'get',
+    {
+      tempCode,
+    },
+    { noToken: true },
+  )
+}

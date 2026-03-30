@@ -82,7 +82,13 @@
             <i class="fa fa-plus mr-2"></i> 添加歌曲
           </el-button>
 
-          <el-button type="danger" plain class="!rounded-lg !bg-transparent" :disabled="true">
+          <el-button 
+            type="danger" 
+            plain 
+            class="!rounded-lg !bg-transparent" 
+            :disabled="selectedIds.length === 0"
+            @click="handleBatchDelete"
+          >
             <i class="fa fa-trash-alt mr-2"></i> 批量删除
           </el-button>
         </div>
@@ -132,8 +138,11 @@
           <el-table-column prop="duration" label="时长" width="100" align="right" />
 
           <el-table-column label="操作" width="150" align="center" fixed="right">
-            <template #default>
-              <button class="text-gray-400 hover:text-red-500 transition-colors p-2">
+            <template #default="{ row }">
+              <button 
+                class="text-gray-400 hover:text-red-500 transition-colors p-2"
+                @click="handleDeleteMusic(row)"
+              >
                 <i class="fa fa-trash"></i>
               </button>
             </template>
@@ -155,8 +164,9 @@
 </template>
 
 <script lang="ts" setup>
-import { getPlayListDetail,addMusicToPlaylist } from '@/api/playlist'
-import { ref } from 'vue'
+import { getPlayListDetail, addMusicToPlaylist, deleteMusicsFromPlaylist, deleteMusicFromPlaylist } from '@/api/playlist'
+import { ref, watch } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import AllSongsVirtualList from './AllSongsVirtualList.vue'
 
 const playlistDetail = ref([])
@@ -175,8 +185,9 @@ const handleClose = () => {
   emit('update:visible', false)
 }
 
+const selectedIds = ref<number[]>([])
 const handleSelectionChange = (val: any[]) => {
-  console.log('选中项:', val)
+  selectedIds.value = val.map(item => item.id)
 }
 
 const musicSongs = ref([])
@@ -198,16 +209,56 @@ watch(
 )
 
 const handleConfirm = async (selectedIds: number[]) => {
- console.log('选中的歌曲', selectedIds)
- try {
-   await addMusicToPlaylist({
-     playlistId: props.playlistId,
-     songIds: selectedIds,
-   })
-   ElMessage.success('添加成功')
- } catch (error) {
-   console.log('添加失败',error)
- }
+  console.log('选中的歌曲', selectedIds)
+  try {
+    await addMusicToPlaylist({
+      playlistId: props.playlistId,
+      songIds: selectedIds,
+    })
+    ElMessage.success('添加成功')
+    await loadData() // 刷新列表
+  } catch (error) {
+    console.log('添加失败', error)
+  }
+}
+
+// 删除单首歌曲
+const handleDeleteMusic = async (row: any) => {
+  try {
+    await ElMessageBox.confirm('确定要将该歌曲从歌单中移除吗？', '提示', {
+      type: 'warning',
+    })
+    await deleteMusicFromPlaylist({
+      playlistId: props.playlistId,
+      songIds: [row.id],
+    })
+    ElMessage.success('移除成功')
+    await loadData()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.log('移除失败', error)
+    }
+  }
+}
+
+// 批量删除
+const handleBatchDelete = async () => {
+  if (selectedIds.value.length === 0) return
+  try {
+    await ElMessageBox.confirm(`确定要将选中的 ${selectedIds.value.length} 首歌曲从歌单中移除吗？`, '提示', {
+      type: 'warning',
+    })
+    await deleteMusicsFromPlaylist({
+      playlistId: props.playlistId,
+      songIds: selectedIds.value,
+    })
+    ElMessage.success('批量移除成功')
+    await loadData()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.log('批量移除失败', error)
+    }
+  }
 }
 </script>
 

@@ -17,7 +17,7 @@
           class="flex flex-col sm:flex-row justify-center gap-4 animate-on-scroll animate-delay-300"
         >
           <!-- 主按钮：渐变从紫色系→纯粉色系（深粉→浅粉） -->
-          <router-link to="/Musician/MusicianJoin">
+          <router-link to="/musician/musician-join">
             <button
               class="px-8 py-4 rounded-full bg-gradient-to-r from-pink-400 to-rose-300 text-white font-bold text-lg hover:shadow-2xl hover:shadow-pink-600/30 transition-all duration-300 transform hover:-translate-y-1"
             >

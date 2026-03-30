@@ -51,6 +51,8 @@ export default defineConfig({
       resolvers: [ElementPlusResolver()],
       // 生成组件类型声明文件（可选，建议开启）
       dts: 'src/components.d.ts',
+      // 排除AiChatWindow组件，避免与手动导入冲突
+      exclude: [/AiChatWindow\.vue$/],
     }),
   ],
   resolve: {
@@ -70,7 +72,13 @@ export default defineConfig({
         target: 'http://39.96.214.163:8080',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
-      }
-    }
-  }
+      },
+      // 新增：网易云音乐API代理
+      '/music-api': {
+        target: 'https://music.163.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/music-api/, ''),
+      },
+    },
+  },
 })

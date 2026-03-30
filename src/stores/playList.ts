@@ -7,6 +7,7 @@ export const usePlaylistStore = defineStore('playlist', {
     currentPlaylistId: '',
     currentPlaylistBasicInfo: null as PlaylistVO | null,
   }),
+  persist: true,
   actions: {
     setCurrentPlaylist(id: number | string, basicInfo?: PlaylistVO) {
       // 加调试日志：确认方法是否执行、ID是否正确

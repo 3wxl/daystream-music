@@ -33,11 +33,9 @@
       <div class="panel tags-panel">
         <div class="panel-header">
           <h2>歌单分类</h2>
-          <router-link to="{path:'/playlist'" class="more-link"
-            >全部</router-link
-          >
+          <router-link to="{ path: '/playlist' }" class="more-link">全部</router-link>
         </div>
-        <TagBar :tags="tagsData" />
+        <TagBar :tags="tagsData"/>
       </div>
 
       <div class="panel list-panel flex flex-col">
@@ -46,7 +44,12 @@
           <button class="action-btn">播放全部</button>
         </div>
         <div class="list-wrapper flex-1">
-          <MusicListItem :items="listData" />
+          <MusicListItem :items="listData" @click-music="handlePlayHotMusic" />
+          <div v-if="listData.length === 0" class="empty-state">
+            <i class="fa fa-music empty-icon"></i>
+            <p class="empty-text">暂无数据</p>
+            <p class="empty-sub">热门音乐正在路上，请稍后再来~</p>
+          </div>
         </div>
       </div>
 
@@ -73,12 +76,14 @@
 </template>
 
 <script lang="ts" setup>
+import { getAlbum } from '@/api/album'
 import { getRecommendMusic } from '@/api/home'
+import { getAllTags } from '@/api/playlist'
 import MusicCarousel from '@/components/MusicCarousel.vue'
 import MusicListItem from '@/components/MusicListItem.vue'
 import TagBar from '@/components/TagBar.vue'
-import { getAlbum } from '@/api/album'
-import { getAllTags } from '@/api/playlist'
+import { usePlayerStore } from '@/stores/player'
+import { ElMessage } from 'element-plus'
 
 defineOptions({
   name: 'HomeIndex',
@@ -90,14 +95,15 @@ const tagsData = ref([])
 let albumData = ref([])
 
 onMounted(() => {
-  getRecommendMusic().then((res) => {
+  getRecommendMusic().then((res: any) => {
     rawData.value = [...res.data]
-    listData.value = rawData.value.map((item) => {
+    listData.value = (rawData.value as any[]).map((item: any) => {
       return {
-        id: item.id,
+        id: item.itemId, // 根据真实的返回数据，这里使用 itemId
         title: item.songName,
         image: item.coverUrl,
         desc: item.singer,
+        raw: item
       }
     })
     // console.log(listData.value)
@@ -105,15 +111,65 @@ onMounted(() => {
 
   getAllTags().then((res) => {
     const flatList = Object.values(res.data).flat()
-    // console.log(flatList)
-    tagsData.value = [...flatList]
+    console.log(flatList)
+    tagsData.value = flatList.map((t) => {
+      return {
+        id:t.id,
+        name:t.tagName,
+        path:`/playlist?tagId=${t.id}`
+      }
+    })
   })
 
-  getAlbum(1, 30).then((res) => {
-    // console.log(res)
+  getAlbum(1, 30).then((res: any) => {
+    console.log(res)
     albumData.value = [...res.data.records]
   })
 })
+
+// 点击本周最热音乐列表触发播放
+const playerStore = usePlayerStore()
+const handlePlayHotMusic = async (item: any) => {
+  if (!item.raw) return
+
+  const data = item.raw
+  // 将接口返回结构适配成播放器需要的 MusicVO
+  const songToPlay = {
+    id: data.itemId, // 根据真实数据修改为 itemId
+    musicName: data.songName,
+    albumId: 0,
+    albumName: '',
+    bpm: 0,
+    commentCount: 0,
+    coverUrl: data.coverUrl,
+    duration: '03:30',
+    isLiked: 0,
+    isVip: 0,
+    likeCount: 0,
+    musicianId: 0,
+    musicianName: data.singer,
+  }
+
+  // 构造播放列表，支持切歌
+  const currentList = rawData.value.map((d: any) => ({
+    id: d.itemId, // 同样修改为 itemId
+    musicName: d.songName,
+    albumId: 0,
+    albumName: '',
+    bpm: 0,
+    commentCount: 0,
+    coverUrl: d.coverUrl,
+    duration: '03:30',
+    isLiked: 0,
+    isVip: 0,
+    likeCount: 0,
+    musicianId: 0,
+    musicianName: d.singer,
+  }))
+
+  await playerStore.playSong(songToPlay as any, currentList as any)
+  ElMessage.success(`正在播放: ${songToPlay.musicName}`)
+}
 
 // recommend模拟数据
 const recommendData =
@@ -554,6 +610,38 @@ const musicData = [
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 1rem;
 }
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  min-height: 200px;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1rem;
+  opacity: 0.6;
+}
+
+.empty-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.25rem;
+}
+
+.empty-sub {
+  font-size: 0.8rem;
+  color: rgba(148, 163, 184, 0.6);
+}
+
 
 @media (max-width: 1200px) {
   .main-content {

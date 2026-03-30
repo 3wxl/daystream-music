@@ -1,73 +1,75 @@
 <template>
   <section class="space-y-4 animate-fade-in-up" style="--delay: 0.2s">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div
-          class="w-2 h-6 bg-gradient-to-b from-pink-300 to-pink-400 rounded-full animate-pulse-glow"
-        ></div>
-        <h2 class="text-2xl font-bold text-pink-400">{{ activeCategoryName }}</h2>
-        <span
-          class="ml-2 px-2 py-1 bg-pink-500/20 rounded-full text-xs text-pink-300 animate-bounce-subtle"
-        >
-          <i class="fa fa-globe mr-1"></i>实时更新
-        </span>
+    <div v-if="charts.length === 0" class="text-center py-10 text-gray-400">暂无榜单数据</div>
+    <div v-else>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div
+            class="w-2 h-6 bg-gradient-to-b from-pink-300 to-pink-400 rounded-full animate-pulse-glow"
+          ></div>
+          <h2 class="text-2xl font-bold text-pink-400">{{ activeCategoryName }}</h2>
+          <span
+            class="ml-2 px-2 py-1 bg-pink-500/20 rounded-full text-xs text-pink-300 animate-bounce-subtle"
+          >
+            <i class="fa fa-globe mr-1"></i>实时更新
+          </span>
+        </div>
+        <div class="flex items-center gap-2">
+          <!-- 轮播控制按钮 -->
+          <button
+            class="w-10 h-10 rounded-full glass-effect flex items-center justify-center transition-all duration-300 hover:scale-110 hover:bg-white/20"
+            @click="pauseAutoPlay"
+            :class="{ 'bg-white/20': !isAutoPlaying }"
+          >
+            <i class="iconfont text-lg">&#xe697;</i>
+          </button>
+          <button
+            class="w-10 h-10 rounded-full glass-effect flex items-center justify-center transition-all duration-300 hover:scale-110 hover:bg-white/20"
+            @click="resumeAutoPlay"
+            :class="{ 'bg-white/20': isAutoPlaying }"
+          >
+            <i class="iconfont text-lg">&#xe621;</i>
+          </button>
+        </div>
       </div>
-      <div class="flex items-center gap-2">
-        <!-- 轮播控制按钮 -->
-        <button
-          class="w-10 h-10 rounded-full glass-effect flex items-center justify-center transition-all duration-300 hover:scale-110 hover:bg-white/20"
-          @click="pauseAutoPlay"
-          :class="{ 'bg-white/20': !isAutoPlaying }"
-        >
-          <i class="iconfont text-lg">&#xe697;</i>
-        </button>
-        <button
-          class="w-10 h-10 rounded-full glass-effect flex items-center justify-center transition-all duration-300 hover:scale-110 hover:bg-white/20"
-          @click="resumeAutoPlay"
-          :class="{ 'bg-white/20': isAutoPlaying }"
-        >
-          <i class="iconfont text-lg">&#xe621;</i>
-        </button>
-      </div>
-    </div>
 
-    <!-- 轮播图容器 -->
-    <div class="relative px-4">
-      <!-- 轮播图 - 修复无限轮播 -->
-      <div
-        ref="carouselContainer"
-        class="carousel-wrapper overflow-hidden"
-        @mouseenter="pauseAutoPlay"
-        @mouseleave="resumeAutoPlay"
-      >
+      <!-- 轮播图容器 -->
+      <div class="relative px-4">
+        <!-- 轮播图 - 修复无限轮播 -->
         <div
-          class="carousel-track flex gap-6"
-          :class="{ 'carousel-paused': !isAutoPlaying }"
-          :style="{ animationDuration: `${carouselSpeed}s` }"
+          ref="carouselContainer"
+          class="carousel-wrapper overflow-hidden"
+          @mouseenter="pauseAutoPlay"
+          @mouseleave="resumeAutoPlay"
         >
-          <!-- 第一组 -->
-          <ChartItem
-            v-for="(chart, index) in charts"
-            :key="`first-${index}`"
-            :chart="chart"
-            :index="index"
-            @hover-enter="handleChartHoverEnter"
-            @hover-leave="handleChartHoverLeave"
-            @play-chart="handlePlayChart"
-            @play-song="handlePlaySong"
-          />
-
-          <!-- 第二组（重复第一组，用于无缝循环） -->
-          <ChartItem
-            v-for="(chart, index) in charts"
-            :key="`second-${index}`"
-            :chart="chart"
-            :index="index"
-            @hover-enter="handleChartHoverEnter"
-            @hover-leave="handleChartHoverLeave"
-            @play-chart="handlePlayChart"
-            @play-song="handlePlaySong"
-          />
+          <div
+            class="carousel-track flex gap-6"
+            :class="{ 'carousel-paused': !isAutoPlaying }"
+            :style="{ animationDuration: `${carouselSpeed}s` }"
+          >
+            <!-- 第一组 -->
+            <ChartItem
+              v-for="(chart, index) in charts"
+              :key="`first-${index}`"
+              :chart="chart"
+              :index="index"
+              @hover-enter="handleChartHoverEnter"
+              @hover-leave="handleChartHoverLeave"
+              @play-chart="handlePlayChart"
+              @play-song="handlePlaySong"
+            />
+            <!-- 第二组（重复第一组，用于无缝循环） -->
+            <ChartItem
+              v-for="(chart, index) in charts"
+              :key="`second-${index}`"
+              :chart="chart"
+              :index="index"
+              @hover-enter="handleChartHoverEnter"
+              @hover-leave="handleChartHoverLeave"
+              @play-chart="handlePlayChart"
+              @play-song="handlePlaySong"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -131,10 +133,17 @@ const handlePlaySong = (song) => {
 
 // 监听榜单数据变化，重置自动播放
 watch(
-  () => props.charts,
-  () => {
-    isAutoPlaying.value = true
+  () => props.carouselSpeed,
+  (newSpeed) => {
+    if (carouselContainer.value) {
+      // 监听速度变化，更新动画时长
+      const track = carouselContainer.value.querySelector('.carousel-track')
+      if (track) {
+        track.style.animationDuration = `${newSpeed}s`
+      }
+    }
   },
+  { immediate: true }, // 初始化时执行
 )
 </script>
 

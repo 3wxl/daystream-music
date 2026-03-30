@@ -1,6 +1,6 @@
 import { reactive } from "vue";
 import type { FormRules,FormItemRule } from "element-plus";
-import { lengthRule } from "./base";
+import { lengthRule, requiredRule } from "./base";
 
 export function useUploadtRules(){
   // 标签数量校验
@@ -41,8 +41,31 @@ export function useUploadtRules(){
     tagsIds: tagsRule,
   })
 
+  const albumUploadRule: FormRules = reactive({
+    albumName:inputRule,
+    introduction:descriptionRule,
+    coverFile:fileRule,
+    musicianId:requiredRule('请输入音乐人ID'),
+  })
+
+  // 音乐人中心音乐上传规则
+  const musicUploadRule: FormRules = reactive({
+    musicName: inputRule,
+    bpm: [{ required: true, message: '请输入BPM', trigger: 'blur' }],
+    licenseType: [{ required: true, message: '请选择版权类型', trigger: 'change' }],
+    price: [{ message: '请输入价格', trigger: 'blur' }], // 价格校验逻辑可在组件内更灵活处理，或此处保持基础
+  })
+ // 音乐人中心mv上传规则 
+  const mvUploadRule: FormRules = reactive({
+    title: inputRule,
+    description: descriptionRule,
+  })
+
   return {
     playlistUploadRule,
+    albumUploadRule,
+    musicUploadRule,
+    mvUploadRule
   }
 }
 

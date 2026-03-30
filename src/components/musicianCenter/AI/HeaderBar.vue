@@ -14,16 +14,16 @@
         ></div>
       </div>
       <div>
-        <h1 class="font-semibold text-white text-lg">{{ userName }}</h1>
+        <h1 class="font-semibold text-white text-lg">AI 作词助手</h1>
         <div class="flex items-center gap-2 mt-1">
           <span
             class="text-xs px-2 py-0.5 bg-pink-500/30 text-pink-200 rounded-full border border-pink-400/50"
           >
-            {{ version }}
+            专业版 · v2.0
           </span>
           <div class="flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full" :class="statusClass"></span>
-            <span class="text-xs text-gray-400">{{ userStatus }}</span>
+            <span class="w-1.5 h-1.5 rounded-full"></span>
+            <span class="text-xs text-gray-400">在线</span>
           </div>
         </div>
       </div>
@@ -51,37 +51,37 @@
 </template>
 
 <script setup lang="ts">
-interface Props {
-  userName: string
-  userStatus: '在线' | '离线' | '忙碌'
-  version?: string
-  avatar?: string
-}
+// interface Props {
+//   userName: string
+//   userStatus: '在线' | '离线' | '忙碌'
+//   version?: string
+//   avatar?: string
+// }
 
-interface Emits {
-  (e: 'show-history'): void
-  (e: 'toggle-settings'): void
-}
+// interface Emits {
+//   (e: 'show-history'): void
+//   (e: 'toggle-settings'): void
+// }
 
-const props = withDefaults(defineProps<Props>(), {
-  userName: 'AI 作词助手',
-  userStatus: '在线',
-  version: '专业版 · v2.0',
-  avatar: 'https://picsum.photos/id/64/200',
-})
+// const props = withDefaults(defineProps<Props>(), {
+//   userName: 'AI 作词助手',
+//   userStatus: '在线',
+//   version: '专业版 · v2.0',
+//   avatar: 'https://picsum.photos/id/64/200',
+// })
 
-defineEmits<Emits>()
+// defineEmits<Emits>()
 
-const statusClass = computed(() => {
-  switch (props.userStatus) {
-    case '在线':
-      return 'bg-green-500 animate-pulse'
-    case '离线':
-      return 'bg-red-500'
-    case '忙碌':
-      return 'bg-yellow-500 animate-pulse'
-    default:
-      return 'bg-gray-500'
-  }
-})
+// const statusClass = computed(() => {
+//   switch (props.userStatus) {
+//     case '在线':
+//       return 'bg-green-500 animate-pulse'
+//     case '离线':
+//       return 'bg-red-500'
+//     case '忙碌':
+//       return 'bg-yellow-500 animate-pulse'
+//     default:
+//       return 'bg-gray-500'
+//   }
+// })
 </script>

@@ -5,28 +5,30 @@
     <!-- 左侧：Logo 和搜索 -->
     <div class="flex items-center flex-1 max-w-2xl">
       <h1 class="text-xl font-bold text-white mr-6 hidden md:block">Daystream Music</h1>
-      <div class="flex items-center flex-1">
-        <search-input v-model="input" />
+      <div class="flex items-center flex-1 relative">
+        <search-input v-model="input" @click="handleModel"/>
+        <!-- 搜索下拉框 -->
+        <HotSearchList v-if="modelValue" :search-hot-list="searchHotList" :suggestList="suggestList" :keyword="input" @close="handleModel" />
       </div>
     </div>
 
     <!-- 右侧：功能按钮 -->
     <div class="flex items-center space-x-3 ml-4">
-      <router-link to="/VipExchangePage">
+      <router-link to="/vip-exchange-page">
         <button
           class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors hidden md:block"
         >
           商城
         </button>
       </router-link>
-      <router-link to="/CheckIn">
+      <router-link to="/check-in">
         <button
           class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors hidden md:block"
         >
           {{ isCheckedIn ? '已签到 ' : '签到' }}
         </button>
       </router-link>
-      <router-link to="/musician/MusicianSettleIn">
+      <router-link to="/musician/musician-settle-in">
         <button
           class="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors hidden md:block"
         >
@@ -130,6 +132,7 @@
 </template>
 
 <script lang="ts" setup>
+import { getSearchHotList, getSearchSuggestion } from '@/api/home/search/index'
 import { useUserStore } from '@/stores/user'
 import { ref  } from 'vue'
 import { useRouter } from 'vue-router'
@@ -141,29 +144,44 @@ const input = ref('')
 
 const userStore = useUserStore()
 
+const searchHotList = ref([])
+const suggestList = ref([])
+const modelValue = ref(false)
+
+const handleModel = () => {
+  modelValue.value = !modelValue.value
+}
+
 const goToAdmin = () => {
   router.push('/admin/dataStatistics')
 }
-// 后端接口返回的数据结构
-// const user = ref({
-//   id: null,
-//   username: '',
-//   avatar: '',
-//   gender: '',
-//   introduction: null,
-//   isVip: false,
-//   vipExpireTime: null,
-//   email: '',
-//   phone: null,
-//   totalPoint: 0,
-//   walletBalance: 0,
-//   createdTime: '',
-//   userRole: [] as string[],
-// })
-onMounted(() => {
-  $stomp.init()
+
+watch(input,(newVal) => {
+  console.log('输入关键字',newVal)
+  if(!newVal){
+    suggestList.value = []
+    return
+  }
+  getSearchSuggestion(newVal).then((res) => {
+    console.log('热搜联想词', res.data.suggestList)
+    suggestList.value = res.data.suggestList.map((t) => {
+      return {
+        keyword: t,
+      }
+    })
+  })
 })
 
+onMounted(() => {
+  getSearchHotList().then((res) => {
+    searchHotList.value = res.data.map((t) => {
+      return {
+        keyword: t.keyword,
+        searchCount: t.searchCount,
+      }
+    })
+  })
+})
 </script>
 
 <style lang="scss" scoped>

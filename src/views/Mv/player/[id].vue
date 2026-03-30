@@ -44,19 +44,19 @@
 
         <!-- MV信息 -->
         <div class="mt-4">
-          <h1 class="text-2xl font-bold mb-2">{{ mvDetail.name }}</h1>
+          <h1 class="text-2xl font-bold mb-2">{{ mvDetail.mvName || mvDetail.name }}</h1>
           <div class="flex items-center text-gray-400 text-sm gap-4 mb-4">
             <span
               class="text-pink-500 cursor-pointer hover:underline"
-              @click="goArtist(mvDetail.artistId)"
+              @click="goArtist(mvDetail.musicianId || mvDetail.artistId)"
             >
-              {{ mvDetail.artistName }}
+              {{ mvDetail.musicianName || mvDetail.artistName }}
             </span>
-            <span>发布时间: {{ mvDetail.publishTime }}</span>
+            <span>发布时间: {{ mvDetail.releaseTime || mvDetail.publishTime }}</span>
             <span>播放次数: {{ mvDetail.playCount }}</span>
           </div>
           <p class="text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">
-            {{ mvDetail.desc || '暂无简介' }}
+            {{ mvDetail.description || mvDetail.desc || '暂无简介' }}
           </p>
         </div>
       </div>
@@ -77,7 +77,7 @@ const mvId = ref(route.params.id as string)
 const mvUrl = ref('')
 const mvDetail = ref<any>({})
 const simiMvs = ref<any[]>([])
-const currentQuality = ref<number>(0) // 0 means not set, will hold resolution like 1080, 720
+const currentQuality = ref<number>(0) 
 const qualityList = computed(() => mvDetail.value.qualityList || [])
 
 const currentQualityLabel = computed(() => {
