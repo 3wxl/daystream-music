@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import TagBar from '@/components/TagBar.vue';
+
 import ArtistList from '@/views/artist/artist.vue';
 
 </script>
