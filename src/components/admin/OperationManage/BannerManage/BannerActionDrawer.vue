@@ -123,13 +123,13 @@
   let activeTab = ref('link');    // 当前激活的标签页
   let Data = ref(null);           // 列表数据
 
-  watch(()=>form.actionType, (newVal) => {
+  watch(()=>form.actionType, (newVal) => {      // 仅作更新抽屉标头
     if(newVal === 4) activeTab.value = 'link';
     else if(newVal === 2) activeTab.value = 'music';
     else if(newVal === 1) activeTab.value = 'playlist';
     else if(newVal === 3) activeTab.value = 'activity';
   }, { immediate: true });
-  watch(activeTab, (newVal) => {
+  watch(activeTab, (newVal) => {      // 更新表单
     if(newVal === 'link'){
       changeActionType(4)
     }

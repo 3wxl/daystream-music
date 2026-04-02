@@ -136,7 +136,7 @@ let clickType = {
 
 const modelValue = defineModel();
 
-const emit = defineEmits(['submit', 'close', 'openActionDrawer']);
+const emit = defineEmits(['submit', 'close', 'openActionDrawer','refreshList']);
 
 const isDialogOpen = computed({
   get() {
@@ -197,6 +197,14 @@ const handleClickTypeChange = (value) => {
 
 // 提交
 async function handleSubmit(){
+  if(!imgFile){
+    ElMessage.error('请上传图片！');
+    return;
+  }
+  if(!form.title || !form.sortOrder || form.actionType === null){
+    ElMessage.error('请填写完整表单！');
+    return;
+  }
   let formData = new FormData();
   formData.append('file', imgFile);
   let imgUpdateRes = await updateImage(formData);
@@ -207,12 +215,11 @@ async function handleSubmit(){
 
   }else{
     delete subForm.targetName
-    console.log(subForm)
     let addRes = await AddBannerAPI(subForm)
-    console.log(addRes)
     if(addRes.success){
       ElMessage.success('添加成功！');
-      emit('submit');
+      emit('refreshList')
+      emit('close');
     }else{
       ElMessage.error('添加失败！');
     }

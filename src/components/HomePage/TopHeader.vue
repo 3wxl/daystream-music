@@ -136,7 +136,7 @@ import { getSearchHotList, getSearchSuggestion } from '@/api/home/search/index'
 import { useUserStore } from '@/stores/user'
 import { ref  } from 'vue'
 import { useRouter } from 'vue-router'
-const $stomp:any = inject('$stomp');        // 引入stomp
+const $wsChat:any = inject('$wsChat');        // 引入wsChat
 const router = useRouter()
 const isCheckedIn = ref(window.localStorage.getItem('checkIn_status.isCheckedIn'))
 const currentWaves = ref(window.localStorage.getItem('checkIn_status.currentWaves'))
@@ -173,6 +173,7 @@ watch(input,(newVal) => {
 })
 
 onMounted(() => {
+  // $wsChat.init()
   getSearchHotList().then((res) => {
     searchHotList.value = res.data.map((t) => {
       return {

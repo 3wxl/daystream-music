@@ -63,11 +63,6 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/ws':{
-        target: 'http://39.96.214.163:8080',
-        changeOrigin: true,
-        ws: true,
-      },
       '/api': {
         target: 'http://39.96.214.163:8080',
         changeOrigin: true,

@@ -20,15 +20,16 @@
 
     <!-- 轮播图表格列表 -->
     <BannerListTable
-      :filteredBanners="filteredBanners"
       :formatDate="formatDate"
-      :isCurrentlyDisplayed="isCurrentlyDisplayed"
-      :getClickTypeText="getClickTypeText"
-      :getClickTypeTagType="getClickTypeTagType"
-      @edit="openEditDialog"
-      @delete="handleDelete"
+      :BannerList="BannerList"
       :searchKeyword="searchKeyword"
-      @searchChange="(key)=>{searchKeyword = key}"
+      :total="total"
+      @prePage="skipPage"
+      @nextPage="skipPage"
+      @clickPage="skipPage"
+      @searchChange="searchChange"
+      :page="page"
+      @refreshList="refreshList"
     />
 
     <!-- 预览组件 -->
@@ -38,13 +39,12 @@
     <BannerFormDialog
       v-model="isDialogOpen"
       :isEditMode="isEditMode"
-      :formRules="formRules"
       :mockMusics="mockMusics"
       :mockPlaylists="mockPlaylists"
-      @submit="submitForm"
       @close="closeDialog"
       @openActionDrawer="isActionDrawerOpen = true"
       v-if="isDialogOpen"
+      @refreshList="refreshList"
     />
 
     <BannerActionDrawer
@@ -63,7 +63,7 @@
   </div>
 </template>
 
-<script setup >
+<script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { ElMessage } from 'element-plus';
 
@@ -76,9 +76,11 @@ import BannerFormDialog from '@/components/admin/OperationManage/BannerManage/Ba
 import BannerActionDrawer from '@/components/admin/OperationManage/BannerManage/BannerActionDrawer.vue';
 import BannerDeleteDialog from '@/components/admin/OperationManage/BannerManage/BannerDeleteDialog.vue';
 import BannerPreview from '@/components/admin/OperationManage/BannerPreview.vue';
+import {useBannerStore} from '@/stores/admin/banner'
+import {GetBannerListAPI,SearchBannerListAPI} from '@/api/Admin/operation/banner';
+import { pa } from 'element-plus/es/locale';
 
-import {GetBannerListAPI} from '@/api/Admin/operation/banner';
-
+let { form } = useBannerStore();
 // 模拟数据
 const mockMusics = ref([
   { id: 1, name: '晴天', singer: '周杰伦', album: '叶惠美', duration: '4:29', url: 'music/1.mp3' },
@@ -113,6 +115,9 @@ const deleteId = ref(null);               // 当前正在删除的轮播图ID
 const banners = ref([]);                  // 当前展示的轮播图数据
 const BannerList = reactive([])           // 轮播图列表数据
 const filteredBanners = reactive([]);     // 根据搜索过滤后的轮播图列表
+const total = ref(0);                      // 轮播图总数
+const page = ref(1);                       // 当前页码
+
 
 const clickType = {
   0:'无点击行为',
@@ -129,8 +134,6 @@ const clickTypeText = {
   4:'链接',
 }
 
-
-
 // 工具方法
 const formatDate = (date) => {
   const d = new Date(date);
@@ -142,18 +145,40 @@ const formatDate = (date) => {
   const seconds = String(d.getSeconds()).padStart(2, '0');
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
+function resetForm(){       // 重置表单数据
+  form.title = null;
+  form.imageUrl = null;
+  form.linkUrl = null;
+  form.sortOrder = null;
+  form.status = null;
+  form.actionType = null;
+  form.targetId = null;
+  form.targetName = null;
+}
 
 // 方法
 async function getDisplayBanners(){           // 获取当前展示的四个轮播图
   let disBanRes = await GetBannerListAPI(1,4);
   banners.value = disBanRes.data.records;
-  console.log(banners.value);
 }
-async function getBannerList(pageNum,pageSize){         // 获取轮播图列表
-  let banRes = await GetBannerListAPI(pageNum,pageSize);
+async function getBannerList(pageNum,pageSize,keyword){         // 获取轮播图列表
+  let banRes = await SearchBannerListAPI(pageNum,pageSize,keyword);
   BannerList.splice(0,BannerList.length,...banRes.data.records);
+  total.value = banRes.data.total;
+  page.value = pageNum;
 }
 
+function skipPage(page:number){
+  getBannerList(page,8,searchKeyword.value)
+}
+function refreshList(){
+  getBannerList(page.value,8,searchKeyword.value)
+}
+
+function searchChange(keyword:string){
+  searchKeyword.value = keyword;
+  getBannerList(1,8,searchKeyword.value)
+}
 // 事件处理
 function openAddDialog(){         // 打开添加轮播图对话框
   isDialogOpen.value = true;
@@ -161,14 +186,14 @@ function openAddDialog(){         // 打开添加轮播图对话框
 }
 
 function closeDialog(){           // 关闭对话框
-  console.log('关闭对话框');
+  resetForm()
   isDialogOpen.value = false;
 }
 
 // 初始化
 onMounted(()=>{
   getDisplayBanners();
-  getBannerList(1,10)
+  getBannerList(1,8,'')
 })
 
 </script>
