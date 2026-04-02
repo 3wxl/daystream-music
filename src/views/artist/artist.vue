@@ -9,8 +9,8 @@
         show-play-button
         :key="item.id"
       >
-        <span class="font-bold text-lg">{{ item.data.songCount }} 单曲</span>
-        <span class="font-bold text-2xl">{{ item.data.singerName }}</span>
+        <span class="font-bold text-lg text-gray-300" style="font-size: 14px">{{ item.data.songCount }}</span>
+        <span class="font-bold text-2xl truncate w-full group-hover:block" :title="item.data.singerName">{{ item.data.singerName }}</span>
       </MusicCard>
     </div>
   </div>
@@ -18,53 +18,43 @@
 
 <script lang="ts" setup>
 import MusicCard from '@/components/MusicCard.vue'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { getAllMusician } from '@/api/artist'
+import { ElMessage } from 'element-plus'
 
-// 定义一组固定的歌手数据
-const mockArtists = [
-  { name: '周杰伦', id: 'jay-chou', songCount: 305 },
-  { name: 'Taylor Swift', id: 'taylor-swift', songCount: 200 },
-  { name: '陈奕迅', id: 'eason-chan', songCount: 450 },
-  { name: '林俊杰', id: 'jj-lin', songCount: 288 },
-  { name: 'Ariana Grande', id: 'ariana-grande', songCount: 155 },
-  { name: 'Ed Sheeran', id: 'ed-sheeran', songCount: 120 },
-  { name: '邓紫棋', id: 'gloria-tang', songCount: 110 },
-  { name: '五月天', id: 'mayday', songCount: 180 },
-  { name: 'Adele', id: 'adele', songCount: 85 },
-  { name: '李荣浩', id: 'li-ronghao', songCount: 95 },
-]
+const musicData = ref<any[]>([])
+const loading = ref(false)
 
-// 循环生成 musicData
-const musicData = ref(
-  // 为了达到 50 个卡片，我们将 mockArtists 重复几次
-  Array.from({ length: 50 }, (_, i) => {
-    // 循环使用 mockArtists 数组中的数据
-    const artistIndex = i % mockArtists.length
-    const artist = mockArtists[artistIndex]
-    const uniqueId = `${artist.id}-${Math.floor(i / mockArtists.length)}` // 确保ID唯一
-
-    // 随机调整歌曲数量，使其看起来更真实
-    const randomCount = artist.songCount + Math.floor(Math.random() * 50) - 25
-
-    return {
-      // 用于 :key，保持唯一性
-      id: uniqueId, 
-
-      // 路由指向 "artist下的id页面"
-      to: { name: 'artist-id', params: { id: artist.id } }, // 假设您的路由是 /artist/:id
-
-      data: {
-        // 使用 picsum.photos 并提供歌手ID作为 seed 来获取图片
-        // 这样同一个歌手会有一致的封面图
-        imgUrl: `https://picsum.photos/seed/${artist.id}/400/400`,
-        // 对应模板中的 <span class="font-bold text-2xl">{{ item.data.singerName }}</span>
-        singerName: artist.name, 
-        // 对应模板中的 <span class="font-bold text-lg">{{ item.data.songCount }} 单曲</span>
-        songCount: randomCount > 50 ? randomCount : 50, // 确保歌曲数量不小于一个合理的值
-      },
+const loadMusicians = async () => {
+  loading.value = true
+  try {
+    const res: any = await getAllMusician(1, 40)
+    if (res.success && res.data && res.data.records) {
+      musicData.value = res.data.records.map((artist: any) => {
+        return {
+          id: artist.id,
+          to: { name: 'artist-id', params: { id: artist.id } },
+          data: {
+            imgUrl: artist.avatar,
+            singerName: artist.stageName,
+            songCount: `${artist.fansCount || 0} 粉丝`, 
+          },
+        }
+      })
+    } else {
+      ElMessage.error(res.errorMsg || '获取歌手列表失败')
     }
-  }),
-)
+  } catch (err) {
+    console.error('获取歌手列表异常', err)
+    ElMessage.error('获取歌手列表异常')
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  loadMusicians()
+})
 </script>
 
 <style lang="scss" scoped>

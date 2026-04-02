@@ -23,7 +23,7 @@
           show-play-button
           :key="item.to"
         >
-          <span class="font-bold text-lg">{{ item.data.songCount }} 首单曲</span>
+          <span class="font-bold text-lg">{{ item.data.songCount }} 单曲</span>
           <span class="font-bold text-2xl">{{ item.data.singerName }}</span>
         </MusicCard>
       </div>
