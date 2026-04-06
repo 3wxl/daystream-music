@@ -43,13 +43,13 @@
     </div>
 
     <!-- 趋势指示器 -->
-    <div
+    <!-- <div
       class="trend-indicator flex items-center text-xs ml-2 px-3 py-1 rounded-full font-bold transition-all duration-300"
       :class="[trendClass, { 'scale-110': hovered }]"
     >
       <span>{{ trendValue }}</span>
       <span class="trend-icon ml-1">{{ trendIcon }}</span>
-    </div>
+    </div> -->
 
     <!-- 热门歌曲 -->
     <div

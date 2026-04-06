@@ -71,7 +71,10 @@ router.beforeEach(async (to, from, next) => {
       next({ path: '/' })
     } else {
       if (Object.keys(userStore.userInfo).length > 0) {
-        if((to.name as string).startsWith('admin')&&userStore.userInfo.userRole.indexOf('管理员')===-1){
+        if (
+          (to.name as string).startsWith('admin') &&
+          userStore.userInfo.userRole.indexOf('管理员') === -1
+        ) {
           next('/UserAuth')
         }
         next()
@@ -79,7 +82,10 @@ router.beforeEach(async (to, from, next) => {
         try {
           await userStore.getUsersInfo()
           const toName = (to.name || '') as string
-          if((toName as string).startsWith('admin')&&userStore.userInfo.userRole.indexOf('管理员')===-1){
+          if (
+            (toName as string).startsWith('admin') &&
+            userStore.userInfo.userRole.indexOf('管理员') === -1
+          ) {
             next('/UserAuth')
           }else if((toName as string)==('admin')&&userStore.userInfo.userRole.indexOf('管理员')!==-1){
             next('/admin/dataStatistics')

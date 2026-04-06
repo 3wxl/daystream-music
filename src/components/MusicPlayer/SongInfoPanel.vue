@@ -150,9 +150,12 @@
         </div>
       </div>
 
-      <!-- 相似歌曲 -->
       <div v-if="activeTab === 'similar'" class="p-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-48 overflow-y-auto scrollbar-hide">
+        <!-- 有相似歌曲：展示列表 -->
+        <div
+          v-if="similarSongs && similarSongs.length > 0"
+          class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-48 overflow-y-auto scrollbar-hide"
+        >
           <div
             v-for="(song, index) in similarSongs"
             :key="`song-${index}-${song.id}`"
@@ -161,8 +164,8 @@
           >
             <div class="relative flex-shrink-0">
               <img
-                :src="song.cover"
-                :alt="song.title"
+                :src="song.coverUrl"
+                :alt="song.musicName"
                 class="w-12 h-12 rounded-lg object-cover border-2 border-pink-400/10 group-hover:border-pink-400/50 transition-colors"
               />
               <div
@@ -177,16 +180,23 @@
               <h4
                 class="text-sm text-pink-400 font-medium group-hover:text-pink-300 transition-colors truncate"
               >
-                {{ song.title }}
+                {{ song.musicName }}
               </h4>
-              <p class="text-xs text-pink-300/70 mt-0.5 truncate">{{ song.singer }}</p>
               <div class="flex items-center gap-1.5 mt-1">
-                <span class="text-xs px-1.5 py-0.5 rounded-full bg-pink-400/20 text-pink-300"
-                  >{{ song.similarity }}%相似</span
-                >
+                <span class="text-xs px-1.5 py-0.5 rounded-full bg-pink-400/20 text-pink-300">{{
+                  song.musicianName
+                }}</span>
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- 没有相似歌曲：显示空状态 -->
+        <div
+          v-else
+          class="flex flex-col items-center justify-center text-pink-300/60 py-10 text-sm"
+        >
+          <span>暂时没有相似歌曲</span>
         </div>
       </div>
 
@@ -266,10 +276,9 @@ const props = defineProps({
   similarSongs: {
     type: Array as () => Array<{
       id: number | string
-      cover: string
-      title: string
-      singer: string
-      similarity: number
+      coverUrl: string
+      musicName: string
+      musicianName: string
     }>,
     default: () => [],
   },

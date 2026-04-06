@@ -124,8 +124,31 @@
           </button>
         </div>
 
-        <!-- 右侧音量控制 -->
-        <div class="flex items-center gap-2 flex-shrink-0">
+        <!-- 右侧音量控制和音质选择 -->
+        <div class="flex items-center gap-3 flex-shrink-0">
+          <!-- 音质选择 -->
+          <div class="relative group">
+            <button
+              class="px-3 py-1 rounded-full text-xs text-pink-300/80 hover:text-pink-400 hover:bg-pink-500/10 transition-colors flex items-center gap-1"
+            >
+              <span>{{ currentQuality || '标准' }}</span>
+              <i class="iconfont text-xs">▼</i>
+            </button>
+            <!-- 音质选项下拉菜单 -->
+            <div
+              class="absolute bottom-full right-0 mb-2 w-24 bg-gray-800/95 backdrop-blur-sm rounded-lg border border-pink-400/20 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50"
+            >
+              <div
+                v-for="quality in qualityOptions"
+                :key="quality"
+                class="px-3 py-2 text-xs text-pink-300/80 hover:bg-pink-500/10 hover:text-pink-400 cursor-pointer transition-colors"
+                @click="switchQuality(quality)"
+              >
+                {{ quality }}
+              </div>
+            </div>
+          </div>
+
           <button
             @click="playerStore.toggleMute"
             class="w-8 h-8 rounded-full flex items-center justify-center text-pink-300/80 hover:text-pink-400 transition-colors flex-shrink-0"
@@ -155,15 +178,106 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePlayerStore } from '@/stores/player'
+import { getMusicPlayUrl } from '@/api/music'
 
 const router = useRouter()
 const playerStore = usePlayerStore()
 
 const progressBar = ref<HTMLDivElement | null>(null)
 const volumeBar = ref<HTMLDivElement | null>(null)
+
+// 音质选项 - 从当前播放歌曲中获取
+const qualityOptions = computed(() => {
+  return playerStore.currentSong?.audioList || []
+})
+
+// 当前音质 - 从当前播放歌曲中获取
+const currentQuality = computed(() => {
+  return playerStore.currentQuality
+})
+
+// 音质映射函数
+const mapQuality = (quality: string): number => {
+  switch (quality) {
+    case '空间音频':
+      return 4
+    case '无损':
+      return 3
+    case '高清':
+      return 2
+    case '标准':
+    default:
+      return 1
+  }
+}
+
+// 切换音质
+const switchQuality = async (quality: string) => {
+  playerStore.currentQuality = quality
+  console.log('切换音质为:', quality)
+
+  // 如果当前有歌曲在播放，重新加载对应音质的版本
+  if (playerStore.currentSong) {
+    try {
+      // 获取当前歌曲信息
+      const currentSong = playerStore.currentSong
+
+      // 重新获取对应音质的播放链接
+      const res = await getMusicPlayUrl({
+        musicId: String(currentSong.id),
+        quality: mapQuality(quality),
+      })
+
+      if (res && res.success && res.data?.audioUrl) {
+        // 更新音频源
+        if (playerStore.audioInstance) {
+          const audio = playerStore.audioInstance
+          const currentTime = audio.currentTime
+
+          // 暂停并更新音频源
+          audio.pause()
+          audio.src = res.data.audioUrl
+
+          // 等待音频加载
+          await new Promise<void>((resolve, reject) => {
+            const onLoaded = () => {
+              audio.removeEventListener('canplaythrough', onLoaded)
+              audio.removeEventListener('error', onError)
+              resolve()
+            }
+
+            const onError = () => {
+              audio.removeEventListener('canplaythrough', onLoaded)
+              audio.removeEventListener('error', onError)
+              reject(new Error('音频加载失败'))
+            }
+
+            audio.addEventListener('canplaythrough', onLoaded)
+            audio.addEventListener('error', onError)
+          })
+
+          // 恢复播放进度
+          audio.currentTime = currentTime
+
+          // 如果之前在播放，继续播放
+          if (playerStore.isPlaying) {
+            await audio.play()
+          }
+
+          // 更新currentSong的音频链接
+          playerStore.currentSong.audioUrl = res.data.audioUrl
+
+          console.log('音质切换成功')
+        }
+      }
+    } catch (error) {
+      console.error('切换音质失败:', error)
+    }
+  }
+}
 
 // 修复：DOM 引用初始化
 onMounted(() => {

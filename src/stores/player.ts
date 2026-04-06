@@ -19,7 +19,7 @@ export const usePlayerStore = defineStore(
     const loop = ref(false)
     const isLiked = ref(false)
     const audioLoadingError = ref(false)
-
+    const currentQuality = ref('标准') // 当前音质
     // 播放列表
     const playList = ref<MusicVO[]>([])
     const currentIndex = ref(-1)
@@ -135,10 +135,22 @@ export const usePlayerStore = defineStore(
       }
 
       // 优先选择最高质量
-      if (audioList.includes('空间音质')) return 4
-      if (audioList.includes('无损')) return 3
-      if (audioList.includes('高清')) return 2
-      if (audioList.includes('标准')) return 1
+      if (audioList.includes('空间音质')) {
+        currentQuality.value = '空间音质'
+        return 4
+      }
+      if (audioList.includes('无损')) {
+        currentQuality.value = '无损'
+        return 3
+      }
+      if (audioList.includes('高清')) {
+        currentQuality.value = '高清'
+        return 2
+      }
+      if (audioList.includes('标准')) {
+        currentQuality.value = '标准'
+        return 1
+      }
 
       return 1 // 默认标准音质
     }
@@ -167,7 +179,6 @@ export const usePlayerStore = defineStore(
             }
           }
         }
-
         // 获取播放链接
         const res = await getMusicPlayUrl({
           musicId: String(song.id),
@@ -451,7 +462,7 @@ export const usePlayerStore = defineStore(
       currentIndex,
       audioLoadingError,
       audioInstance,
-
+      currentQuality,
       // 方法
       formatTime,
       playSong,
@@ -482,6 +493,7 @@ export const usePlayerStore = defineStore(
         'playList',
         'currentIndex',
         'audioLoadingError',
+        'currentQuality',
       ],
       storage: localStorage,
     } satisfies import('pinia-plugin-persistedstate').PersistOptions,

@@ -57,6 +57,7 @@
               @hover-leave="handleChartHoverLeave"
               @play-chart="handlePlayChart"
               @play-song="handlePlaySong"
+              @click="handleDetail(chart)"
             />
             <!-- 第二组（重复第一组，用于无缝循环） -->
             <ChartItem
@@ -77,9 +78,10 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits, watch } from 'vue'
-import ChartItem from './ChartItem.vue'
-
+import { useRouter } from 'vue-router'
+import { usePlaylistStore } from '@/stores/playList.ts'
+const router = useRouter()
+const playlistStore = usePlaylistStore()
 // 接收父组件参数
 const props = defineProps({
   charts: {
@@ -122,13 +124,22 @@ const handleChartHoverLeave = () => {
   hoveredChartIndex.value = -1
 }
 
+const handleDetail = (chart) => {
+  console.log('查看榜单详情:', chart.id)
+  if (chart.id) {
+    playlistStore.setCurrentPlaylist(chart.id)
+    router.push('/user/liked-songs-list')
+  } else {
+    ElMessage.warning('未找到榜单列表')
+  }
+}
 // 播放榜单/歌曲
 const handlePlayChart = (chart) => {
   emit('play-chart', chart)
 }
 
-const handlePlaySong = (song) => {
-  emit('play-song', song)
+const handlePlaySong = (chart, song) => {
+  emit('play-song', song, chart)
 }
 
 // 监听榜单数据变化，重置自动播放

@@ -28,7 +28,7 @@
       <MusicCardContainer :card-data="cardData" class="first-section" />
       <MusicProContainer id="second-section" class="second-section mb-40" />
 
-      <MusicianCardContainer id="third-section" class="third-section" />
+      <MusicianCardContainer :musicians="musicians" id="third-section" class="third-section" />
       <HeroSection id="four-section" class="four-section" />
 
       <ValueSection id="five-section" class="five-section" />
@@ -38,6 +38,9 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
+import { getFourMusician } from '@/api/personalCenter/musicianCenter'
+
 const isFirst = ref(true)
 const isSecond = ref(false)
 const isThird = ref(false)
@@ -257,9 +260,18 @@ const cardData = ref([
   },
 ])
 
-let observers = []
+const musicians = ref([])
 
-onMounted(() => {
+onMounted(async () => {
+  try {
+    const res = await getFourMusician()
+    if (res.success && res.data) {
+      musicians.value = res.data
+    }
+  } catch (error) {
+    console.error('获取音乐人数据失败:', error)
+  }
+
   const firstSection = document.querySelector('.first-section')
   const secondSection = document.querySelector('#second-section')
   const thirdSection = document.querySelector('#third-section')
@@ -344,6 +356,8 @@ onMounted(() => {
     sixObserver,
   ]
 })
+
+let observers = []
 
 onUnmounted(() => {
   observers.forEach((observer) => observer.disconnect())

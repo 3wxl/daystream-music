@@ -44,10 +44,8 @@
         ]"
         @click="logout"
       >
-
         <Setting class="w-5 h-5 shrink-0" />
         <span v-if="!isCollapse" class="whitespace-nowrap">退出登录</span>
-
       </router-link>
     </div>
   </div>
@@ -65,11 +63,17 @@ import {
   Setting,
   Tickets,
   User,
-  View
+  View,
 } from '@element-plus/icons-vue'
-import { ref } from 'vue'
 
 const isCollapse = ref(false)
+const userStore = useUserStore()
+// 根据用户角色动态获取个人中心路径
+const personalCenterPath = computed(() => {
+  return userStore.userInfo?.userRole === '音乐人'
+    ? '/user/musician-center'
+    : '/user/personal-center'
+})
 
 const menuItems = [
   { path: '/', title: '首页', icon: House },
@@ -80,14 +84,12 @@ const menuItems = [
   { path: '/music-ranking', title: '榜单', icon: Histogram },
   { path: '/community/CommunityDisplay', title: '社区', icon: ChatLineSquare },
   // { path: '/musician/MusicianSettleIn', title: '音乐人', icon: Service },
-  { path: '/user/personal-center', title: '个人中心', icon: User },
+  { path: personalCenterPath, title: '个人中心', icon: User },
 ]
 
 const changeCollapse = () => {
   isCollapse.value = !isCollapse.value
 }
-
-const userStore = useUserStore()
 
 const logout = () => {
   userStore.logout()

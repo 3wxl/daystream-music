@@ -50,38 +50,4 @@
   </header>
 </template>
 
-<script setup lang="ts">
-// interface Props {
-//   userName: string
-//   userStatus: '在线' | '离线' | '忙碌'
-//   version?: string
-//   avatar?: string
-// }
-
-// interface Emits {
-//   (e: 'show-history'): void
-//   (e: 'toggle-settings'): void
-// }
-
-// const props = withDefaults(defineProps<Props>(), {
-//   userName: 'AI 作词助手',
-//   userStatus: '在线',
-//   version: '专业版 · v2.0',
-//   avatar: 'https://picsum.photos/id/64/200',
-// })
-
-// defineEmits<Emits>()
-
-// const statusClass = computed(() => {
-//   switch (props.userStatus) {
-//     case '在线':
-//       return 'bg-green-500 animate-pulse'
-//     case '离线':
-//       return 'bg-red-500'
-//     case '忙碌':
-//       return 'bg-yellow-500 animate-pulse'
-//     default:
-//       return 'bg-gray-500'
-//   }
-// })
-</script>
+<script setup lang="ts"></script>

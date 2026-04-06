@@ -174,63 +174,11 @@ const similarSongs = ref<
     albumId: number
     bpm: number
     commentCount: number
-    albumName: ''
-    isVip: 0
-    musicianId: 0
+    albumName: string
+    isVip: number
+    musicianId: number
   }>
->([
-  {
-    id: 1,
-    title: 'Faded',
-    musicName: 'Faded',
-    musicianName: 'Alan Walker',
-    coverUrl: 'https://picsum.photos/id/1019/60/60',
-    similarity: 92,
-    duration: '03:32',
-    isLiked: 0,
-    likeCount: 125800,
-    albumId: 101,
-    bpm: 90,
-    commentCount: 8920,
-    albumName: '',
-    isVip: 0,
-    musicianId: 0,
-  },
-  {
-    id: 2,
-    title: 'Alone',
-    musicName: 'Alone',
-    musicianName: 'Marshmello',
-    coverUrl: 'https://picsum.photos/id/1020/60/60',
-    similarity: 88,
-    duration: '02:48',
-    isLiked: 0,
-    likeCount: 98500,
-    albumId: 102,
-    bpm: 100,
-    commentCount: 7540,
-    albumName: '',
-    isVip: 0,
-    musicianId: 0,
-  },
-  {
-    id: 3,
-    title: 'Closer',
-    musicName: 'Closer',
-    musicianName: 'The Chainsmokers/Halsey',
-    coverUrl: 'https://picsum.photos/id/1021/60/60',
-    similarity: 85,
-    duration: '04:04',
-    isLiked: 0,
-    likeCount: 156700,
-    albumId: 103,
-    bpm: 95,
-    commentCount: 12300,
-    albumName: '',
-    isVip: 0,
-    musicianId: 0,
-  },
-])
+>(null)
 
 // ==================== 歌词处理函数 ====================
 
@@ -451,7 +399,25 @@ const loadSongDetail = async () => {
         rawLyricText存在: !!data.rawLyricText,
         syncLyric长度: data.syncLyric?.length || 0,
         rawLyricText长度: data.rawLyricText?.length || 0,
+        recommendMusic存在: !!data.recommendMusic,
+        recommendMusic长度: data.recommendMusic?.length || 0,
       })
+
+      // 更新相似歌曲
+      if (
+        data.recommendMusic &&
+        Array.isArray(data.recommendMusic) &&
+        data.recommendMusic.length > 0
+      ) {
+        console.log('使用后端返回的相似歌曲')
+        similarSongs.value = data.recommendMusic.map((song) => ({
+          ...song,
+          isVip: song.isVip || 0,
+          musicianId: song.musicianId || 0,
+        }))
+      } else {
+        console.log('使用默认相似歌曲')
+      }
 
       isRawTextLyric.value = false
       if (data.syncLyric && Array.isArray(data.syncLyric) && data.syncLyric.length > 0) {
@@ -582,7 +548,6 @@ const seekToLyric = (targetSeconds: number) => {
  */
 const playSimilarSong = async (song: any) => {
   console.log('播放相似歌曲:', song.title)
-  ElMessage.success(`即将播放：${song.title}`)
 
   const mockSong: MusicVO = {
     id: song.id,
@@ -598,8 +563,9 @@ const playSimilarSong = async (song: any) => {
     likeCount: song.likeCount || 0,
     musicianId: 0,
     musicianName: song.singer,
+    audioList: song.audioList,
   }
-
+  console.log('相似歌曲信息', song)
   await playerStore.playSong(mockSong)
   activeTab.value = 'lyric'
 }

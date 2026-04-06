@@ -295,9 +295,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getFollower } from '@/api/follow'
 import type { NormalUserItem } from '@/types/follow'
+
+const router = useRouter()
 
 // 分页参数定义
 interface FollowListParams {
@@ -356,7 +359,8 @@ const filteredFans = computed(() => {
 
   return result
 })
-
+const route = useRoute()
+const userId = route.query.userId as string | undefined
 // 加载粉丝数据（核心修改：支持传递搜索关键词）
 const loadFans = async (isLoadMore = false) => {
   if ((isLoadMore && loadingMore.value) || (!isLoadMore && loading.value)) return
@@ -375,6 +379,7 @@ const loadFans = async (isLoadMore = false) => {
     const params: FollowListParams = {
       lastId: isLoadMore ? lastId.value : null,
       size: 10,
+      userId: userId || undefined,
       keyword: searchQuery.value.trim() || undefined, // 有搜索词则传递，无则不传
     }
 
@@ -492,7 +497,7 @@ const formatFollowTime = (time?: string) => {
 // 跳转粉丝主页
 const goToFanProfile = (fanId: number) => {
   console.log(`跳转到粉丝主页：${fanId}`)
-  // router.push(`/user/${fanId}`)
+  router.push(`/user/other-user/${fanId}`)
 }
 
 // 发送私信

@@ -225,8 +225,7 @@
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import PlaylistList from './components/PlaylistList.vue'
-import { getCollectPlaylists, getCreatePlaylists } from '@/api/personalCenter/index'
+import { getPlayList, getCreatePlaylists } from '@/api/personalCenter/index'
 import type {
   CollectPlaylistReq,
   CreatePlaylistReq,
@@ -236,6 +235,9 @@ import type {
 } from '@/types/personalCenter/index'
 
 const router = useRouter()
+import { useRoute } from 'vue-router'
+const route = useRoute()
+const userId = route.query.userId as string | undefined
 
 // 扩展Playlist类型
 interface Playlist extends PlaylistVO {
@@ -315,12 +317,16 @@ const notificationRef = ref<HTMLDivElement | null>(null)
 const loadCollectPlaylists = async () => {
   try {
     loading.value = true
-    const res: CollectPlaylistResp = await getCollectPlaylists(collectPagination)
+    console.log('userId:', userId)
+    const res: CollectPlaylistResp = await getPlayList({
+      ...collectPagination,
+      userId: Number(userId || 0),
+    })
     console.log('加载收藏的歌单：', res)
 
-    if (res.success && res.data) {
-      if (res.data.records && res.data.records.length > 0) {
-        const records = res.data.records
+    if (res.data) {
+      if (res.data.dateList && res.data.dateList.length > 0) {
+        const records = res.data.dateList
         collectPlaylists.value = Array.isArray(records[0])
           ? (records[0] as Playlist[])
           : (records as Playlist[])
@@ -344,7 +350,10 @@ const loadCollectPlaylists = async () => {
 const loadCreatePlaylists = async () => {
   try {
     loading.value = true
-    const res: CreatePlaylistResp = await getCreatePlaylists(createPagination)
+    const res: CreatePlaylistResp = await getCreatePlaylists({
+      ...createPagination,
+      userId: Number(userId || 0),
+    })
     console.log('加载创建的歌单：', res)
 
     if (res.success) {

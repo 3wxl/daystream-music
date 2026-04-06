@@ -11,7 +11,7 @@
       class="relative flex items-center px-5 py-3 hover:bg-gray-800/30 transition-colors group cursor-pointer justify-between"
       :class="{ 'playing-song': playerStore.currentSong && playerStore.currentSong.id === song.id }"
     >
-      <div class="flex items-center shrink-0 w-[280px]">
+      <div class="flex items-center shrink-0 w-[400px]">
         <div class="w-8 text-center text-gray-400 mr-4">
           <!-- 正在播放时根据播放状态显示播放或暂停图标，否则显示序号 -->
           <template v-if="playerStore.currentSong && playerStore.currentSong.id === song.id">
@@ -36,10 +36,10 @@
         </div>
         <!-- 封面URL补全（若后端返回相对路径，需拼接域名） -->
         <img :src="song.coverUrl" class="w-10 h-10 rounded object-cover shrink-0" alt="歌曲封面" />
-        <div class="ml-3 min-w-0">
+        <div class="ml-3 min-w-0 flex-1">
           <div class="flex items-center gap-2 mb-0.5">
             <span
-              class="text-white text-sm font-medium group-hover:text-pink-400 transition-colors truncate max-w-[150px]"
+              class="text-white text-sm font-medium group-hover:text-pink-400 transition-colors truncate"
               :class="{
                 'playing-song-text':
                   playerStore.currentSong && playerStore.currentSong.id === song.id,
@@ -53,6 +53,30 @@
                 class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-xs px-1.5 py-0.25 rounded"
               >
                 VIP
+              </span>
+            </template>
+            <!-- 渲染音质信息 -->
+            <template v-if="song.audioList && song.audioList.length > 0">
+              <span
+                v-for="(quality, index) in song.audioList"
+                :key="index"
+                :class="[
+                  'text-xs px-1.5 py-0.25 rounded mr-1 inline-block',
+                  quality === '标准'
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                    : '',
+                  quality === '高清'
+                    ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                    : '',
+                  quality === '无损'
+                    ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                    : '',
+                  quality === '空间音频'
+                    ? 'bg-yellow-300/20 text-yellow-200 border border-yellow-300/30'
+                    : '',
+                ]"
+              >
+                {{ quality }}
               </span>
             </template>
           </div>
@@ -172,8 +196,8 @@ console.log('likedSongsList.value', likedSongsList.value)
 // 新增：播放歌曲方法
 const handlePlaySong = async (song: MusicVO) => {
   try {
-    // 调用播放方法，传入当前歌曲和完整播放列表
-    console.log(song.isLiked)
+    // 调用播放方法，传入当前歌曲和完整
+    console.log('当前歌曲信息', song)
     await playerStore.playSong(song, props.likedSongs)
   } catch (error) {
     console.error('播放歌曲失败:', error)
@@ -240,14 +264,14 @@ const handleLike = async (songId: string) => {
 
 // 音质映射表
 const qualityMap = {
-  标清: 1,
+  标准: 1,
   高清: 2,
   无损: 3,
   空间音频: 4,
 }
 
 const mimeTypeMap = {
-  标清: 'audio/mpeg',
+  标准: 'audio/mpeg',
   高清: 'audio/mpeg',
   无损: 'audio/flac',
   空间音频: 'audio/mpeg',

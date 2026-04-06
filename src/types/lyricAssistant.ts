@@ -24,6 +24,7 @@ export interface Message {
       content: string
     }>
     creationIdea?: string
+    tips?: string
   }
   analysis?: {
     title: string
@@ -64,4 +65,12 @@ export interface InputState {
   value: string
   placeholder: string
   focused: boolean
+}
+
+export interface aiChatSession {
+  id: string
+  title: string
+  sessionType: number
+  createTime: string
+  updateTime: string
 }

@@ -132,6 +132,8 @@ import { ElMessage } from 'element-plus'
 import { getFollowMusician, getFollowNormal, cancelFollow } from '@/api/follow/index'
 import type { FollowListResp } from '@/types/follow/index'
 
+const route = useRoute()
+const userId = route.query.userId as string | undefined
 const router = useRouter()
 
 // 状态管理
@@ -324,6 +326,7 @@ const loadMusicians = async (isLoadMore = false) => {
     const params = {
       lastId: isLoadMore ? musicianLastId.value : null,
       size: 12, // 改成和原本页面一样
+      userId: userId || '',
     }
 
     const res = await getFollowMusician(params)
@@ -362,6 +365,7 @@ const loadUsers = async (isLoadMore = false) => {
     const params = {
       lastId: isLoadMore ? userLastId.value : null,
       size: 10,
+      userId: userId || '',
     }
 
     const res = await getFollowNormal(params)

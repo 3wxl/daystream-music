@@ -12,10 +12,24 @@
 
     <!-- 卡片区域 -->
     <div class="w-full flex flex-row justify-center gap-20 p-6 mt-10">
-      <MusicianCard />
-      <MusicianCard />
-      <MusicianCard />
-      <MusicianCard />
+      <MusicianCard
+        v-for="musician in musicians"
+        :key="musician.id"
+        :name="musician.stageName"
+        :tag="musician.representativeWork || '音乐人'"
+        :avatar="musician.avatar"
+        :shortDesc="'来自白昼音流的音乐人'"
+        :description="musician.introduction || '暂无详细介绍'"
+      />
     </div>
   </div>
 </template>
+
+<script setup>
+const props = defineProps({
+  musicians: {
+    type: Array,
+    default: () => [],
+  },
+})
+</script>

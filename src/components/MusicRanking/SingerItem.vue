@@ -1,8 +1,9 @@
 <template>
   <div
-    class="ranking-card relative overflow-hidden flex items-center p-4 h-28 rounded-2xl border border-gray-700/50 bg-gray-800/40 shadow-xl transition-all duration-400 backdrop-blur-sm group"
+    class="ranking-card relative overflow-hidden flex items-center p-4 h-28 rounded-2xl border border-gray-700/50 bg-gray-800/40 shadow-xl transition-all duration-400 backdrop-blur-sm group cursor-pointer"
     @mouseenter="handleHoverEnter"
     @mouseleave="handleHoverLeave"
+    @click="handleSingerClick"
   >
     <!-- 排名数字 -->
     <div
@@ -68,6 +69,9 @@
 <script setup>
 import { ref, defineProps } from 'vue'
 import { ElAvatar } from 'element-plus'
+import { useGoToUserPage } from '@/composables/useUserPage'
+
+const { goToUserPage } = useGoToUserPage()
 
 // 接收父组件参数
 const props = defineProps({
@@ -94,6 +98,13 @@ const handleHoverLeave = () => {
   isHovered.value = false
 }
 
+// 处理点击歌手
+const handleSingerClick = async () => {
+  if (props.singer.userId) {
+    await goToUserPage(Number(props.singer.userId))
+  }
+}
+
 // 获取排名样式类
 const getRankClass = (rank) => {
   switch (rank) {
@@ -105,28 +116,6 @@ const getRankClass = (rank) => {
       return 'bg-gradient-to-br from-amber-600 to-amber-800 text-white shadow-[0_0_25px_rgba(205,127,50,0.6)]'
     default:
       return 'bg-gradient-to-br from-pink-500 to-pink-700 text-pink-100 shadow-[0_0_25px_rgba(138,43,226,0.6)]'
-  }
-}
-
-// 获取趋势样式类
-const getTrendClass = (type) => {
-  return {
-    up: 'text-green-400 bg-green-500/15 shadow-[0_0_10px_rgba(76,175,80,0.2)]',
-    down: 'text-red-400 bg-red-500/15 shadow-[0_0_10px_rgba(244,67,54,0.2)]',
-    stable: 'text-orange-400 bg-orange-500/15 shadow-[0_0_10px_rgba(255,152,0,0.2)]',
-  }[type]
-}
-
-const getTrendIcon = (type) => {
-  switch (type) {
-    case 'up':
-      return '↑'
-    case 'down':
-      return '↓'
-    case 'stable':
-      return '→'
-    default:
-      return ''
   }
 }
 </script>
