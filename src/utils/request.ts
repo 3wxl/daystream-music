@@ -133,7 +133,6 @@ service.interceptors.response.use(
 
     const headers = response.headers
     // 测试是否携带了新的token请求头
-    console.log('响应头', headers)
     const newToken = headers['authorization'] || headers['Authorization']
     const isRefreshed = headers['token-refreshed'] || headers['Token-Refreshed']
     if (newToken && isRefreshed) {

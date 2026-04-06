@@ -3,8 +3,9 @@
     <!-- 头部操作区 -->
     <BannerHeader
       @openAddDialog="openAddDialog"
-      @refreshData="refreshData"
       @preview="isPreview = true"
+      @isEditModeFun="isEditModeFun"
+      :resetForm="resetForm"
     />
 
     <!-- 展示规则提示 -->
@@ -30,6 +31,8 @@
       @searchChange="searchChange"
       :page="page"
       @refreshList="refreshList"
+      @isEditModeFun="isEditModeFun"
+      @openUpdate="openUpdate"
     />
 
     <!-- 预览组件 -->
@@ -68,14 +71,14 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { ElMessage } from 'element-plus';
 
 // 导入子组件
-import BannerHeader from '@/components/admin/OperationManage/BannerManage/BannerHeader.vue';
-import BannerRuleTip from '@/components/admin/OperationManage/BannerManage/BannerRuleTip.vue';
-import BannerListTable from '@/components/admin/OperationManage/BannerManage/BannerListTable.vue';
-import BannerDisplayList from '@/components/admin/OperationManage/BannerManage/BannerDisplayList.vue';
-import BannerFormDialog from '@/components/admin/OperationManage/BannerManage/BannerFormDialog.vue';
-import BannerActionDrawer from '@/components/admin/OperationManage/BannerManage/BannerActionDrawer.vue';
-import BannerDeleteDialog from '@/components/admin/OperationManage/BannerManage/BannerDeleteDialog.vue';
-import BannerPreview from '@/components/admin/OperationManage/BannerPreview.vue';
+import BannerHeader from '@/components/Admin/OperationManage/BannerManage/BannerHeader.vue';
+import BannerRuleTip from '@/components/Admin/OperationManage/BannerManage/BannerRuleTip.vue';
+import BannerListTable from '@/components/Admin/OperationManage/BannerManage/BannerListTable.vue';
+import BannerDisplayList from '@/components/Admin/OperationManage/BannerManage/BannerDisplayList.vue';
+import BannerFormDialog from '@/components/Admin/OperationManage/BannerManage/BannerFormDialog.vue';
+import BannerActionDrawer from '@/components/Admin/OperationManage/BannerManage/BannerActionDrawer.vue';
+import BannerDeleteDialog from '@/components/Admin/OperationManage/BannerManage/BannerDeleteDialog.vue';
+import BannerPreview from '@/components/Admin/OperationManage/BannerPreview.vue';
 import {useBannerStore} from '@/stores/admin/banner'
 import {GetBannerListAPI,SearchBannerListAPI} from '@/api/Admin/operation/banner';
 import { pa } from 'element-plus/es/locale';
@@ -173,6 +176,7 @@ function skipPage(page:number){
 }
 function refreshList(){
   getBannerList(page.value,8,searchKeyword.value)
+  getDisplayBanners()
 }
 
 function searchChange(keyword:string){
@@ -188,6 +192,12 @@ function openAddDialog(){         // 打开添加轮播图对话框
 function closeDialog(){           // 关闭对话框
   resetForm()
   isDialogOpen.value = false;
+}
+function isEditModeFun(val:boolean){       // 设置编辑模式
+  isEditMode.value = val;
+}
+function openUpdate(){           // 打开修改抽屉
+  isDialogOpen.value = true;
 }
 
 // 初始化

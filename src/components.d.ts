@@ -29,6 +29,7 @@ declare module 'vue' {
     BackgroundParticles: typeof import('./components/MusicPlayer/BackgroundParticles.vue')['default']
     BannerActionDrawer: typeof import('./components/Admin/OperationManage/BannerManage/BannerActionDrawer.vue')['default']
     BannerAllList: typeof import('./components/admin/OperationManage/BannerManage/BannerAllList.vue')['default']
+    BannerChangeForm: typeof import('./components/Admin/OperationManage/BannerManage/BannerChangeForm.vue')['default']
     BannerDeleteDialog: typeof import('./components/Admin/OperationManage/BannerManage/BannerDeleteDialog.vue')['default']
     BannerDisplayList: typeof import('./components/Admin/OperationManage/BannerManage/BannerDisplayList.vue')['default']
     BannerFormDialog: typeof import('./components/Admin/OperationManage/BannerManage/BannerFormDialog.vue')['default']

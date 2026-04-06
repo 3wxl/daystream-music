@@ -68,7 +68,7 @@
         <template #default="scope">
           <span
             class="active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#bfdcff] inline-block bg-[#e0eeff] text-[#529FFD] py-[3px] rounded-[20px] px-[12px] cursor-pointer mr-4 text-[15px]"
-            @click="updateUserInfo(scope.row.id);updateId = scope.row.id;"
+            @click.prevent="updateBannerInfo(scope.row.id);"
           >
             <IconFontSymbol name="xiugai" size="18px"></IconFontSymbol>
             修改
@@ -116,7 +116,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import {debounce} from "@/utils/debounceThrottle"
-import {DeleteBannerAPI,BatchDeleteBannerAPI} from "@/api/Admin/operation/banner";     // 删除轮播图API
+import {DeleteBannerAPI,BatchDeleteBannerAPI,GetBannerDetailAPI} from "@/api/Admin/operation/banner";     // 删除轮播图API
+import {useBannerStore} from '@/stores/admin/banner'
 
 const props = defineProps({
   BannerList: { type: Array, default: () => [] },
@@ -125,14 +126,13 @@ const props = defineProps({
   page:{ type: Number, default: 1 }
 })
 
-const emit = defineEmits(['searchChange', 'prePage', 'clickPage', 'nextPage','refreshList'])
+const emit = defineEmits(['searchChange', 'prePage', 'clickPage', 'nextPage','refreshList','isEditModeFun','openUpdate'])
 
 // 搜索关键字
 const searchKeywordT = ref("")
 let isShowDel = ref(false);         // 是否显示删除确认对话框
 let isShowDelList = ref(false);     // 是否显示批量删除确认对话框
 let nowId = ref(null);              // 当前删除的轮播图ID
-let updateId = ref(null);           // 当前修改的轮播图ID
 let ids: number[] = [];                  // 批量删除的轮播图ID列表
 // 全选事件（空实现）
 const handleSelectionChange = (val: any[]) => {
@@ -158,7 +158,7 @@ async function DeleteBannerFun(){       // 删除轮播图
   isShowDel.value = false;
   emit('refreshList');
 }
-async function deleteSelect(){
+async function deleteSelect(){      // 批量删除轮播图
   if(ids.length === 0) {
     ElMessage.warning('请先选择要删除的轮播图');
     isShowDelList.value = false;
@@ -168,6 +168,21 @@ async function deleteSelect(){
   ElMessage.success('删除成功');
   isShowDelList.value = false;
   emit('refreshList');
+}
+
+async function updateBannerInfo(id:number){     // 修改轮播图信息
+  const bannerInfo:any = await GetBannerDetailAPI(id);
+  let form = useBannerStore()?.form;
+  form.title = bannerInfo.data.title;
+  form.imageUrl = bannerInfo.data.imageUrl;
+  form.linkUrl = bannerInfo.data.linkUrl;
+  form.sortOrder = bannerInfo.data.sortOrder;
+  form.status = bannerInfo.data.status;
+  form.actionType = bannerInfo.data.actionType;
+  form.targetId = bannerInfo.data.targetId;
+  form.id = id
+  await emit('isEditModeFun', true);
+  emit('openUpdate');
 }
 
 onMounted(()=>{

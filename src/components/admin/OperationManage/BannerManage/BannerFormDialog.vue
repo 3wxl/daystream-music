@@ -43,7 +43,7 @@
           </el-upload>
           <p class="text-xs text-gray-500">支持 JPG、PNG 格式，建议尺寸 1920×500px</p>
         </div>
-        <div v-if="imgFile" class="mt-3 w-full h-40 bg-gray-50 rounded flex items-center justify-center overflow-hidden">
+        <div v-if="imgFileUrl" class="mt-3 w-full h-40 bg-gray-50 rounded flex items-center justify-center overflow-hidden">
           <img :src="imgFileUrl" alt="预览图" class="max-w-full max-h-full object-contain" />
         </div>
       </el-form-item>
@@ -108,7 +108,7 @@ import { Setting } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import {useBannerStore} from '@/stores/admin/banner'
 import {updateImage} from '@/api/community/ImageOperate'
-import {AddBannerAPI} from '@/api/Admin/operation/banner'
+import {AddBannerAPI,UpdateBannerAPI} from '@/api/Admin/operation/banner'
 
 // 数据
 const props = defineProps({
@@ -133,6 +133,7 @@ let clickType = {
   1: '跳转歌单',
   3: '跳转秒杀活动'
 }
+let isUpdateImg = ref(false);    // 是否修改了图片
 
 const modelValue = defineModel();
 
@@ -153,6 +154,21 @@ let imgFile;
 const imgFileUrl = ref(null);
 const uploadFileList = ref([]);
 const isSubmitting = ref(false);
+watch(
+  () => form.imageUrl,
+  (newImageUrl) => {
+    imgFileUrl.value = newImageUrl || null;
+    if (newImageUrl) {
+      uploadFileList.value = [{
+        name: 'current-image',
+        url: newImageUrl
+      }];
+    } else {
+      uploadFileList.value = [];
+    }
+  },
+  { immediate: true }
+);
 
 const handleImageChange = (file, fileList) => {       //
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
@@ -163,6 +179,7 @@ const handleImageChange = (file, fileList) => {       //
     }
     return;
   }
+  isUpdateImg.value = true;
   imgFile = file.raw;
   // 读取文件并更新预览
   const reader = new FileReader();
@@ -197,7 +214,7 @@ const handleClickTypeChange = (value) => {
 
 // 提交
 async function handleSubmit(){
-  if(!imgFile){
+  if(!imgFile&&isUpdateImg.value){
     ElMessage.error('请上传图片！');
     return;
   }
@@ -205,16 +222,29 @@ async function handleSubmit(){
     ElMessage.error('请填写完整表单！');
     return;
   }
-  let formData = new FormData();
-  formData.append('file', imgFile);
-  let imgUpdateRes = await updateImage(formData);
   let subForm = toRaw(useBannerStore().form);
-  subForm.imageUrl = imgUpdateRes.data;
+  if(isUpdateImg.value){
+    let formData = new FormData();
+    formData.append('file', imgFile);
+    let imgUpdateRes = await updateImage(formData);
+    subForm.imageUrl = imgUpdateRes.data;
+  }else{
+    subForm.imageUrl = form.imageUrl;
+  }
   subForm.status = 0;
   if(props.isEditMode){
-
+    delete subForm.targetName
+    let res = await UpdateBannerAPI(subForm)
+    if(res.success){
+      ElMessage.success('修改成功！');
+      emit('refreshList')
+      emit('close');
+    }else{
+      ElMessage.error('修改失败！');
+    }
   }else{
     delete subForm.targetName
+    delete subForm.id
     let addRes = await AddBannerAPI(subForm)
     if(addRes.success){
       ElMessage.success('添加成功！');
@@ -225,7 +255,4 @@ async function handleSubmit(){
     }
   }
 }
-onMounted(()=>{
-
-})
 </script>

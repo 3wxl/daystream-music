@@ -19,7 +19,7 @@ export const initStomp = () => {
   }
 
   isConnecting = true;
-  const wsUrl = `ws://39.96.214.163:8080/chat?token=${encodeURIComponent(token)}`;
+  const wsUrl = `ws://39.96.214.163:8080/ws/chat?token=${encodeURIComponent(token)}`;
   wsClient = new WebSocket(wsUrl);
 
   wsClient.onopen = (event) => {

@@ -1,11 +1,11 @@
 <template>
   <div class="flex justify-between">
-    <span class="text-[18px] font-700 ml-2">{{musicianManageStore.type==='0'?'音乐人审核':musicianManageStore.type==='1'?'已通过音乐人':'已驳回音乐人'}}</span>
+    <span class="text-[18px] font-700 ml-2">{{musicianType===0?'音乐人审核':musicianType===1?'已通过音乐人':'已驳回音乐人'}}</span>
     <div class="flex mr-8">
-      <el-tooltip content="通过所选的音乐人申请" v-if="musicianManageStore.type==='0'||musicianManageStore.type==='2'">
+      <el-tooltip content="通过所选的音乐人申请" v-if="musicianType===0||musicianType===2">
         <IconFontSymbol name="quanbutongguo" class="text-[#666] font-700 relative top-[3px] cursor-pointer duration-[0.3s] hover:text-[#529FFD] mr-4"></IconFontSymbol>
       </el-tooltip>
-      <el-tooltip content="驳回所选音乐人申请" v-if="musicianManageStore.type==='0'||musicianManageStore.type==='1'">
+      <el-tooltip content="驳回所选音乐人申请" v-if="musicianType===0||musicianType===1">
         <IconFontSymbol name="quanbubohui" class="text-[#666] font-700 relative top-[3px] cursor-pointer hover:text-red-700 mr-4"></IconFontSymbol>
       </el-tooltip>
       <el-tooltip content="删除所选音乐人记录">
@@ -17,18 +17,18 @@
     </div>
   </div>
   <div class="user-table w-full mt-4">
-    <el-table v-if="musicianManageStore.type==='0'" :data="musicianManageStore.musicianList_0" stripe >
+    <el-table v-if="musicianType===0" :data="musicianList_0" stripe >
       <el-table-column type="selection" width="55" align="center" class="ml-3"/>
       <el-table-column label="头像" width="130" align="center">
         <template #default="scope">
           <div class="flex justify-center relative cursor-pointer">
-            <img :src="scope.row.avatar" alt="头像" class="m-1 w-[50px] h-[50px] rounded-[6px]">
+            <img :src="scope.row.avatar" alt="头像" class="m-1 w-[50px] h-[50px] rounded-[6px] object-cover">
           </div>
         </template>
       </el-table-column>
       <el-table-column label="艺名" width="200" align="center">
         <template #default="scope">
-          <span>{{ scope.row.name }}</span>
+          <span>{{ scope.row.nickname }}</span>
         </template>
       </el-table-column>
       <el-table-column label="简介" width="240" align="center">
@@ -43,14 +43,14 @@
       </el-table-column>
       <el-table-column label="申请时间" width="200" align="center">
         <template #default="scope">
-          <span>{{ scope.row.applyTime }}</span>
+          <span>{{ scope.row.createdTime }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center">
         <template #default="scope">
           <span
             class="mr-3 active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#bfdcff] inline-block bg-[#e0eeff] text-[#529FFD] py-[3px] rounded-[20px] px-[12px] cursor-pointer text-[14px]"
-            @click="showDetail = true"
+            @click="showDetailFun(scope.row)"
           >
             <IconFontSymbol name="robot-3-line" size="18px"></IconFontSymbol>
             详情
@@ -72,18 +72,18 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-table v-if="musicianManageStore.type==='1'" :data="musicianManageStore.musicianList_1" stripe >
+    <el-table v-if="musicianType===1" :data="musicianList_1" stripe >
       <el-table-column type="selection" width="55" align="center" class="ml-3"/>
       <el-table-column label="头像" width="130" align="center">
         <template #default="scope">
           <div class="flex justify-center relative cursor-pointer">
-            <img :src="scope.row.avatar" alt="头像" class="m-1 w-[50px] h-[50px] rounded-[6px]">
+            <img :src="scope.row.avatar" alt="头像" class="m-1 w-[50px] h-[50px] rounded-[6px] object-cover">
           </div>
         </template>
       </el-table-column>
       <el-table-column label="艺名" width="200" align="center">
         <template #default="scope">
-          <span>{{ scope.row.name }}</span>
+          <span>{{ scope.row.nickname }}</span>
         </template>
       </el-table-column>
       <el-table-column label="简介" width="240" align="center">
@@ -98,40 +98,33 @@
       </el-table-column>
       <el-table-column label="入驻时间" width="200" align="center">
         <template #default="scope">
-          <span>{{ scope.row.joinTime }}</span>
+          <span>{{ scope.row.createdTime }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center">
         <template #default="scope">
           <span
             class="mr-3 active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#bfdcff] inline-block bg-[#e0eeff] text-[#529FFD] py-[3px] rounded-[20px] px-[12px] cursor-pointer text-[14px]"
-            @click="showMusicianDetail = true"
+            @click="showMusicianDetailFun(scope.row)"
           >
             <IconFontSymbol name="robot-3-line" size="18px"></IconFontSymbol>
             详情
           </span>
-          <span
-            class="active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#ffbfbf] inline-block bg-[#ffe0e0] text-[#fd5252] py-[3px] rounded-[20px] px-[12px] cursor-pointer text-[14px]"
-            @click=""
-          >
-            <IconFontSymbol name="bohui" size="15px"></IconFontSymbol>
-            删除
-          </span>
         </template>
       </el-table-column>
     </el-table>
-    <el-table v-if="musicianManageStore.type==='2'" :data="musicianManageStore.musicianList_2" stripe >
+    <el-table v-if="musicianType===2" :data="musicianList_2" stripe >
       <el-table-column type="selection" width="55" align="center" class="ml-3"/>
       <el-table-column label="头像" width="130" align="center">
         <template #default="scope">
           <div class="flex justify-center relative cursor-pointer">
-            <img :src="scope.row.avatar" alt="头像" class="m-1 w-[50px] h-[50px] rounded-[6px]">
+            <img :src="scope.row.avatar" alt="头像" class="m-1 w-[50px] h-[50px] rounded-[6px] object-cover">
           </div>
         </template>
       </el-table-column>
       <el-table-column label="艺名" width="200" align="center">
         <template #default="scope">
-          <span>{{ scope.row.name }}</span>
+          <span>{{ scope.row.nickname }}</span>
         </template>
       </el-table-column>
       <el-table-column label="简介" width="240" align="center">
@@ -146,12 +139,12 @@
       </el-table-column>
       <el-table-column label="驳回时间" width="200" align="center">
         <template #default="scope">
-          <span>{{ scope.row.rejectTime }}</span>
+          <span>{{ scope.row.createdTime }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center">
         <template #default="scope">
-          <span class="text-[#529FFD] cursor-pointer" @click="showDetail = true">
+          <span class="text-[#529FFD] cursor-pointer" @click="showDetailFun(scope.row)">
             <IconFontSymbol name="robot-3-line" size="17px"></IconFontSymbol>
             详情
           </span>
@@ -170,22 +163,64 @@
       <el-pagination
         background
         layout="prev, pager, next ,jumper"
-        :total="100"
+        :total="total"
         :default-page-size="8"
+        @current-change="(page) => emit('pageSkip',page)"
+        @prev-click="(page) => emit('pageSkip',page)"
+        @next-click="(page) => emit('pageSkip',page)"
       />
     </div>
   </div>
-  <MusicianApplyCard v-model="showDetail">
+  <MusicianApplyCard
+    v-model="showDetail"
+    :musicianData="musicianData"
+  >
   </MusicianApplyCard>
-  <MusicianDetailCard v-model="showMusicianDetail">
+  <MusicianDetailCard
+    v-model="showMusicianDetail"
+    :musicianData="musicianData"
+  >
   </MusicianDetailCard>
 </template>
 
 <script setup lang="ts">
-  import {useMusicianManageStore} from '@/stores/admin/musicianManage'
-  let musicianManageStore = useMusicianManageStore()
+  const props = defineProps({
+    musicianType:{
+      type: Number,
+      default: 0
+    },
+    musicianList_0:{
+      type: Array,
+      default: []
+    },
+    musicianList_1:{
+      type: Array,
+      default: []
+    },
+    musicianList_2:{
+      type: Array,
+      default: []
+    },
+    total:{
+      type: Number,
+      default: 0
+    },
+  })
+  const emit = defineEmits(['pageSkip'])
+  // 数据
+
   let showDetail = ref(false)
   let showMusicianDetail = ref(false)
+  let musicianData = ref({})
+  // 方法
+  function showDetailFun(obj:any){      // 对于未审核通过的音乐人，点击查看详情
+    musicianData.value = obj
+    showDetail.value = true
+  }
+  function showMusicianDetailFun(obj:any){      // 对于已审核通过的音乐人，点击查看详情
+    musicianData.value = obj
+    showMusicianDetail.value = true
+  }
 </script>
 
 <style scoped>

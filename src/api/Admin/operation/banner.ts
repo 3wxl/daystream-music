@@ -45,3 +45,20 @@ export function BatchDeleteBannerAPI(array:number[]) {
     { isParams: false }
   )
 }
+
+// 获取轮播图详情
+export function GetBannerDetailAPI(id:number) {
+  return request(
+    `/operations/banner/${id}`,
+    'get'
+  )
+}
+
+// 修改轮播图
+export function UpdateBannerAPI(data:any) {
+  return request(
+    `/operations/banner`,
+    'put',
+    data
+  )
+}
