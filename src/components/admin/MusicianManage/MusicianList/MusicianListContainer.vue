@@ -26,7 +26,7 @@
           <span>{{ scope.row.nickname }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="简介" width="240" align="center">
+      <el-table-column label="简介" width="320" align="center">
         <template #default="scope">
           <span class="line-clamp-2">{{ scope.row.introduction }}</span>
         </template>
@@ -36,19 +36,35 @@
           <span>{{ scope.row.email }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="入驻时间" width="200" align="center">
+      <el-table-column label="状态" width="100" align="center">
         <template #default="scope">
-          <span>{{ scope.row.createdTime }}</span>
+          <span
+            class="cursor-pointer bg-[#c8f2d1] text-[#37D159] rounded-[16px] py-1.5 px-[18px] border-[1px] border-solid border-transparent text-[12px] inline-block font-[700] text-center"
+            v-show="scope.row.status===0"
+            @click="banMusician(scope.row.id)"
+          >启用</span>
+          <span
+            class="cursor-pointer bg-[#ffd4cb] text-[#FF6746] rounded-[16px] py-1.5 px-[18px] border-[1px] border-solid border-transparent text-[12px] inline-block font-[700] text-center"
+            v-show="scope.row.status===2"
+            @click="banMusician(scope.row.id)"
+          >禁用</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center">
         <template #default="scope">
           <span
-            class="active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#bfdcff] inline-block bg-[#e0eeff] text-[#529FFD] py-[3px] rounded-[20px] px-[12px] cursor-pointer text-[14px]"
-            @click="showMusicianDetailFun(scope.row)"
+            class="active:scale-[0.97] mr-3 duration-150 hover:shadow-xl hover:shadow-[#bfdcff] inline-block bg-[#e0eeff] text-[#529FFD] py-[3px] rounded-[20px] px-[12px] cursor-pointer text-[14px]"
+            @click="showMusicianDetailFun(scope.row.id)"
           >
             <IconFontSymbol name="robot-3-line" size="18px"></IconFontSymbol>
             详情
+          </span>
+          <span
+            class="active:scale-[0.97] ml-3 duration-150 hover:shadow-xl hover:shadow-[#ffc3bf] inline-block bg-[#ffe4e0] text-[#fd5252] py-[3px] rounded-[20px] px-[12px] cursor-pointer text-[14px]"
+            @click="showMusicianDetailFun(scope.row)"
+          >
+            <IconFontSymbol name="shanchu" size="18px"></IconFontSymbol>
+            删除
           </span>
         </template>
       </el-table-column>
@@ -65,16 +81,10 @@
       />
     </div>
   </div>
-  <MusicianApplyCard
-    v-model="showDetail"
-    :musicianData="musicianData"
-  >
-  </MusicianApplyCard>
-  <MusicianDetailCard
+  <MusicianListDetailCard
     v-model="showMusicianDetail"
     :musicianData="musicianData"
-  >
-  </MusicianDetailCard>
+  />
   <AdminConfirm
     v-model="isShowDeleteMusician"
     width="470px"
@@ -87,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-  import {} from '@/api/Admin/musicianAudit'
+  import {GetMusicianDetailApi,BanMusicianApi} from '@/api/Admin/musicianAudit'
   const props = defineProps({
     musicianType:{
       type: Number,
@@ -105,22 +115,32 @@
   const emit = defineEmits(['pageSkip', 'refresh'])
   // 数据
 
-  let showDetail = ref(false)
   let showMusicianDetail = ref(false)
-  let musicianData = ref({})
+  let musicianData:any = ref({})
   let nowSelectIds:any = ref([])            // 当前选中的音乐人id列表
   let isShowDeleteMusician = ref(false)     // 是否显示删除所选音乐人弹框
 
 
-  function showMusicianDetailFun(obj:any){      // 对于已审核通过的音乐人，点击查看详情
-    musicianData.value = obj
-    showMusicianDetail.value = true
+  async function showMusicianDetailFun(id:any){      // 点击查看详情
+    let res = await GetMusicianDetailApi(id)
+    if(res.success){
+      musicianData.value = res.data
+      showMusicianDetail.value = true
+    }
   }
   function handleSelectionChange(val:any){   // 选择框变化回调
     nowSelectIds.value = val.map((item:any)=>item.id)
   }
   async function deleteSelectMusician(){
 
+  }
+  async function banMusician(id:string){
+    let res = await BanMusicianApi(id)
+    if(res.success){
+      console.log(res)
+      emit('refresh')
+      ElMessage.success('操作成功')
+    }
   }
 </script>
 

@@ -37,3 +37,19 @@ export function GetMusicianListApi(data:{nameKey?:string,status:number,pageNum:n
     data
   )
 }
+
+// 获取音乐人详情
+export function GetMusicianDetailApi(id:string){
+  return request(
+    `/adminMusician/detailMusician?musicianId=${id}`,
+    'get'
+  )
+}
+
+// 封禁音乐人
+export function BanMusicianApi(id:string){
+  return request(
+    `/adminMusician/banMusician?musicianId=${id}`,
+    'get'
+  )
+}

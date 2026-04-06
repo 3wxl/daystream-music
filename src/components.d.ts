@@ -152,6 +152,7 @@ declare module 'vue' {
     MusicianJoin: typeof import('./components/MusicianCenter/MusicianJoin.vue')['default']
     MusicianJoinSteps: typeof import('./components/musician-join/MusicianJoinSteps.vue')['default']
     MusicianListContainer: typeof import('./components/Admin/MusicianManage/MusicianList/MusicianListContainer.vue')['default']
+    MusicianListDetailCard: typeof import('./components/Admin/MusicianManage/MusicianList/MusicianListDetailCard.vue')['default']
     MusicianListHeader: typeof import('./components/Admin/MusicianManage/MusicianList/MusicianListHeader.vue')['default']
     MusicianNumDataCard: typeof import('./components/Admin/DataStatistics/MusicianNumDataCard.vue')['default']
     MusicListItem: typeof import('./components/MusicListItem.vue')['default']
