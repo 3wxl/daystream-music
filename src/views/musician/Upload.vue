@@ -184,28 +184,37 @@
     >
       <div class="p-4">
         <div class="animate-fade-in">
-          <div
-            class="border-2 border-dashed border-gray-700 rounded-xl p-8 text-center hover:border-pink-500/50 hover:bg-pink-500/5 transition-all cursor-pointer mb-6"
-            @click="triggerFileSelect"
-          >
-            <input
-              type="file"
-              ref="audioInput"
-              class="hidden"
-              accept=".mp3,.wav"
-              @change="onAudioFileChange"
-            />
-            <div v-if="!audioFile">
-              <i class="fa fa-cloud-upload text-4xl text-gray-500 mb-2"></i>
-              <p class="text-sm font-medium text-gray-300">点击上传音频</p>
-              <p class="text-xs text-gray-500 mt-1">支持 MP3, WAV (Max 50MB)</p>
-            </div>
-            <div v-else>
-              <i class="fa fa-check-circle text-4xl text-green-500 mb-2"></i>
-              <p class="text-white">已选择: {{ audioFile.name }}</p>
-              <button @click.stop="audioFile = null" class="text-xs text-red-400 mt-2 underline">
-                移除
-              </button>
+          <div class="grid grid-cols-2 gap-4 mb-6">
+            <div
+              v-for="(label, key) in qualityLabels"
+              :key="key"
+              class="border-2 border-dashed border-gray-700 rounded-xl p-4 text-center hover:border-pink-500/50 hover:bg-pink-500/5 transition-all cursor-pointer relative"
+              @click="triggerQualitySelect(key)"
+            >
+              <input
+                type="file"
+                :ref="(el) => (qualityRefs[key] = el)"
+                class="hidden"
+                accept=".mp3,.wav,.flac"
+                @change="(e) => onQualityFileChange(key, e)"
+              />
+              <div v-if="!audioFiles[key]">
+                <i class="fa fa-cloud-upload text-2xl text-gray-500 mb-1"></i>
+                <p class="text-xs font-medium text-gray-300">{{ label }}</p>
+                <p class="text-[10px] text-gray-500">点击上传</p>
+              </div>
+              <div v-else>
+                <i class="fa fa-check-circle text-2xl text-green-500 mb-1"></i>
+                <p class="text-[10px] text-white truncate px-2" :title="audioFiles[key].name">
+                  {{ audioFiles[key].name }}
+                </p>
+                <button
+                  @click.stop="audioFiles[key] = null"
+                  class="text-[10px] text-red-400 mt-1 underline"
+                >
+                  移除
+                </button>
+              </div>
             </div>
           </div>
 
@@ -300,9 +309,9 @@
                 >
                   <el-option
                     v-for="album in myAlbums"
-                    :key="album.id"
-                    :label="album.albumName"
-                    :value="album.id"
+                    :key="album.idStr || album.id"
+                    :label="album.albumName || album.name"
+                    :value="album.idStr || album.id"
                   />
                 </el-select>
               </el-form-item>
@@ -398,14 +407,24 @@ const audioForm = reactive({
   tags: [] as any[],
 })
 
-const availableTags = ref<any[]>([])
-const myAlbums = ref<any[]>([])
-const loadingAlbums = ref(false)
+const qualityLabels: Record<string, string> = {
+  standard: '标清音质',
+  highDefinition: '高清音质',
+  lossless: '无损',
+  spatialAudio: '空间音频',
+}
 
-const audioInput = ref<HTMLInputElement | null>(null)
+const audioFiles = reactive<Record<string, File | null>>({
+  standard: null,
+  highDefinition: null,
+  lossless: null,
+  spatialAudio: null,
+})
+
+const qualityRefs = reactive<Record<string, any>>({})
+
 const coverInput = ref<HTMLInputElement | null>(null)
 const lyricInput = ref<HTMLInputElement | null>(null)
-const audioFile = ref<File | null>(null)
 const coverFile = ref<File | null>(null)
 const lyricFile = ref<File | null>(null)
 const coverPreview = ref('')
@@ -433,9 +452,9 @@ const fetchTags = async () => {
 const fetchAlbums = async () => {
   loadingAlbums.value = true
   try {
-    const res = await getMyAlbums()
+    const res = await getMyAlbums(1,40)
     if (res.success && res.data) {
-      myAlbums.value = res.data
+      myAlbums.value = res.data.records
     }
   } catch (error) {
     console.error('获取专辑失败:', error)
@@ -443,6 +462,10 @@ const fetchAlbums = async () => {
     loadingAlbums.value = false
   }
 }
+
+const availableTags = ref<any[]>([])
+const myAlbums = ref<any[]>([])
+const loadingAlbums = ref(false)
 
 const toggleTag = (tag: any) => {
   const index = audioForm.tags.indexOf(tag.id)
@@ -456,16 +479,18 @@ const toggleTag = (tag: any) => {
   }
 }
 
-const triggerFileSelect = () => {
-  audioInput.value?.click()
+const triggerQualitySelect = (key: string) => {
+  qualityRefs[key]?.click()
 }
 
-const onAudioFileChange = (e: Event) => {
+const onQualityFileChange = (key: string, e: Event) => {
   const files = (e.target as HTMLInputElement).files
   if (files && files[0]) {
-    audioFile.value = files[0]
+    audioFiles[key] = files[0]
   }
 }
+
+// 移除旧的单文件处理逻辑
 
 const triggerCoverSelect = () => {
   coverInput.value?.click()
@@ -491,9 +516,12 @@ const onLyricFileChange = (e: Event) => {
 }
 
 const handleUpload = async () => {
-  if (!audioFile.value) {
-    return ElMessage.warning('请选择音频文件')
+  // 检查是否至少选择了一个音质
+  const selectedQualities = Object.keys(audioFiles).filter(key => audioFiles[key] !== null)
+  if (selectedQualities.length === 0) {
+    return ElMessage.warning('请至少选择一种音质的音频文件')
   }
+
   if (!coverFile.value) {
     ElMessage.warning('请选择歌曲封面')
     return
@@ -516,7 +544,7 @@ const handleUpload = async () => {
     // 构造元数据 musicDTO
     const musicMetadata = {
       musicName: audioForm.musicName,
-      albumId: audioForm.albumId ? Number(audioForm.albumId) : null,
+      albumId: audioForm.albumId || null, // 不强制转 Number，避免大数精度丢失
       bpm: Number(audioForm.bpm),
       licenseType: audioForm.licenseType,
       isVip: Number(audioForm.isVip),
@@ -524,49 +552,50 @@ const handleUpload = async () => {
       tags: audioForm.tags,
     }
 
-    // 调试 调试 调试 调试  此处显示参数有误 有误
-    console.log('musicDTO:', JSON.stringify(musicMetadata, null, 2))
+    // 调试输出
+    console.log('musicDTO:', JSON.stringify(musicMetadata))
 
-    // 显式声明 musicDTO 的 Content-Type 为 application/json
-    formData.append(
-      'musicDTO',
-      new Blob([JSON.stringify(musicMetadata)], { type: 'application/json' })
-    )
+    // 文档中指定musicDTO为json格式
+    const musicJsonBlob = new Blob([JSON.stringify(musicMetadata)],
+    {type:'application/json'}
+  )
+    formData.append('musicDTO', musicJsonBlob)
 
-    // 2. 封面部分
-    formData.append('cover', coverFile.value)
-
-    // 3. 音频部分 (将原本写死的 standard 改为 highDefinition，320kbps 音频在 standard 通道会被后端拒绝)
-    // 后续需要补充音质下拉框-------------
-    if (audioFile.value) {
-      formData.append('highDefinition', audioFile.value, audioFile.value.name)
-    }
+    // 3. 追加所有选中的音质文件
+    selectedQualities.forEach((key) => {
+      if (audioFiles[key]) {
+        formData.append(key, audioFiles[key] as File)
+      }
+    })
 
     // 4. 歌词部分
     if (lyricFile.value) {
       formData.append('lyric', lyricFile.value)
     }
+ box
 
     const res = await uploadMusic(formData)
     if (res.success) {
       ElMessage.success('上传成功，进入审核流程')
       showUploadDialog.value = false
-      // 重置
-      audioFile.value = null
+      // 重置所有文件和表单
+      Object.keys(audioFiles).forEach(key => audioFiles[key] = null)
       coverFile.value = null
       coverPreview.value = ''
+      lyricFile.value = null
       Object.assign(audioForm, {
         musicName: '',
         isVip: 0,
         price: '',
         bpm: 120,
-        licenseType: 'original',
-        lyric: '',
+        licenseType: 'CC-BY',
         albumId: '',
+        tags: [],
       })
     }
   } catch (error) {
     console.error('Upload failed:', error)
+    ElMessage.error('上传音频文件音质不符')
   }
 }
 </script>

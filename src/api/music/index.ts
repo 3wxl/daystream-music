@@ -47,7 +47,7 @@ export function uploadMusic(data: FormData) {
 }
 
 
-// 分页查询我的音乐作品 
+// 分页查询我的音乐作品
 export function getMyMusicList(pageNum: number, pageSize: number) {
   return request<any>('/musician/home/getMyMusic', 'post', {
     pageNum,
@@ -56,6 +56,6 @@ export function getMyMusicList(pageNum: number, pageSize: number) {
 }
 
 // 获取我的专辑列表
-export function getMyAlbums() {
-  return request<any[]>('/music/albums', 'get')
+export function getMyAlbums(pageNum:number,pageSize:number) {
+  return request<any[]>('/music/albums', 'get',{pageNum,pageSize})
 }

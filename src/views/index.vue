@@ -6,10 +6,10 @@
 
     <section class="main-header px-10">
       <div class="card-row">
-        <MusicCard :to="recommendData.to" :imgUrl="recommendData.data.imgUrl" variant="recommend">
+        <MusicCard to="/daily-recommend" imgUrl="https://picsum.photos/seed/recommend/400/400" variant="recommend">
           <h3 class="text-xl font-bold mb-2">每日推荐</h3>
           <ul class="text-sm space-y-1 opacity-90">
-            <li v-for="song in recommendData.data.list" :key="song.songName">
+            <li v-for="song in recommendSongsList" :key="song.id" class="truncate">
               {{ song.songName }}
             </li>
           </ul>
@@ -21,9 +21,9 @@
           :img-url="item.data.imgUrl"
           variant="artist"
           show-play-button
-          :key="item.to"
+          :key="item.id"
         >
-          <span class="font-bold text-lg">{{ item.data.songCount }} 首单曲</span>
+          <span class="font-bold text-lg">{{ item.data.songCount }}</span>
           <span class="font-bold text-2xl">{{ item.data.singerName }}</span>
         </MusicCard>
       </div>
@@ -76,6 +76,7 @@
 </template>
 
 <script lang="ts" setup>
+import { getAllMusician } from '@/api/artist'
 import { getAlbum } from '@/api/album'
 import { getRecommendMusic } from '@/api/home'
 import { getAllTags } from '@/api/playlist'
@@ -89,53 +90,82 @@ defineOptions({
   name: 'HomeIndex',
 })
 
-let rawData = ref([])
-let listData = ref([])
-const tagsData = ref([])
-let albumData = ref([])
-
-onMounted(() => {
-  getRecommendMusic().then((res: any) => {
-    rawData.value = [...res.data]
-    listData.value = (rawData.value as any[]).map((item: any) => {
-      return {
-        id: item.itemId, // 根据真实的返回数据，这里使用 itemId
-        title: item.songName,
-        image: item.coverUrl,
-        desc: item.singer,
-        raw: item
-      }
-    })
-    // console.log(listData.value)
-  })
-
-  getAllTags().then((res) => {
-    const flatList = Object.values(res.data).flat()
-    console.log(flatList)
-    tagsData.value = flatList.map((t) => {
-      return {
-        id:t.id,
-        name:t.tagName,
-        path:`/playlist?tagId=${t.id}`
-      }
-    })
-  })
-
-  getAlbum(1, 30).then((res: any) => {
-    console.log(res)
-    albumData.value = [...res.data.records]
-  })
-})
+const rawData = ref<any[]>([])
+const listData = ref<any[]>([])
+const tagsData = ref<any[]>([])
+const albumData = ref<any[]>([])
+const musicData = ref<any[]>([])
+const recommendSongsList = ref<any[]>([])
 
 // 点击本周最热音乐列表触发播放
 const playerStore = usePlayerStore()
+
+onMounted(() => {
+  // 获取推荐音乐和热门列表
+  getRecommendMusic().then((res: any) => {
+    if (res.success && res.data) {
+      rawData.value = [...res.data]
+      listData.value = (rawData.value as any[]).map((item: any) => {
+        return {
+          id: item.itemId,
+          title: item.songName,
+          image: item.coverUrl,
+          desc: item.singer,
+          raw: item
+        }
+      })
+
+      // 取前三个用于首页推荐卡片预览
+      recommendSongsList.value = res.data.slice(0, 3).map((item: any) => ({
+        id: item.itemId,
+        songName: `${item.songName} - ${item.singer}`
+      }))
+    }
+  })
+
+  // 获取热门歌手
+  getAllMusician(1, 5).then((res: any) => {
+    if (res.success && res.data && res.data.records) {
+      musicData.value = res.data.records.map((artist: any) => {
+        return {
+          id: artist.id,
+          to: { name: 'artist-id', params: { id: artist.id } },
+          data: {
+            imgUrl: artist.avatar,
+            singerName: artist.stageName,
+            songCount: `${artist.fansCount || 0} 粉丝`,
+          },
+        }
+      })
+    }
+  })
+
+  getAllTags().then((res) => {
+    if (res.data) {
+      const flatList = Object.values(res.data).flat()
+      tagsData.value = (flatList as any[]).map((t: any) => {
+        return {
+          id: t.id,
+          name: t.tagName,
+          path: `/playlist?tagId=${t.id}`
+        }
+      })
+    }
+  })
+
+  getAlbum('1', '30').then((res: any) => {
+    if (res.success && res.data && res.data.records) {
+      albumData.value = [...res.data.records]
+    }
+  })
+})
+
 const handlePlayHotMusic = async (item: any) => {
   if (!item.raw) return
 
   const data = item.raw
-  // 将接口返回结构适配成播放器需要的 MusicVO
   const songToPlay = {
-    id: data.itemId, // 根据真实数据修改为 itemId
+    id: String(data.itemId),
     musicName: data.songName,
     albumId: 0,
     albumName: '',
@@ -150,9 +180,8 @@ const handlePlayHotMusic = async (item: any) => {
     musicianName: data.singer,
   }
 
-  // 构造播放列表，支持切歌
   const currentList = rawData.value.map((d: any) => ({
-    id: d.itemId, // 同样修改为 itemId
+    id: String(d.itemId),
     musicName: d.songName,
     albumId: 0,
     albumName: '',
@@ -170,96 +199,6 @@ const handlePlayHotMusic = async (item: any) => {
   await playerStore.playSong(songToPlay as any, currentList as any)
   ElMessage.success(`正在播放: ${songToPlay.musicName}`)
 }
-
-// recommend模拟数据
-const recommendData =
-  // 1. 类型: recommend
-  {
-    type: 'recommend',
-    to: '/list/daily-recommend-123', // 指向每日推荐详情页
-    data: {
-      id: 'daily-recommend-123',
-      imgUrl: 'https://picsum.photos/seed/recommend/400/400', // 示例图片
-      alt: '每日推荐封面',
-      title: '根据你的听歌口味推荐', // v-if="type == 'recommend'" 中的 .album-title
-      list: [
-        { id: 'song-001', songName: '七里香 - 周杰伦' },
-        { id: 'song-002', songName: '关键词 - 林俊杰' },
-        { id: 'song-003', songName: '泡沫 - G.E.M.邓紫棋' },
-      ],
-    },
-  }
-
-// musicCard模拟数据1
-const musicData = [
-  // 2. 类型: artist
-  {
-    type: 'artist',
-    to: '/list/artist-1001', // 指向歌手详情页
-    data: {
-      id: 'artist-1001',
-      imgUrl: 'https://picsum.photos/seed/jjlin/400/400', // 示例图片
-      alt: '林俊杰',
-      songCount: '128 首', // v-else 中的 data.songCount
-      singerName: '林俊杰', // v-else 中的 data.singerName
-    },
-  },
-
-  // 3. 类型: artist
-  {
-    type: 'artist',
-    to: '/list/artist-1002',
-    data: {
-      id: 'artist-1002',
-      imgUrl: 'https://picsum.photos/seed/jaychou/400/400',
-      alt: '周杰伦',
-      songCount: '210 首',
-      singerName: '周杰伦',
-    },
-  },
-
-  // 4. 类型: artist
-  {
-    type: 'artist',
-    to: '/list/artist-1003',
-    data: {
-      id: 'artist-1003',
-      imgUrl: 'https://picsum.photos/seed/gem/400/400',
-      alt: 'G.E.M.邓紫棋',
-      songCount: '92 首',
-      singerName: 'G.E.M.邓紫棋',
-    },
-  },
-
-  // 5. 类型: artist
-  {
-    type: 'artist',
-    to: '/list/artist-1004',
-    data: {
-      id: 'artist-1004',
-      imgUrl: 'https://picsum.photos/seed/eason/400/400',
-      alt: '陈奕迅',
-      songCount: '175 首',
-      singerName: '陈奕迅',
-    },
-  },
-
-  // 6.类型：artist
-  {
-    type: 'artist',
-    to: '/list/artist-1001', // 指向歌手详情页
-    data: {
-      id: 'artist-1001',
-      imgUrl: 'https://picsum.photos/seed/jjlin/400/400', // 示例图片
-      alt: '林俊杰',
-      songCount: '128 首', // v-else 中的 data.songCount
-      singerName: '林俊杰', // v-else 中的 data.singerName
-    },
-  },
-]
-
-// musicCard模拟数据1
-// const albumData = [
 //   {
 //     type: 'album',
 //     to: '/list/album-101',
