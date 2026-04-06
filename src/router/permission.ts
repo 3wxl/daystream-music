@@ -81,15 +81,11 @@ router.beforeEach(async (to, from, next) => {
       } else {
         try {
           await userStore.getUsersInfo()
-<<<<<<< HEAD
+          const toName = (to.name || '') as string
           if (
-            (to.name as string).startsWith('admin') &&
+            (toName as string).startsWith('admin') &&
             userStore.userInfo.userRole.indexOf('管理员') === -1
           ) {
-=======
-          const toName = (to.name || '') as string
-          if((toName as string).startsWith('admin')&&userStore.userInfo.userRole.indexOf('管理员')===-1){
->>>>>>> 49ed0dc8114a58c3911b3645d2a53c860dcd8d9d
             next('/UserAuth')
           }
           next({ ...to, replace: true })

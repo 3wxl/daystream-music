@@ -16,7 +16,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <SingerItem
         v-for="(singer, index) in singers"
-        :key="singer.id"
+        :key="singer.userId"
         :singer="singer"
         :rank="index + 1"
       />

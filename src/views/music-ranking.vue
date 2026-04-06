@@ -144,6 +144,7 @@ const fetchRankData = async () => {
         .filter((musician) => musician?.stageName) // 过滤无效歌手
         .map((musician) => ({
           id: musician.id || Math.random(), // 兜底ID
+          userId: musician.userId || Math.random(), // 兜底ID
           name: musician.stageName || '未知歌手',
           avatar: musician.avatar || '默认头像URL',
           fans: formatFansCount(musician.totalFans || 0), // 兜底0

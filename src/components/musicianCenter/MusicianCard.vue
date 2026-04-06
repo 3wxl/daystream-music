@@ -19,7 +19,7 @@
         <p class="text-[24px] font-bold text-pink-200">{{ name }}</p>
 
         <!-- 标签 -->
-        <p class="text-base opacity-80 text-pink-300">{{ tag }}</p>
+        <p class="text-base opacity-80 text-pink-300">音乐作品:{{ tag }}</p>
 
         <!-- 简短介绍 -->
         <p class="text-sm text-center max-w-[180px] opacity-70 leading-tight text-pink-300">
