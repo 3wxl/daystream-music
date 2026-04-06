@@ -114,6 +114,7 @@
 
 <script lang="ts" setup>
 import { createPlaylist, deletePlaylist, getAllTags, getUserPlaylist } from '@/api/playlist'
+import { useUserStore } from '@/stores/user'
 import { useUploadtRules } from '@/utils/rules/upload'
 import { Plus } from '@element-plus/icons-vue'
 import type { CheckboxValueType, FormInstance, UploadProps } from 'element-plus'
@@ -128,6 +129,7 @@ const isIndeterminate = ref(true)
 const creatPlaylistRef = ref<FormInstance>()
 const showDetailDrawer = ref(false)
 const currentPlaylistId = ref('')
+const userStore = useUserStore()
 
 const openDetailDrawer = (item: any) => {
   currentPlaylistId.value = item.id
@@ -176,8 +178,8 @@ const showCreatePlaylistDialog = ref(false)
 // 获取列表
 const getPlaylistData = () => {
   loading.value = true
-  getUserPlaylist(1, 40)
-    .then((res) => {
+  getUserPlaylist(userStore.userInfo.id, '1', '40')
+    .then((res: any) => {
       playlist.value = res.data.records.flat()
       console.log(playlist.value)
     })

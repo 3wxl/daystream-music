@@ -17,8 +17,9 @@ export function getlistByTags(currentTag: string[], pageNum: string, pageSize: s
 }
 
 // 获取用户歌单
-export function getUserPlaylist(pageNum: string, pageSize: string) {
+export function getUserPlaylist(userId: string, pageNum: string, pageSize: string) {
   return request('/playlist/query-my-playlist-by-collect', 'get', {
+    userId,
     pageNum,
     pageSize,
   })

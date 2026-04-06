@@ -48,8 +48,9 @@ export function uploadMusic(data: FormData) {
 
 
 // 分页查询我的音乐作品
-export function getMyMusicList(pageNum: number, pageSize: number) {
-  return request<any>('/musician/home/getMyMusic', 'post', {
+export function getMyMusicList(musicianId: string | number, pageNum: number, pageSize: number) {
+  return request<any>('/musician/home/getMyMusic', 'get', {
+    musicianId,
     pageNum,
     pageSize,
   })

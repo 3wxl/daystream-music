@@ -568,11 +568,13 @@ const handleUpload = async () => {
       }
     })
 
-    // 4. 歌词部分
+    // 4. 歌词与封面
     if (lyricFile.value) {
       formData.append('lyric', lyricFile.value)
     }
- box
+    if (coverFile.value) {
+      formData.append('cover', coverFile.value)
+    }
 
     const res = await uploadMusic(formData)
     if (res.success) {
@@ -593,9 +595,9 @@ const handleUpload = async () => {
         tags: [],
       })
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Upload failed:', error)
-    ElMessage.error('上传音频文件音质不符')
+    ElMessage.error(error.message || '发布作品失败，请检查网络或文件格式')
   }
 }
 </script>
