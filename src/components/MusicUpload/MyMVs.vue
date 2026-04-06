@@ -250,6 +250,7 @@ import { useUploadtRules } from '@/utils/rules/upload'
 import type { FormInstance } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useUserStore } from '@/stores/user'
 // @ts-ignore
 // @ts-ignore
 // @ts-ignore
@@ -268,6 +269,7 @@ const { mvUploadRule } = useUploadtRules()
 
 // 数据定义
 const showCreateMvDialog = ref(false)
+const userStore = useUserStore()
 const createMvFormRef = ref<FormInstance>()
 const fileInput = ref<HTMLInputElement>()
 const coverInput = ref<HTMLInputElement | null>(null)
@@ -407,7 +409,7 @@ const onCoverChange = (e: Event) => {
 const fetchMySongs = async () => {
   loadingSongs.value = true
   try {
-    const res: any = await getMyMusicList(1, 100)
+    const res: any = await getMyMusicList(userStore.userInfo.id, 1, 100)
     if (res.success && res.data?.records) {
       // 如果后端返回的是 [[{...}]] 嵌套数组，则需要扁平化
       mySongs.value = res.data.records.flat()

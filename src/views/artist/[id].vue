@@ -133,11 +133,9 @@ const loadInfo = async () => {
     if (res.success && res.data) {
       artistDetail.value = res.data
       
-      // 有了详情后，加载歌曲和专辑
-      // 注意歌曲请求要求使用 pageNum 和 pageSize
-      loadSongs()
-      // 专辑要求使用 userId
+      // 有了详情后，加载该用户 (musicianId) 的歌曲和专辑
       if (res.data.userId) {
+        loadSongs(res.data.userId)
         loadAlbums(res.data.userId)
       }
     } else {
@@ -148,10 +146,10 @@ const loadInfo = async () => {
   }
 }
 
-const loadSongs = async () => {
+const loadSongs = async (musicianId: number) => {
   loadingSongs.value = true
   try {
-    const res: any = await getMusicianMusic(1, 50)
+    const res: any = await getMusicianMusic(musicianId, 1, 50)
     // 根据您提供的接口结构，数据是一个二维数组的嵌套 records: [ [ {...} ] ] 或一维数组
     if (res.success && res.data && res.data.records) {
       if (Array.isArray(res.data.records[0])) {

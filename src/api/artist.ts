@@ -25,8 +25,9 @@ export const getOtherAlbum = (userId: number, pageNum: number, pageSize: number)
 }
 
 // 获取歌手的音乐 (歌手详情页歌曲Tab使用)
-export const getMusicianMusic = (pageNum: number, pageSize: number) => {
-  return request('/musician/home/getMyMusic', 'post', {
+export const getMusicianMusic = (musicianId: number, pageNum: number, pageSize: number) => {
+  return request('/musician/home/getMyMusic', 'get', {
+    musicianId,
     pageNum,
     pageSize,
   })
