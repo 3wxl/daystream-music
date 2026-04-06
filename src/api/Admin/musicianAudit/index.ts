@@ -11,3 +11,45 @@ export function GetMusicianAuditListApi(data:{key?:string,status?:number,pageNum
 }
 
 
+// [批量]通过待审核音乐人申请
+export function PassMusicianAuditApi(applyId:[string]) {
+  return request(
+    `/admin/batchPass`,
+    'post',
+    { applyId }
+  )
+}
+
+// [批量]驳回待审核音乐人申请
+export function RejectMusicianAuditApi(applyId:[string]) {
+  return request(
+    `/admin/batchRefuse`,
+    'post',
+    { applyId }
+  )
+}
+
+/////// 音乐人列表API
+export function GetMusicianListApi(data:{nameKey?:string,status:number,pageNum:number,pageSize:number}){
+  return request(
+    `/adminMusician/list`,
+    'post',
+    data
+  )
+}
+
+// 获取音乐人详情
+export function GetMusicianDetailApi(id:string){
+  return request(
+    `/adminMusician/detailMusician?musicianId=${id}`,
+    'get'
+  )
+}
+
+// 封禁音乐人
+export function BanMusicianApi(id:string){
+  return request(
+    `/adminMusician/banMusician?musicianId=${id}`,
+    'get'
+  )
+}

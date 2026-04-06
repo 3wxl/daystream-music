@@ -87,6 +87,8 @@ router.beforeEach(async (to, from, next) => {
             userStore.userInfo.userRole.indexOf('管理员') === -1
           ) {
             next('/UserAuth')
+          }else if((toName as string)==('admin')&&userStore.userInfo.userRole.indexOf('管理员')!==-1){
+            next('/admin/dataStatistics')
           }
           next({ ...to, replace: true })
         } catch (error) {
