@@ -72,8 +72,8 @@ router.beforeEach(async (to, from, next) => {
     } else {
       if (Object.keys(userStore.userInfo).length > 0) {
         if((to.name as string).startsWith('admin')&&userStore.userInfo.userRole.indexOf('管理员')===-1){
-            next('/UserAuth')
-          }
+          next('/UserAuth')
+        }
         next()
       } else {
         try {
@@ -81,6 +81,8 @@ router.beforeEach(async (to, from, next) => {
           const toName = (to.name || '') as string
           if((toName as string).startsWith('admin')&&userStore.userInfo.userRole.indexOf('管理员')===-1){
             next('/UserAuth')
+          }else if((toName as string)==('admin')&&userStore.userInfo.userRole.indexOf('管理员')!==-1){
+            next('/admin/dataStatistics')
           }
           next({ ...to, replace: true })
         } catch (error) {

@@ -13,7 +13,13 @@
         :musicianList_2="musicianList_2"
         :total="total"
         @pageSkip="pageSkip"
+        @refresh="refresh"
       />
+      <div v-show="isLoading" class="w-full h-full absolute top-0 left-0 z-10 bg-[rgba(255,255,255,0.15)] rounded-[8px] flex items-center justify-center">
+        <svg viewBox="25 25 50 50">
+          <circle r="20" cy="50" cx="50"></circle>
+        </svg>
+      </div>
     </div>
   </div>
 </template>
@@ -28,6 +34,7 @@
   let musicianList_2 = ref([])  // 驳回的审核音乐人列表
   let total = ref(0)            // 音乐人总数
   let page = ref(1)             // 当前页码
+  let isLoading = ref(false)  // 加载状态
   // 方法回调
   function searchHandle(val:[number,string]){     // 搜索回调
     musicianType.value = val[0]
@@ -35,6 +42,7 @@
     getMusicianList()
   }
   async function getMusicianList(){               // 获取音乐人列表
+    isLoading.value = true
     let rel:any = await GetMusicianAuditListApi({pageNum:page.value,pageSize:8,status:musicianType.value,key:keyword.value});
     total.value = rel.data.total
     page.value = rel.data.current
@@ -46,10 +54,14 @@
       }else if(musicianType.value===2){
         musicianList_2.value = rel.data.records
       }
+      isLoading.value = false
     }
   }
   function pageSkip(pageNum:number){              // 分页回调
     page.value = pageNum
+    getMusicianList()
+  }
+  function refresh(){                             // 刷新回调
     getMusicianList()
   }
   onMounted(async ()=>{
@@ -58,4 +70,41 @@
 </script>
 
 <style scoped>
+svg {
+  width:5em;
+  transform-origin: center;
+  animation: rotate4 2s linear infinite;
+  }
+
+  circle {
+  fill: none;
+  stroke: hsl(214, 97%, 59%);
+  stroke-width: 2;
+  stroke-dasharray: 1, 200;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  animation: dash4 1.5s ease-in-out infinite;
+  }
+
+  @keyframes rotate4 {
+  100% {
+    transform: rotate(360deg);
+  }
+  }
+
+  @keyframes dash4 {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 90, 200;
+    stroke-dashoffset: -35px;
+  }
+
+  100% {
+    stroke-dashoffset: -125px;
+  }
+  }
 </style>
