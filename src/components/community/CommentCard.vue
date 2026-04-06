@@ -1,11 +1,11 @@
 <template>
   <div class="flex gap-4 items-start mb-8 group">
     <div>
-      <img :src="avatar" alt="我的头像" class="w-[44px] h-[44px] rounded-[38px] ml-2 flex-shrink-0 cursor-pointer object-cover" :id="userId">
+      <img @click="handleSingerClick" :src="avatar" alt="头像" class="w-[44px] h-[44px] rounded-[38px] ml-2 flex-shrink-0 cursor-pointer object-cover" :id="userId">
     </div>
     <div style="width:calc(100% - 60px)">
       <div class="flex justify-between">
-        <p class="font-bold text-[17px] text-white cursor-pointer hover:text-pink-400 mt-[6px]">{{ username }}</p>
+        <p class="font-bold text-[17px] text-white cursor-pointer hover:text-pink-400 mt-[6px]" @click="handleSingerClick">{{ username }}</p>
         <div>
           <span class="text-gray-300/30 mr-1 cursor-pointer hover:text-pink-500 mr-3 duration-300" @click="isShowReport = true">
             <el-tooltip
@@ -102,6 +102,12 @@
   import SonCommentCard from './SonCommentCard.vue';                           // 子评论组件
   import {reportRule} from '@/utils/rules/community/report'                          // 举报规则
   import {Report} from '@/api/community/Report';                               // 举报
+  import { useGoToUserPage } from "@/composables/useUserPage";
+
+  const {goToUserPage} = useGoToUserPage();
+  const handleSingerClick = async ()=>{
+    await goToUserPage(userId.value)
+  }
   // 数据
   let props = defineProps({
     commentObj: {

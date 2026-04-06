@@ -1,7 +1,7 @@
 <template>
   <div class="flex w-full flex-col gap-1 mb-5">
     <div class="flex flex-shrink-0 w-full items-center">
-      <img :src="avatar" alt="评论者头像" class="w-[30px] h-[30px] rounded-[50%] mr-2 cursor-pointer object-cover">
+      <img @click="handleSingerClick" :src="avatar" alt="评论者头像" class="w-[30px] h-[30px] rounded-[50%] mr-2 cursor-pointer object-cover">
       <span class="text-[15px] text-[#fe65ce] mr-2 cursor-pointer">{{ username }}</span>
       <span class="text-white">
         回复 <span class="text-[#31A2D4] cursor-pointer">@{{replyUsername}}:</span>
@@ -68,6 +68,14 @@
   import {Like} from '@/api/community/DynamicOperate';      // 点赞
   import {reportRule} from '@/utils/rules/community/report'                          // 举报规则
   import {Report} from '@/api/community/Report';                               // 举报
+  import { useGoToUserPage } from "@/composables/useUserPage";
+
+
+  // 数据
+  const {goToUserPage} = useGoToUserPage();
+  const handleSingerClick = async ()=>{
+    await goToUserPage(userId.value)
+  }
   // ts
   // 数据
   let props = defineProps(['sonComment'])

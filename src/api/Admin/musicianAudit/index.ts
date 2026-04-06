@@ -28,3 +28,12 @@ export function RejectMusicianAuditApi(applyId:[string]) {
     { applyId }
   )
 }
+
+/////// 音乐人列表API
+export function GetMusicianListApi(data:{nameKey?:string,status:number,pageNum:number,pageSize:number}){
+  return request(
+    `/adminMusician/list`,
+    'post',
+    data
+  )
+}

@@ -63,11 +63,11 @@
               <IconFontSymbol name="yinleren" class="mr-1"></IconFontSymbol>
               <span>音乐人管理</span>
             </template>
-            <el-menu-item index="4-1">
+            <el-menu-item index="4-1" @click="router.push('/admin/musicianManage/musicianList')">
               <IconFontSymbol name="liebiao" size="15px" class="mr-1"></IconFontSymbol>
               <span>音乐人列表</span>
             </el-menu-item>
-            <el-menu-item index="4-2" @click="router.push('/admin/musicianManage/musicianList')">
+            <el-menu-item index="4-2" @click="router.push('/admin/musicianManage/musicianAudit')">
               <IconFontSymbol name="shenhe" class="mr-1"></IconFontSymbol>
               <span>音乐人审核</span>
             </el-menu-item>

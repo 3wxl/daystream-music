@@ -2,7 +2,7 @@
   <div class="w-full flex items-center overflow-hidden">
     <AdminInput
       type="text"
-      placeholder="请输入艺名/简介/邮箱"
+      placeholder="请输入艺名"
       width="280px"
       label="搜索:"
       class="flex ml-2 items-center"
@@ -11,8 +11,9 @@
     <AdminSelect
       label="类型"
       :options="[
-        {value: 0, label: '正常'},
-        {value: 2, label: '封禁'}
+        {value: 0, label: '待审核'},
+        {value: 1, label: '已通过'},
+        {value: 2, label: '已驳回'}
       ]"
       v-model="musicianType"
       class="ml-5"

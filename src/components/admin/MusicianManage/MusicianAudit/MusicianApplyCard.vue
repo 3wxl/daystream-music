@@ -38,6 +38,7 @@
             <span>音乐标签</span>
           </h5>
           <div class="flex flex-wrap gap-2">
+            <span class="text-pink-400 text-[15px] font-[500]" v-if="musicianData.tags.length==0">没有设置风格标签</span>
             <span class="px-4 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium" v-for="item in musicianData.tags" :key="item.id">{{ item }}</span>
           </div>
         </div>
