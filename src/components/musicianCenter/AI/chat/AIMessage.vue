@@ -51,24 +51,45 @@
               </div>
               <div>
                 <h3 class="text-white font-semibold">{{ message.lyrics.title }}</h3>
-                <p class="text-pink-300 text-sm">AI 词曲创作 · 源自你的灵感</p>
+                <p class="text-pink-300 text-sm">
+                  <span v-if="message.lyrics.style" class="mr-2">[{{ message.lyrics.style }}]</span>
+                  <span>AI 词曲创作 · 源自你的灵感</span>
+                </p>
               </div>
             </div>
 
             <!-- 歌词节选 -->
             <div class="space-y-3 text-gray-300">
               <div
-                v-for="section in message.lyrics.sections"
-                :key="section.type"
-                @click="$emit('play-lyric', section.type)"
-                class="p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group"
+                v-for="(section, index) in message.lyrics.sections"
+                :key="index"
+                :class="{
+                  'p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group':
+                    section.type !== '其他',
+                  'p-3 rounded-lg bg-gray-800/50 border border-gray-700/50':
+                    section.type === '其他',
+                }"
+                @click="section.type !== '其他' && $emit('play-lyric', section.type)"
               >
                 <div class="flex items-start gap-3">
                   <div class="text-pink-300 text-sm font-mono opacity-70 group-hover:opacity-100">
                     [{{ section.type }}]
                   </div>
-                  <p class="leading-relaxed whitespace-pre-line">{{ section.content }}</p>
+                  <p class="leading-relaxed whitespace-pre-line" v-html="section.content"></p>
                 </div>
+              </div>
+            </div>
+
+            <!-- 创作思路 -->
+            <div
+              v-if="message.lyrics.tips"
+              class="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-400/30"
+            >
+              <div class="flex items-start gap-3">
+                <div class="text-blue-400 text-sm font-mono opacity-70">[创作思路]</div>
+                <p class="leading-relaxed whitespace-pre-line text-blue-300">
+                  {{ message.lyrics.tips }}
+                </p>
               </div>
             </div>
           </div>

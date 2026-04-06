@@ -28,15 +28,8 @@
           </button>
         </div>
       </div>
-      <div class="flex items-center space-x-4">
-        <button @click="handleShowHistory" class="text-gray-400 hover:text-white transition-colors">
-          历史记录
-        </button>
-        <button @click="toggleSettings" class="text-gray-400 hover:text-white transition-colors">
-          设置
-        </button>
-      </div>
     </div>
+
     <!-- 主要内容区域 -->
     <div class="flex-1 flex overflow-hidden">
       <!-- 左侧聊天区域 -->
@@ -49,13 +42,19 @@
         :is-loading="isStreaming"
         :show-welcome="showWelcome && messages.length === 0"
       />
-      <!-- 右侧推荐主题区域 -->
+
+      <!-- 右侧历史对话区域 -->
       <RightSideBar
-        :themes="recommendedThemes"
-        :is-show="showRightSidebar && currentMode === 'create'"
-        @select-theme="selectTheme"
+        :chatSessions="chatSessions"
+        :is-show="showRightSidebar"
+        :has-more="hasMore"
+        :is-loading="isLoadingHistory"
+        @load-more="handleLoadMore"
+        @select-conversation="handleSelectConversation"
+        @delete-conversation="handleDeleteConversation"
       />
     </div>
+
     <!-- 输入区域 -->
     <MessageInput
       v-model="inputValue"
@@ -63,23 +62,28 @@
       :placeholder="inputPlaceholder"
       :is-loading="isCreatingSong || isStreaming"
       @send="handleSend"
+      @stop="stopGenerate"
       @use-quick-phrase="handleUseQuickPhrase"
     />
-    <!-- 设置菜单 -->
-    <SettingsMenu v-if="showSettings" @close="toggleSettings" />
   </div>
 </template>
 
 <script setup lang="ts">
-import type { Theme, QuickPhrase, Message, UserStatus } from '@/types/lyricAssistant'
-import { createNewSession, fetchStream } from '@/api/aiChat'
+import type { Theme, QuickPhrase, Message, UserStatus, aiChatSession } from '@/types/lyricAssistant'
+import {
+  createNewSession,
+  fetchStream,
+  getSessionList,
+  getMessages,
+  deleteSession,
+} from '@/api/aiChat'
 import { getUserInfo } from '@/api/personalCenter'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 // 会话状态管理
 const sessionId = ref<string>('')
 const message = ref<string>('')
 const panelCollapsed = ref<boolean>(false)
-const showSettings = ref<boolean>(false)
 const showWelcome = ref<boolean>(true)
 const userName = ref<string>('AI 作词助手')
 const userStatus = ref<UserStatus>('在线')
@@ -87,28 +91,62 @@ const userAvatar = ref<string>('')
 const isLoading = ref<boolean>(false)
 const isStreaming = ref<boolean>(false)
 const chatContainerRef = ref<any>(null)
-// 添加缺失的变量
-const aiAvatar = ref<string>('https://picsum.photos/id/1027/200') // AI 头像
-const showRightSidebar = ref<boolean>(true) // 右侧边栏显示状态
-const inputValue = ref<string>('') // 输入框内容
-const isCreatingSong = ref<boolean>(false) // 创建歌曲加载状态
-// 模式切换状态
-const currentMode = ref<'chat' | 'create'>('chat') // 默认进入咨询模式
+const aiAvatar = ref<string>('https://picsum.photos/id/1027/200')
+const showRightSidebar = ref<boolean>(true)
+const inputValue = ref<string>('')
+const isCreatingSong = ref<boolean>(false)
+const currentMode = ref<'chat' | 'create'>('chat')
+const chatSessions = ref<aiChatSession[]>([])
+
+// 🔥 无限滚动相关状态
+const isLoadingHistory = ref(false)
+const hasMore = ref(true)
+const currentPage = ref(1)
+const pageSize = ref(10)
+
+// 🔥 中断控制器
+const abortController = ref<AbortController | null>(null)
+
+// 🔥 停止生成
+const stopGenerate = () => {
+  if (abortController.value) {
+    abortController.value.abort()
+    abortController.value = null
+  }
+
+  // 找到最新的AI消息并添加终止标记
+  const latestAiMessage = [...messages.value].reverse().find((m) => m.type === 'ai')
+  if (latestAiMessage) {
+    if (latestAiMessage.content) {
+      latestAiMessage.content += '\n\n⚠️ 已终止输出'
+    } else if (latestAiMessage.lyrics) {
+      if (latestAiMessage.lyrics.tips) {
+        latestAiMessage.lyrics.tips += '\n\n⚠️ 已终止输出'
+      } else {
+        latestAiMessage.lyrics.tips = '⚠️ 已终止输出'
+      }
+    }
+  }
+
+  isStreaming.value = false
+  isCreatingSong.value = false
+  console.log('✅ 已停止AI生成')
+}
 
 // 添加缺失的函数
 const handleShowHistory = () => {
-  // 显示历史记录的处理逻辑
   console.log('显示历史记录')
   restartSession()
 }
 
 // 模式切换函数
-const switchMode = (mode: 'chat' | 'create') => {
+const switchMode = async (mode: 'chat' | 'create') => {
   currentMode.value = mode
-  // 切换模式时可以选择是否清空消息列表
-  // 如果需要清空，可以取消下面的注释
-  // messages.value = []
-  // showWelcome.value = true
+  // 🔥 切换模式时重置分页并重新加载会话列表
+  currentPage.value = 1
+  hasMore.value = true
+  chatSessions.value = []
+  await getSessionLists()
 }
 
 // 计算属性：输入框占位符
@@ -130,38 +168,6 @@ const inputPlaceholder = computed<string>(() => {
 // 消息列表
 const messages = ref<Message[]>([])
 
-// 推荐主题数据
-const recommendedThemes = ref<Theme[]>([
-  {
-    id: 1,
-    title: '都市情感故事',
-    description: '现代城市的爱恨情仇',
-    icon: 'icon-heart',
-    iconCode: '&#xe849;',
-  },
-  {
-    id: 2,
-    title: '旅行随笔',
-    description: '旅途中的感悟与风景',
-    icon: 'icon-travel',
-    iconCode: '&#xe893;',
-  },
-  {
-    id: 3,
-    title: '青春回忆录',
-    description: '校园时光的纯真年代',
-    icon: 'icon-graduation',
-    iconCode: '&#xe6a7;',
-  },
-  {
-    id: 4,
-    title: '梦想追逐',
-    description: '追梦路上的坚持与成长',
-    icon: 'icon-star',
-    iconCode: '&#xe6b8;',
-  },
-])
-
 // 快捷短语数据
 const quickPhrases = ref<QuickPhrase[]>([
   { id: 1, text: '创作一首关于青春遗憾的流行歌曲' },
@@ -178,17 +184,16 @@ const scrollToBottom = () => {
     }
   })
 }
+
 // 创建新会话的函数
 const createNewSessionAndFetch = async (): Promise<void> => {
   isLoading.value = true
 
   try {
-    // 1. 创建新会话
     const newSessionId = await createNewSession()
     sessionId.value = newSessionId
     console.log('创建新会话成功，会话ID:', newSessionId)
 
-    // 2. 创建临时AI消息用于流式显示欢迎消息
     const tempMessageId = Date.now()
     let streamingContent = ''
     isStreaming.value = true
@@ -196,7 +201,7 @@ const createNewSessionAndFetch = async (): Promise<void> => {
     const welcomeMessage: Message = {
       id: tempMessageId,
       type: 'ai',
-      content: '',
+      content: '请耐心等待...',
       timestamp: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
       avatar: aiAvatar.value,
       status: '在线',
@@ -204,8 +209,9 @@ const createNewSessionAndFetch = async (): Promise<void> => {
 
     messages.value = [welcomeMessage]
 
-    // 根据当前模式发送不同的初始消息
     const initialMessage = currentMode.value === 'chat' ? '你是谁' : '我想创作一首歌曲'
+
+    abortController.value = new AbortController()
 
     await fetchStream(
       currentMode.value === 'chat' ? '/ai/chat' : '/ai/music/create',
@@ -213,9 +219,7 @@ const createNewSessionAndFetch = async (): Promise<void> => {
         memoryId: sessionId.value,
         [currentMode.value === 'chat' ? 'message' : 'request']: initialMessage,
       },
-      // 收到数据块时的回调
       (data: string) => {
-        console.log('收到欢迎消息数据块:', data)
         streamingContent += data
         const index = messages.value.findIndex((m) => m.id === tempMessageId)
         if (index !== -1) {
@@ -223,7 +227,6 @@ const createNewSessionAndFetch = async (): Promise<void> => {
           scrollToBottom()
         }
       },
-      // 错误回调
       (error: Error) => {
         console.error('获取AI欢迎消息失败:', error)
         const index = messages.value.findIndex((m) => m.id === tempMessageId)
@@ -238,7 +241,6 @@ const createNewSessionAndFetch = async (): Promise<void> => {
         }
         isStreaming.value = false
       },
-      // 完成回调
       () => {
         console.log('欢迎消息加载完成')
         isStreaming.value = false
@@ -250,6 +252,7 @@ const createNewSessionAndFetch = async (): Promise<void> => {
           })
         }
       },
+      abortController.value.signal,
     )
     showWelcome.value = true
   } catch (error) {
@@ -272,7 +275,7 @@ const createNewSessionAndFetch = async (): Promise<void> => {
   }
 }
 
-// 获取用户信息的函数
+// 获取用户信息
 const fetchUserInfo = async (): Promise<void> => {
   try {
     const userInfo = await getUserInfo()
@@ -285,22 +288,163 @@ const fetchUserInfo = async (): Promise<void> => {
   }
 }
 
-// 页面初始化
-onMounted(() => {
-  console.log('AI作词助手界面已加载')
+// 🔥 获取会话列表（支持分页）
+const getSessionLists = async (isLoadMore = false): Promise<void> => {
+  let sessionType = ''
 
-  // 先获取用户信息
-  fetchUserInfo()
+  try {
+    const response = await getSessionList({
+      sessionType: '1',
+      pageNum: currentPage.value,
+      pageSize: pageSize.value,
+    })
 
-  // 创建新会话并获取AI欢迎消息
-  createNewSessionAndFetch()
-})
+    if (response && Array.isArray(response)) {
+      const newSessions = response.map((session) => ({
+        id: session.id || session.sessionId || '',
+        title: session.title || '未命名对话',
+        createTime: session.createTime || session.createdAt || new Date().toISOString(),
+        updateTime: session.updateTime || session.updatedAt || new Date().toISOString(),
+      }))
 
-// 发送消息函数 - 使用流式响应
+      if (isLoadMore) {
+        chatSessions.value = [...chatSessions.value, ...newSessions]
+      } else {
+        chatSessions.value = newSessions
+      }
+
+      // 判断是否还有更多数据
+      hasMore.value = newSessions.length === pageSize.value
+
+      console.log('会话列表加载成功:', {
+        currentPage: currentPage.value,
+        count: chatSessions.value.length,
+        hasMore: hasMore.value,
+        isLoadMore: isLoadMore,
+      })
+    } else {
+      if (!isLoadMore) {
+        chatSessions.value = []
+      }
+      hasMore.value = false
+    }
+  } catch (error) {
+    console.error('获取会话列表失败:', error)
+    if (!isLoadMore) {
+      chatSessions.value = []
+    }
+    ElMessage.error('获取历史对话失败')
+  } finally {
+    isLoadingHistory.value = false
+  }
+}
+
+// 🔥 处理加载更多
+const handleLoadMore = async () => {
+  if (isLoadingHistory.value || !hasMore.value) {
+    console.log('跳过加载：', {
+      isLoading: isLoadingHistory.value,
+      hasMore: hasMore.value,
+    })
+    return
+  }
+
+  console.log('加载更多历史对话...', {
+    currentPage: currentPage.value,
+    pageSize: pageSize.value,
+  })
+
+  isLoadingHistory.value = true
+  currentPage.value++
+  await getSessionLists(true)
+}
+
+// 🔥 处理选择会话
+const handleSelectConversation = async (conversation: aiChatSession) => {
+  console.log('选择会话:', conversation)
+
+  try {
+    isLoading.value = true
+    // 调用API获取会话消息记录
+    const messagesData = await getMessages({
+      memoryId: conversation.id,
+      pageNum: 1,
+      pageSize: 50,
+    })
+    console.log('获取会话消息记录成功:', messagesData)
+    // 清空当前消息列表
+    messages.value = []
+
+    // 添加获取到的消息到消息列表
+    if (messagesData && Array.isArray(messagesData)) {
+      messages.value = messagesData
+        .reverse()
+        .slice(1)
+        .map((msg, index) => ({
+          id: index + 1,
+          type: msg.messageType == '1' ? 'user' : 'ai',
+          content: msg.content || '',
+          timestamp:
+            msg.sendTime ||
+            new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+          avatar: msg.sessionType === '1' ? userAvatar.value : aiAvatar.value,
+          status: '在线',
+        }))
+    }
+
+    // 更新sessionId
+    sessionId.value = conversation.id
+    showWelcome.value = false
+    scrollToBottom()
+  } catch (error) {
+    console.error('加载会话消息失败:', error)
+    ElMessage.error('加载对话失败')
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// 🔥 处理删除会话
+const handleDeleteConversation = async (conversationId: string) => {
+  try {
+    await ElMessageBox.confirm('确定要删除这个对话吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+
+    // 调用删除会话的API
+    const success = await deleteSession(conversationId)
+    console.log('删除会话结果:', { conversationId, success })
+    if (success) {
+      // 从列表中移除
+      chatSessions.value = chatSessions.value.filter((s) => s.id !== conversationId)
+
+      // 如果当前正在查看的会话被删除，创建新会话
+      if (sessionId.value === conversationId) {
+        messages.value = []
+        sessionId.value = ''
+        showWelcome.value = true
+        // 创建新会话
+        await createNewSessionAndFetch()
+      }
+
+      ElMessage.success('删除成功')
+    } else {
+      ElMessage.error('删除失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除会话失败:', error)
+      ElMessage.error('删除失败')
+    }
+  }
+}
+
+// 发送消息
 const sendMessage = async (content: string): Promise<void> => {
   if (!content.trim() || isStreaming.value || isCreatingSong.value) return
 
-  // 添加用户消息到列表
   const newMessage: Message = {
     id: Date.now(),
     type: 'user',
@@ -312,8 +456,8 @@ const sendMessage = async (content: string): Promise<void> => {
   messages.value.push(newMessage)
   const userInput = content.trim()
   showWelcome.value = false
+  scrollToBottom()
 
-  // 创建临时AI消息用于流式显示
   const tempMessageId = Date.now() + 1
   let streamingContent = ''
   isStreaming.value = true
@@ -327,34 +471,35 @@ const sendMessage = async (content: string): Promise<void> => {
     status: '在线',
   }
   messages.value.push(aiTempMessage)
+  scrollToBottom()
 
   try {
-    // 检查是否有会话ID，如果没有则创建
     if (!sessionId.value) {
       sessionId.value = await createNewSession()
     }
 
-    // 使用流式请求
+    abortController.value = new AbortController()
+
     await fetchStream(
       '/ai/chat',
       {
         memoryId: sessionId.value,
         message: userInput,
       },
-      // 收到数据块时的回调
       (data: string) => {
-        console.log('收到AI回复数据块:', data)
         streamingContent += data
-        // 更新临时消息的内容
         const index = messages.value.findIndex((m) => m.id === tempMessageId)
         if (index !== -1) {
           messages.value[index].content = streamingContent
-          // 自动滚动到底部
           scrollToBottom()
         }
       },
-      // 错误回调
       (error: Error) => {
+        if (error.name === 'AbortError') {
+          console.log('✅ AI咨询请求已被用户中止')
+          isStreaming.value = false
+          return
+        }
         console.error('AI咨询请求失败:', error)
         const index = messages.value.findIndex((m) => m.id === tempMessageId)
         if (index !== -1) {
@@ -362,11 +507,9 @@ const sendMessage = async (content: string): Promise<void> => {
         }
         isStreaming.value = false
       },
-      // 完成回调
       () => {
         console.log('AI回复完成')
         isStreaming.value = false
-        // 更新最终时间戳
         const index = messages.value.findIndex((m) => m.id === tempMessageId)
         if (index !== -1) {
           messages.value[index].timestamp = new Date().toLocaleTimeString('zh-CN', {
@@ -375,6 +518,7 @@ const sendMessage = async (content: string): Promise<void> => {
           })
         }
       },
+      abortController.value.signal,
     )
   } catch (error) {
     console.error('发送消息失败:', error)
@@ -386,11 +530,10 @@ const sendMessage = async (content: string): Promise<void> => {
   }
 }
 
-// 创作歌曲函数 - 使用流式响应
+// 创作歌曲
 const createSong = async (request: string): Promise<void> => {
   if (!request.trim() || isCreatingSong.value || isStreaming.value) return
 
-  // 添加用户消息到列表
   const newMessage: Message = {
     id: Date.now(),
     type: 'user',
@@ -398,11 +541,10 @@ const createSong = async (request: string): Promise<void> => {
     timestamp: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
     avatar: userAvatar.value,
   }
-
   messages.value.push(newMessage)
   showWelcome.value = false
+  scrollToBottom()
 
-  // 创建临时AI消息用于流式显示
   const tempMessageId = Date.now() + 1
   let streamingContent = ''
   isCreatingSong.value = true
@@ -410,92 +552,154 @@ const createSong = async (request: string): Promise<void> => {
   const aiTempMessage: Message = {
     id: tempMessageId,
     type: 'ai',
-    content: 'AI助手正在全力为您解答中...',
+    content: '🎵 AI 正在为你创作歌曲，请稍候...',
     timestamp: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
     avatar: aiAvatar.value,
     status: '在线',
   }
   messages.value.push(aiTempMessage)
+  scrollToBottom()
 
   try {
-    // 检查是否有会话ID，如果没有则创建
     if (!sessionId.value) {
       sessionId.value = await createNewSession()
     }
 
-    // 使用流式请求
+    abortController.value = new AbortController()
+
     await fetchStream(
       '/ai/music/create',
       {
         memoryId: sessionId.value,
-        request: request,
+        message: request,
       },
-      // 收到数据块时的回调
       (data: string) => {
-        console.log('收到数据块：', data)
         streamingContent += data
-        // 更新临时消息的内容
         const index = messages.value.findIndex((m) => m.id === tempMessageId)
         if (index !== -1) {
           messages.value[index].content = streamingContent
           scrollToBottom()
         }
       },
-      // 错误回调
       (error: Error) => {
-        console.error('AI创作歌曲请求失败:', error)
-        const index = messages.value.findIndex((m) => m.id === tempMessageId)
-        if (index !== -1) {
-          messages.value[index].content = '很抱歉，歌曲创作失败，请稍后再试。'
+        if (error.name === 'AbortError') {
+          console.log('✅ 创作请求已被用户中止')
+          isCreatingSong.value = false
+          return
+        }
+        console.error('创作失败', error)
+        const idx = messages.value.findIndex((m) => m.id === tempMessageId)
+        if (idx !== -1) {
+          messages.value[idx].content = '创作失败，请重试'
         }
         isCreatingSong.value = false
       },
-      // 完成回调
       () => {
-        console.log('AI创作完成')
-        // 解析歌词结构
+        console.log('✅ 创作完成，开始解析')
         const index = messages.value.findIndex((m) => m.id === tempMessageId)
-        if (index !== -1) {
-          const lines = streamingContent.split('\n').filter((line) => line.trim())
-          messages.value[index].lyrics = {
-            title: 'AI创作歌曲',
-            sections: [
-              {
-                type: '主歌',
-                content: lines[0] || '',
-              },
-              {
-                type: '副歌',
-                content: lines[1] || '',
-              },
-            ],
-          }
-          messages.value[index].timestamp = new Date().toLocaleTimeString('zh-CN', {
-            hour: '2-digit',
-            minute: '2-digit',
-          })
+        if (index === -1) {
+          isCreatingSong.value = false
+          return
         }
+
+        const parsed = parseFinalSong(streamingContent)
+
+        const isQuestionMessage =
+          parsed.sections.length === 0 &&
+          (parsed.title === '未命名歌曲' ||
+            streamingContent.includes('？') ||
+            streamingContent.includes('确认') ||
+            streamingContent.includes('需要先'))
+
+        if (isQuestionMessage) {
+          messages.value[index] = {
+            ...messages.value[index],
+            content: streamingContent,
+            lyrics: undefined,
+            timestamp: new Date().toLocaleTimeString('zh-CN', {
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+          }
+        } else {
+          messages.value[index] = {
+            ...messages.value[index],
+            content: '',
+            lyrics: parsed,
+            timestamp: new Date().toLocaleTimeString('zh-CN', {
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+          }
+        }
+
         isCreatingSong.value = false
+        scrollToBottom()
       },
+      abortController.value.signal,
     )
   } catch (error) {
-    console.error('创作歌曲失败:', error)
-    const index = messages.value.findIndex((m) => m.id === tempMessageId)
-    if (index !== -1) {
-      messages.value[index].content = '很抱歉，歌曲创作失败，请稍后再试。'
-    }
+    console.error('创作异常', error)
+    const idx = messages.value.findIndex((m) => m.id === tempMessageId)
+    if (idx !== -1) messages.value[idx].content = '创作失败'
     isCreatingSong.value = false
   }
 }
 
-// 处理创建歌曲
+const parseFinalSong = (text: string) => {
+  let title = '未命名歌曲'
+  let style = '抒情流行'
+  let content = text
+  let idea = ''
+
+  const ideaPos = content.lastIndexOf('创作思路：')
+  if (ideaPos !== -1) {
+    idea = content.slice(ideaPos + 5).trim()
+    content = content.slice(0, ideaPos).trim()
+  }
+
+  const styleMatch = content.match(/曲风[：:](.*?)(?=主歌|$)/)
+  if (styleMatch) {
+    style = styleMatch[1].trim()
+    content = content.replace(styleMatch[0], '').trim()
+  }
+
+  const styleIndex = content.indexOf('曲风：')
+  if (styleIndex > 0) {
+    title = content.slice(0, styleIndex).trim()
+    content = content.slice(styleIndex).trim()
+  } else {
+    const geIndex = content.indexOf('主歌：')
+    if (geIndex > 0) {
+      title = content.slice(0, geIndex).trim()
+    }
+  }
+
+  const sections = []
+  const regex = /(主歌|副歌|桥段)[：:]([\s\S]*?)(?=主歌|副歌|桥段|$)/g
+
+  let match
+  while ((match = regex.exec(content)) !== null) {
+    const type = match[1].trim()
+    let text = match[2].trim()
+    text = text.replace(/\\n/g, '</br>')
+    sections.push({ type, content: text })
+  }
+
+  return {
+    title: title || '未命名歌曲',
+    style: style || '抒情流行',
+    sections,
+    tips: idea,
+  }
+}
+
 const handleCreateSong = (request: string = ''): void => {
-  // 如果没有提供请求内容，使用默认提示
   const songRequest = request || '请为我创作一首新歌...'
+  console.log('创作歌曲请求:', songRequest)
   createSong(songRequest)
 }
 
-// 处理发送消息
 const handleSend = (): void => {
   if (inputValue.value.trim()) {
     if (currentMode.value === 'chat') {
@@ -507,26 +711,20 @@ const handleSend = (): void => {
   }
 }
 
-// 处理使用快捷短语
 const handleUseQuickPhrase = (phrase: QuickPhrase): void => {
   inputValue.value = phrase.text
   handleSend()
 }
 
-// 重新开始会话的函数
 const restartSession = async (): Promise<void> => {
   if (messages.value.length > 1 && !confirm('确定要开始新的会话吗？当前对话历史将被清空。')) {
     return
   }
 
-  // 清空消息列表
   messages.value = []
-
-  // 显示加载状态
   isLoading.value = true
 
   try {
-    // 创建新会话并获取AI欢迎消息
     await createNewSessionAndFetch()
   } catch (error) {
     console.error('重新开始会话失败:', error)
@@ -534,62 +732,43 @@ const restartSession = async (): Promise<void> => {
   }
 }
 
-// 继续创作
 const continueCreation = (): void => {
   console.log('继续创作')
   createSong('请继续完善刚才的歌词创作...')
 }
 
-// 开始快速创作
 const startQuickCreation = (): void => {
   console.log('开始快速创作')
   createSong('请为我创作一首新歌...')
 }
 
-// 选择主题
 const selectTheme = (theme: Theme): void => {
   console.log('选择主题:', theme)
   createSong(`创作一段关于"${theme.title}"的歌词：${theme.description}`)
 }
 
-// 试听歌曲
 const previewSong = (): void => {
   console.log('试听歌曲')
   alert('即将播放歌曲预览...')
 }
 
-// 保存歌词
 const saveLyrics = (): void => {
   console.log('保存歌词')
   alert('歌词已保存到本地')
 }
 
-// 播放歌词片段
 const playLyric = (section: string): void => {
   console.log('播放歌词片段:', section)
 }
 
-// 切换设置菜单
-const toggleSettings = (): void => {
-  showSettings.value = !showSettings.value
-}
-
-// 关闭设置菜单
-const closeSettings = (): void => {
-  showSettings.value = false
-}
-
-// 切换面板
 const togglePanel = (): void => {
   panelCollapsed.value = !panelCollapsed.value
 }
 
-// 清空历史（重新开始会话）
 const clearHistory = (): void => {
   restartSession()
 }
 
-// 导出数据
 const exportData = (): void => {
   console.log('导出数据')
   const data = {
@@ -608,19 +787,26 @@ const exportData = (): void => {
   URL.revokeObjectURL(url)
 }
 
-// 切换主题
 const toggleTheme = (): void => {
   console.log('切换主题')
   alert('主题切换功能开发中...')
 }
 
-// 页面卸载时清理
+// 生命周期
+onMounted(() => {
+  fetchUserInfo()
+  createNewSessionAndFetch()
+  getSessionLists()
+})
+
 onUnmounted(() => {
+  abortController.value?.abort()
   console.log('AI作词助手界面已卸载，会话ID:', sessionId.value)
 })
 </script>
 
 <style scoped></style>
+
 <route lang="yaml">
 meta:
   layout: empty

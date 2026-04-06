@@ -298,7 +298,9 @@ const vipProgress = computed(() => {
 const handleBestSuggestionClick = () => {
   const suggestion = getBestSuggestion()
   if (suggestion.target) {
-    handleRedeemTarget(suggestion.target)
+    router.push({
+      path: '/vip-exchange-page',
+    })
   }
 }
 const getBestSuggestion = () => {
@@ -330,7 +332,7 @@ const handleRedeemTarget = (target: VipTarget) => {
   if (props.currentCoins >= target.value) {
     emit('redeem-vip', target)
     router.push({
-      path: '/VipExchangePage',
+      path: '/vip-exchange-page',
       query: {
         targetValue: target.value.toString(),
         duration: target.duration,

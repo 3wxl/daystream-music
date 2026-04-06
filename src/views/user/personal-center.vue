@@ -3,12 +3,14 @@
     <div class="mx-auto space-y-6">
       <!-- 传递完整的userInfo，监听子组件事件 -->
       <UserHeader
+        :isOthersPage="!!userId"
+        :isFollowing="isFollowing"
         v-if="userInfo.id"
         :userInfo="userInfo"
-        :isOthersPage="false"
         @update-user-info="handleUpdateUserInfo"
         @upload-avatar="handleUploadAvatar"
         @upload-bg="handleUploadBg"
+        @follow-change="handleFollowChange"
       />
 
       <div class="bg-gray-900/50 rounded-xl overflow-hidden border border-gray-800">
@@ -59,7 +61,9 @@
                   <img src="../../assets/turntable-13463_256.gif" alt="" class="w-13" />
                   <h3 class="text-white font-semibold text-lg">我收藏的歌单</h3>
                 </div>
-                <router-link to="/user/collected-songs-list">
+                <router-link
+                  :to="`/user/collected-songs-list?userId=${Number(userInfo.id) || Number(userId)}`"
+                >
                   <el-button type="text" size="small" class="text-[#00f0ff] hover:text-white">
                     查看全部
                   </el-button>
@@ -90,7 +94,9 @@
                   <h3 class="text-white font-semibold text-lg">我创建的歌单</h3>
                 </div>
                 <div class="flex items-center gap-2">
-                  <router-link to="/user/collected-songs-list">
+                  <router-link
+                    :to="`/user/collected-songs-list?userId=${Number(userInfo.id) || Number(userId)}`"
+                  >
                     <el-button type="text" size="small" class="text-[#00f0ff] hover:text-white">
                       查看全部
                     </el-button>
@@ -127,7 +133,7 @@
       <!-- 这里添加了缺失的闭合div -->
 
       <!-- 收藏专辑 -->
-      <div class="collection-albums-page bg-[#080812] text-white overflow-x-hidden rounded-2xl">
+      <!-- <div class="collection-albums-page bg-[#080812] text-white overflow-x-hidden rounded-2xl">
         <main class="container mx-auto px-4 md:px-8 py-8">
           <div class="mb-8 pb-3">
             <div class="flex items-center justify-between w-full">
@@ -147,7 +153,6 @@
             </div>
           </div>
 
-          <!-- 专辑列表 -->
           <div v-if="albumLoading" class="py-12 text-center"></div>
           <div v-else-if="albums.length > 0">
             <CollectedAlbum
@@ -169,7 +174,7 @@
             </router-link>
           </div>
         </main>
-      </div>
+      </div> -->
     </div>
 
     <!-- 创建歌单弹窗组件 -->
@@ -190,14 +195,15 @@ import { ElMessage } from 'element-plus'
 import {
   getUserInfo,
   updateUserInfo,
-  getMyLikeSongs,
+  getLikeMusic,
   getCollectPlaylists,
   getCreatePlaylists,
   createPlaylistApi,
   getWeeklyDailyListenCount,
   getWeeklyTagRatio, // 新增导入
   getMyCollectAlbums,
-  collectAlbum, // 新增：导入取消收藏专辑接口
+  collectAlbum,
+  getPlayList, // 新增：导入取消收藏专辑接口
 } from '@/api/personalCenter/index'
 import type {
   MusicVO,
@@ -216,7 +222,7 @@ import type {
   AlbumVO,
   AlbumCardVO,
 } from '@/types/personalCenter/index'
-import { usePlaylistStore } from '@/stores/playList.ts'
+import { usePlaylistStore } from '@/stores/playList'
 const playlistStore = usePlaylistStore()
 // 原有变量定义...
 const router = useRouter()
@@ -259,6 +265,7 @@ const loadCollectAlbums = async () => {
     const res: CollectAlbumResp = await getMyCollectAlbums({
       pageNum: albumPagination.pageNum,
       pageSize: albumPagination.pageSize,
+      userId: userId ? String(userId) : userInfo.value.id,
     })
 
     console.log('收藏专辑接口原始返回：', res)
@@ -314,6 +321,7 @@ const searchHistory = ref<string[]>(['周杰伦', '孤独的海', '小幸运'])
 const isCreateDialogOpen = ref(false)
 
 const userInfo = ref<UserInfoVO>({
+  id: '',
   isVip: false,
   playCount: 0,
   createdCount: 0,
@@ -408,8 +416,8 @@ const loadWeeklyListenCount = async () => {
 }
 // 修改onMounted：新增加载标签占比
 onMounted(async () => {
+  await loadUserInfo()
   await Promise.all([
-    loadUserInfo(),
     loadLikedSongs(),
     loadCollectPlaylists(),
     loadCreatePlaylists(),
@@ -430,12 +438,17 @@ const handleUpdateSuccess = async () => {
 const loadCollectPlaylists = async () => {
   try {
     collectPlaylistLoading.value = true
-    const res: CollectPlaylistResp = await getCollectPlaylists(collectPagination)
+    console.log('userId.value:', userId)
+    console.log('userInfo.value.id', userInfo.value.id)
+    const res: CollectPlaylistResp = await getPlayList({
+      ...collectPagination,
+      userId: userId || userInfo.value.id,
+    })
     console.log('加载收藏的歌单完整响应：', res)
 
-    if (res.success && res.data) {
-      if (res.data.records && res.data.records.length > 0) {
-        const records = res.data.records
+    if (res.data) {
+      if (res.data.dateList && res.data.dateList.length > 0) {
+        const records = res.data.dateList
         collectPlaylists.value = Array.isArray(records[0])
           ? (records[0] as PlaylistVO[])
           : (records as PlaylistVO[])
@@ -457,9 +470,13 @@ const loadCollectPlaylists = async () => {
 }
 
 const loadCreatePlaylists = async () => {
+  console.log(Number(userInfo.value.id))
   try {
     createPlaylistLoading.value = true
-    const res: CreatePlaylistResp = await getCreatePlaylists(createPagination)
+    const res: CreatePlaylistResp = await getCreatePlaylists({
+      ...createPagination,
+      userId: Number(userId) || Number(userInfo.value.id),
+    })
     console.log('加载创建的歌单：', res)
     if (res.success) {
       const pageData = res.data || { records: [], total: 0 }
@@ -483,15 +500,17 @@ const loadCreatePlaylists = async () => {
 
 const loadLikedSongs = async () => {
   loading.value = true
+  console.log('userId.value:', userInfo.value.id)
   try {
-    const res = await getMyLikeSongs({
-      pageNum: pagination.pageNum,
-      pageSize: pagination.pageSize,
+    const res = await getLikeMusic({
+      lastId: null,
+      size: 5,
+      userId: userId || userInfo.value.id,
     })
-    console.log('API原始返回:', res)
+    console.log('API原始返回:', res.data)
 
     if (res.success) {
-      const rawRecords = res.data?.records || []
+      const rawRecords = res.data?.dateList || []
       likedSongs.value = Array.isArray(rawRecords[0])
         ? (rawRecords[0] as MusicVO[])
         : (rawRecords as MusicVO[])
@@ -528,27 +547,27 @@ const handleDeleteChange = async (playlistId: string | number) => {
     console.error('处理删除变更失败:', error)
   }
 }
-const loadUserInfo = async () => {
-  try {
-    const res = await getUserInfo()
-    console.log(res)
-    console.log(res.data.likePlaylistId)
-    userInfo.value = {
-      ...res.data,
-      username: res.data.username,
-      introduction: res.data.introduction,
-      followCount: res.data.followCount || 0,
-      fansCount: res.data.fansCount || 0,
-      likeCount: res.data.likeCount || 0,
-      onlineStatus: res.data.onlineStatus || 0,
-      userRole: res.data.userRole || '普通用户',
-      likePlaylistId: res.data.likePlaylistId || undefined,
-    }
-    console.log(userInfo.value.lastCheckinTime)
-  } catch (error) {
-    console.error('加载用户信息失败:', error)
-  }
-}
+// const loadUserInfos = async () => {
+//   try {
+//     const res = await getUserInfo()
+//     console.log(res)
+//     console.log(res.data.likePlaylistId)
+//     userInfo.value = {
+//       ...res.data,
+//       username: res.data.username,
+//       introduction: res.data.introduction,
+//       followCount: res.data.followCount || 0,
+//       fansCount: res.data.fansCount || 0,
+//       likeCount: res.data.likeCount || 0,
+//       onlineStatus: res.data.onlineStatus || 0,
+//       userRole: res.data.userRole || '普通用户',
+//       likePlaylistId: res.data.likePlaylistId || undefined,
+//     }
+//     console.log(userInfo.value.lastCheckinTime)
+//   } catch (error) {
+//     console.error('加载用户信息失败:', error)
+//   }
+// }
 const handleViewAllLikedSongs = () => {
   console.log(userInfo.value.likePlaylistId)
   if (userInfo.value.likePlaylistId) {
@@ -750,6 +769,34 @@ const shareAlbum = (id: number | string) => {
 const exploreAlbums = () => {
   console.log('发现专辑')
   router.push('/discovery')
+}
+const route = useRoute()
+const userId = route.query.userId as string | undefined
+import { getOtherUserInfo } from '@/api/personalCenter'
+
+const isFollowing = ref(false)
+
+const loadUserInfo = async () => {
+  try {
+    let res
+    if (userId) {
+      // 看别人
+      res = await getOtherUserInfo({ userId: Number(userId) })
+      // 从响应中获取关注状态
+      isFollowing.value = res.data?.isFollowing || false
+    } else {
+      // 看自己
+      res = await getUserInfo()
+    }
+    userInfo.value = res.data
+    console.log('用户信息:', userInfo.value)
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+const handleFollowChange = (newIsFollowing: boolean) => {
+  isFollowing.value = newIsFollowing
 }
 </script>
 

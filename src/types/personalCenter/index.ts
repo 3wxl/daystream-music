@@ -33,6 +33,7 @@ export interface UserInfoVO {
   updatedTime?: string
   onlineStatus?: number
   likePlaylistId?: string
+  isFollowing?: boolean // 是否已关注
 }
 
 /**
@@ -137,6 +138,23 @@ export interface MusicDetailVO extends BaseMusicVO {
     sampleRate?: number
     channels?: number
   }
+  recommendMusic?: Array<{
+    id: number | string
+    title: string
+    similarity: number
+    musicName: string
+    coverUrl: string
+    musicianName: string
+    duration: string
+    isLiked: 0 | 1
+    likeCount: number
+    albumId: number
+    bpm: number
+    commentCount: number
+    albumName: string
+    isVip: 0
+    musicianId: 0
+  }> // 相似歌曲
 }
 
 /**

@@ -7,14 +7,18 @@ import type {
 } from '@/types/follow/index'
 
 // 获取关注的音乐人列表
-export const getFollowMusician = (params: FollowListParams): Promise<FollowListResp> => {
+export const getFollowMusician = (
+  params: FollowListParams & { userId: string },
+): Promise<FollowListResp> => {
   return request<FollowListResp>('/userbase/getFollowMusician', 'POST', {
     ...params,
   }).then((res) => res.data)
 }
 
 // 获取关注的普通用户列表
-export const getFollowNormal = (params: FollowListParams): Promise<FollowListResp> => {
+export const getFollowNormal = (
+  params: FollowListParams & { userId: string },
+): Promise<FollowListResp> => {
   return request<FollowListResp>('/userbase/getFollowNormal', 'POST', {
     ...params,
   }).then((res) => res.data)
@@ -31,8 +35,17 @@ export const cancelFollow = (userId: number): Promise<any> => {
 }
 
 // 获取粉丝列表（关注我的人）
-export const getFollower = (params: FollowListParams): Promise<FollowListResp> => {
+export const getFollower = (
+  params: FollowListParams & { userId: string },
+): Promise<FollowListResp> => {
   return request<FollowListResp>('/userbase/getFollowedList', 'POST', {
     ...params,
+  }).then((res) => res.data)
+}
+
+// 获取指定用户的信息
+export const getOtherUserInfo = (userId: number): Promise<any> => {
+  return request('/userbase/getOtherUserInfo', 'GET', undefined, {
+    params: { userId },
   }).then((res) => res.data)
 }

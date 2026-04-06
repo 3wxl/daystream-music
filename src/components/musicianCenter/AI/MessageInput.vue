@@ -9,11 +9,21 @@
             v-model="localValue"
             :placeholder="placeholder"
             :disabled="isLoading"
-            class="w-full bg-gray-800/70 border border-white/10 rounded-2xl py-4 px-5 pr-24 text-white text-sm focus:outline-none focus:border-pink-400/50 resize-none transition-all duration-300 placeholder-gray-500 backdrop-blur-sm group-hover:border-pink-400/40 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="w-full bg-gray-800/70 border border-white/10 rounded-2xl py-4 px-5 pr-48 text-white text-sm focus:outline-none focus:border-pink-400/50 resize-none transition-all duration-300 placeholder-gray-500 backdrop-blur-sm group-hover:border-pink-400/40 disabled:opacity-50 disabled:cursor-not-allowed"
             rows="1"
             @keydown.enter.exact.prevent="handleSend"
             @input="adjustTextareaHeight"
           ></textarea>
+
+          <!-- 终止按钮 -->
+          <div v-if="isLoading" class="absolute right-24 top-1/2 -translate-y-1/2">
+            <button
+              @click="$emit('stop')"
+              class="w-8 h-8 rounded-full flex items-center justify-center bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 text-red-400 hover:text-red-300 transition-all duration-300"
+            >
+              <i class="iconfont icon-stop text-xs">&#xe60b;</i>
+            </button>
+          </div>
 
           <!-- 发送按钮 -->
           <div class="absolute right-4 top-1/2 -translate-y-1/2">
@@ -67,6 +77,7 @@ interface Props {
 interface Emits {
   (e: 'update:modelValue', value: string): void
   (e: 'send'): void
+  (e: 'stop'): void
   (e: 'use-quick-phrase', phrase: QuickPhrase): void
 }
 

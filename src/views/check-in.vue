@@ -23,9 +23,6 @@
 
       <!-- 任务中心 -->
       <TaskCenter :tasks="tasks" @complete-task="handleTaskClick" />
-
-      <!-- 音浪记录 -->
-      <CoinRecords :records="coinRecords" @show-record="showRecordDetail" />
     </main>
 
     <!-- VIP特权详情弹窗 -->

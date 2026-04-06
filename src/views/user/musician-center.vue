@@ -6,10 +6,12 @@
       <UserHeader
         v-if="musicianInfo.id"
         :userInfo="musicianInfo"
-        :isOthersPage="false"
+        :isOthersPage="!!userId"
+        :isFollowing="isFollowing"
         @update-user-info="handleUpdateUserInfo"
         @upload-avatar="handleUploadAvatar"
         @upload-bg="handleUploadBg"
+        @follow-change="handleFollowChange"
       />
 
       <!-- 统一卡片样式：和个人中心保持一致的深色卡片风格 -->
@@ -21,14 +23,6 @@
             @click="switchTab('works')"
           >
             作品
-          </button>
-
-          <button
-            class="tab-button flex-1 h-full flex items-center justify-center border-none bg-transparent text-[#b8b8cc] text-base font-medium rounded-2xl cursor-pointer tab-button-transition relative z-10"
-            :class="{ 'text-white font-semibold': activeTab === 'dynamic' }"
-            @click="switchTab('dynamic')"
-          >
-            动态
           </button>
 
           <button
@@ -60,20 +54,51 @@
             >
               我的作品
             </h3>
-            <MusicianWorks class="mb-8" />
+
+            <div v-if="mySongs.length === 0" class="py-12 text-center">
+              <el-empty description="暂无已发布的音乐作品" class="text-gray-500" />
+              <el-button
+                type="primary"
+                class="mt-4 bg-pink-600 hover:bg-pink-700 border-none"
+                @click="$router.push('/musician/Upload')"
+              >
+                发布新作品
+              </el-button>
+            </div>
+            <div
+              v-else
+              v-infinite-scroll="loadMoreMusic"
+              :infinite-scroll-disabled="
+                musicLoading || musicPagination.pageNum >= musicPagination.pages
+              "
+              :infinite-scroll-distance="30"
+              :infinite-scroll-immediate="false"
+              class="mb-8 max-h-[300px] overflow-y-auto"
+            >
+              <LikedSongs :likedSongs="mySongs" />
+              <div v-if="musicLoading" class="py-4 text-center text-gray-500">
+                <el-icon class="is-loading"></el-icon>
+                加载中...
+              </div>
+              <div
+                v-else-if="musicPagination.pageNum >= musicPagination.pages && mySongs.length > 0"
+                class="py-4 text-center text-gray-500 text-sm"
+              >
+                已经到底了~
+              </div>
+            </div>
             <h3 class="mb-4 text-lg font-semibold text-gray-100 pl-3 border-l-3 border-pink-500">
               我的专辑
             </h3>
-            <!-- 统一专辑组件传参和事件 -->
+            <!-- 统一音乐人专辑组件传参和事件 -->
             <div v-if="albumLoading" class="py-12 text-center">
               <el-skeleton loading animation="wave" :rows="6" class="w-full skeleton-dark" />
             </div>
-            <div v-else-if="albums.length > 0">
-              <CollectedAlbum
-                :albums="filteredAlbums.length ? filteredAlbums : albums"
+            <div v-else-if="myAlbums.length > 0">
+              <MyAlbum
+                :albums="filteredmyAlbums.length ? filteredmyAlbums : myAlbums"
                 @goToAlbumDetail="goToAlbumDetail"
                 @playAlbum="playAlbum"
-                @toggleCollection="toggleCollection"
                 @shareAlbum="shareAlbum"
                 @exploreAlbums="exploreAlbums"
               />
@@ -82,23 +107,6 @@
               <el-empty description="暂无专辑" class="text-gray-500" />
               <p class="text-gray-400 text-sm mt-2">去创建你的第一张专辑吧</p>
             </div>
-          </div>
-
-          <!-- 动态Tab -->
-          <div
-            class="content-section"
-            :class="{ hidden: activeTab !== 'dynamic', active: activeTab === 'dynamic' }"
-          >
-            <h3
-              class="mt-0 mb-4 text-lg font-semibold text-gray-100 pl-3 border-l-3 border-pink-500"
-            >
-              我的动态
-            </h3>
-            <MusicianDynamic class="mb-8" />
-            <h3 class="mb-4 text-lg font-semibold text-gray-100 pl-3 border-l-3 border-pink-500">
-              收到的评论
-            </h3>
-            <CommentSection />
           </div>
 
           <!-- 音乐私藏馆Tab（和个人中心统一） -->
@@ -124,13 +132,15 @@
                 <div v-if="likedSongs.length > 0" class="w-[200px] text-center">
                   <span class="text-gray-400 text-sm">专辑</span>
                 </div>
-                <router-link to="/User/LikedSongsList">
-                  <div v-if="likedSongs.length > 0" class="shrink-0 w-[100px] flex justify-end">
-                    <el-button type="text" size="small" class="text-[#00f0ff] hover:text-white">
-                      查看全部
-                    </el-button>
-                  </div>
-                </router-link>
+                <div
+                  v-if="likedSongs.length > 0"
+                  class="shrink-0 w-[100px] flex justify-end"
+                  @click="handleViewAllLikedSongs"
+                >
+                  <el-button type="text" size="small" class="text-[#00f0ff] hover:text-white">
+                    查看全部
+                  </el-button>
+                </div>
               </div>
               <div v-if="loading" class="py-12 text-center">
                 <el-skeleton loading animation="wave" :rows="4" class="w-full skeleton-dark" />
@@ -160,7 +170,9 @@
                         <img src="../../assets/turntable-13463_256.gif" alt="" class="w-13" />
                         <h3 class="text-white font-semibold text-lg">我收藏的歌单</h3>
                       </div>
-                      <router-link to="/User/CollectedSongsList">
+                      <router-link
+                        :to="`/user/collected-songs-list?userId=${Number(musicianInfo.id) || Number(userId)}`"
+                      >
                         <el-button type="text" size="small" class="text-[#00f0ff] hover:text-white">
                           查看全部
                         </el-button>
@@ -196,7 +208,9 @@
                         <h3 class="text-white font-semibold text-lg">我创建的歌单</h3>
                       </div>
                       <div class="flex items-center gap-2">
-                        <router-link to="/User/CollectedSongsList">
+                        <router-link
+                          :to="`/user/collected-songs-list?userId=${Number(musicianInfo.id) || Number(userId)}`"
+                        >
                           <el-button
                             type="text"
                             size="small"
@@ -241,53 +255,6 @@
             </div>
 
             <!-- 收藏专辑（和个人中心统一） -->
-            <div
-              class="collection-albums-page bg-[#080812] text-white overflow-x-hidden rounded-2xl mt-6"
-            >
-              <main class="container mx-auto px-4 md:px-8 py-8">
-                <div class="mb-8 pb-3">
-                  <div class="flex items-center justify-between w-full">
-                    <button
-                      class="px-6 py-3 rounded-full bg-gradient-to-r from-[#ec4899] to-[#f472b6] text-white text-sm font-medium shadow-xl shadow-[#ec4899]/20 hover:shadow-[#ec4899]/40 transition-all duration-400 transform hover:-translate-y-1 active:scale-95"
-                    >
-                      我收藏的专辑
-                    </button>
-                    <router-link to="/User/CollectedAlbums">
-                      <button
-                        class="px-4 py-2 rounded-full bg-[#121224] border border-[rgba(236,72,153,0.2)] text-white/80 text-sm hover:bg-[#1a1a36] hover:text-white hover:border-[rgba(236,72,153,0.4)] transition-all duration-400 flex items-center gap-1"
-                      >
-                        <span>查看全部</span>
-                        <i class="iconfont text-xs">&#xe696;</i>
-                      </button>
-                    </router-link>
-                  </div>
-                </div>
-
-                <!-- 专辑列表（统一加载和空状态） -->
-                <div v-if="albumLoading" class="py-12 text-center">
-                  <el-skeleton loading animation="wave" :rows="6" class="w-full skeleton-dark" />
-                </div>
-                <div v-else-if="albums.length > 0">
-                  <CollectedAlbum
-                    :albums="filteredAlbums.length ? filteredAlbums : albums"
-                    @goToAlbumDetail="goToAlbumDetail"
-                    @playAlbum="playAlbum"
-                    @toggleCollection="toggleCollection"
-                    @shareAlbum="shareAlbum"
-                    @exploreAlbums="exploreAlbums"
-                  />
-                </div>
-                <div v-else class="py-6 text-center">
-                  <el-empty description="暂无收藏的专辑" class="text-gray-500" />
-                  <p class="text-gray-400 text-sm mt-2">去发现更多精彩的专辑吧</p>
-                  <router-link to="/album">
-                    <el-button type="text" class="text-[#00f0ff] hover:text-white mt-4">
-                      发现专辑
-                    </el-button>
-                  </router-link>
-                </div>
-              </main>
-            </div>
           </div>
         </div>
       </div>
@@ -306,13 +273,13 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { getMyAlbums } from '@/api/personalCenter/musician/index'
 // 统一导入个人中心的API和类型
 import {
   getUserInfo,
   updateUserInfo,
-  getMyLikeSongs,
-  getCollectPlaylists,
+  getLikeMusic,
+  getPlayList,
   getCreatePlaylists,
   createPlaylistApi,
   getWeeklyDailyListenCount,
@@ -340,20 +307,22 @@ import type {
   LikeRecordResponse,
 } from '@/types/personalCenter/index'
 
+import { getMyMusic } from '@/api/personalCenter/musician/index'
+
 const router = useRouter()
 
 // ========== 1. 统一Tab切换逻辑 ==========
-const activeTab = ref('works')
+const activeTab = ref<'works' | 'collection'>('works')
 const indicatorOffset = ref(0)
 const indicatorWidth = ref(0)
 const indicatorScale = ref(1)
 
-const switchTab = (tab: 'works' | 'dynamic' | 'collection') => {
+const switchTab = (tab: 'works' | 'collection') => {
   indicatorScale.value = 0.95
   activeTab.value = tab
 
   const tabButton = document.querySelector(
-    `.tab-button:nth-child(${tab === 'works' ? 1 : tab === 'dynamic' ? 2 : 3})`,
+    `.tab-button:nth-child(${tab === 'works' ? 1 : 2})`,
   ) as HTMLElement
   const tabsContainer = document.querySelector('.tabs') as HTMLElement
 
@@ -429,40 +398,160 @@ const musicTagRatio = ref<MusicTagRatioVO[]>([]) // 标签占比
 const dailyListenDuration = ref<number[]>([0, 0, 0, 0, 0, 0, 0]) // 每日听歌时长（分钟）
 const dailyListenSeconds = ref<number[]>([0, 0, 0, 0, 0, 0, 0]) // 每日听歌时长（秒）
 const loadingIds = ref<number[]>([]) // 点赞加载ID
+const myAlbums = ref<AlbumCardVO[]>([])
+const filteredmyAlbums = ref<AlbumCardVO[]>([])
+// 音乐作品数据
+const mySongs = ref<any[]>([]) // 音乐作品列表
+const musicLoading = ref(false) // 音乐作品加载状态
+const musicPagination = reactive({
+  pageNum: 1,
+  pageSize: 10,
+  total: 0,
+  pages: 0,
+})
+
+// 将 mySongs 转换为 LikedSongs 组件需要的格式
+// const mySongsForLikedSongs = computed(() => {
+//   return mySongs.value.map((song) => ({
+//     id: song.id,
+//     musicName: song.name,
+//     musicianName: '', // 音乐人自己的作品，不显示歌手名
+//     coverUrl: song.cover,
+//     albumName: song.album,
+//     duration: formatDuration(song.duration),
+//     isLiked: 0,
+//     likeCount: 0,
+//     isVip: 0,
+//     audioList: song.tags || [],
+//   }))
+// })
+
+// 格式化时长（秒转为 mm:ss 格式）
+const formatDuration = (seconds: number): string => {
+  if (!seconds || seconds <= 0) return '00:00'
+  const m = Math.floor(seconds / 60)
+    .toString()
+    .padStart(2, '0')
+  const s = (seconds % 60).toString().padStart(2, '0')
+  return `${m}:${s}`
+}
 
 // ========== 6. 统一弹窗状态（和个人中心一致） ==========
 const isCreateDialogOpen = ref(false)
 
-// ========== 7. 统一加载函数（复用个人中心的成熟逻辑） ==========
-// 加载用户信息
-const loadUserInfo = async () => {
+import { usePlaylistStore } from '@/stores/playList'
+const playlistStore = usePlaylistStore()
+const handleViewAllLikedSongs = () => {
+  console.log(musicianInfo.value.likePlaylistId)
+  if (musicianInfo.value.likePlaylistId) {
+    playlistStore.setCurrentPlaylist(musicianInfo.value.likePlaylistId)
+    router.push('/user/liked-songs-list')
+  } else {
+    ElMessage.warning('未找到喜欢的歌曲列表')
+  }
+}
+const loadMyMusic = async (isAppend: boolean = false) => {
+  musicLoading.value = true
   try {
-    const res = await getUserInfo()
-    musicianInfo.value = {
-      ...res.data,
-      username: res.data.username,
-      introduction: res.data.introduction,
-      followCount: res.data.followCount || 0,
-      fansCount: res.data.fansCount || 0,
-      likeCount: res.data.likeCount || 0,
-      onlineStatus: res.data.onlineStatus || 0,
-      userRole: '音乐人',
+    const res = await getMyMusic({
+      pageNum: musicPagination.pageNum,
+      pageSize: musicPagination.pageSize,
+      musicianId: Number(userId || musicianInfo.value.id),
+    })
+    console.log('获取我的音乐成功:', res.data)
+    if (res.success && res.data) {
+      let records = res.data.records || []
+      // 处理后端返回的特殊数据结构：records是包含数组的数组
+      if (Array.isArray(records) && records.length === 1 && Array.isArray(records[0])) {
+        // 如果是嵌套数组，使用内部数组
+        records = records[0]
+      }
+
+      // 确保records是数组
+      if (!Array.isArray(records)) {
+        records = []
+      }
+
+      const newSongs = records.map((item: any) => {
+        // 处理audioList，提取qualityType并转换为文字
+        const audioList =
+          item.audioList?.map((audio: any) => {
+            const qualityType = audio.qualityType
+            switch (qualityType) {
+              case 1:
+                return '标准'
+              case 2:
+                return '高清'
+              case 3:
+                return '无损'
+              case 4:
+                return '空间音频'
+              default:
+                return '标准'
+            }
+          }) || []
+        return {
+          ...item,
+          audioList: audioList, // 把处理好的音质列表加进去
+        }
+      })
+
+      // 根据是否是追加模式处理数据
+      if (isAppend) {
+        mySongs.value = [...mySongs.value, ...newSongs]
+      } else {
+        mySongs.value = newSongs
+      }
+
+      musicPagination.total = res.data.total || 0
+      musicPagination.pages = res.data.pages || 0
+    } else {
+      if (!isAppend) {
+        mySongs.value = []
+      }
+      musicPagination.total = 0
+      musicPagination.pages = 0
+      ElMessage.error(res.errorMsg || '获取作品列表失败')
     }
   } catch (error) {
-    console.error('加载用户信息失败:', error)
+    console.error('加载音乐作品失败:', error)
+    if (!isAppend) {
+      mySongs.value = []
+    }
+    ElMessage.error('加载作品列表失败')
+  } finally {
+    musicLoading.value = false
   }
+}
+
+// 无限滚动加载更多
+const loadMoreMusic = () => {
+  if (!musicLoading.value && musicPagination.pageNum < musicPagination.pages) {
+    musicPagination.pageNum++
+    console.log('加载更多音乐作品')
+    loadMyMusic(true)
+  }
+}
+
+// 重置音乐作品列表
+const resetMusicList = () => {
+  musicPagination.pageNum = 1
+  loadMyMusic()
 }
 
 // 加载喜欢的歌曲
 const loadLikedSongs = async () => {
   loading.value = true
   try {
-    const res = await getMyLikeSongs({
-      pageNum: pagination.pageNum,
-      pageSize: pagination.pageSize,
+    const res = await getLikeMusic({
+      size: 5,
+      lastId: null,
+      userId: userId || musicianInfo.value.id,
     })
+    console.log(musicianInfo.value)
+    console.log('loadLikedSongs 响应:', res)
     if (res.success) {
-      const rawRecords = res.data?.records || []
+      const rawRecords = res.data?.dateList || []
       likedSongs.value = Array.isArray(rawRecords[0])
         ? (rawRecords[0] as MusicVO[])
         : (rawRecords as MusicVO[])
@@ -483,10 +572,15 @@ const loadLikedSongs = async () => {
 const loadCollectPlaylists = async () => {
   try {
     collectPlaylistLoading.value = true
-    const res: CollectPlaylistResp = await getCollectPlaylists(collectPagination)
-    if (res.success && res.data) {
-      if (res.data.records && res.data.records.length > 0) {
-        const records = res.data.records
+    const res: CollectPlaylistResp = await getPlayList({
+      lastId: null,
+      size: 3,
+      userId: userId || musicianInfo.value.id,
+    })
+    console.log('获取收藏歌单成功:', res)
+    if (res.data) {
+      if (res.data.dateList && res.data.dateList.length > 0) {
+        const records = res.data.dateList
         collectPlaylists.value = Array.isArray(records[0])
           ? (records[0] as PlaylistVO[])
           : (records as PlaylistVO[])
@@ -510,7 +604,10 @@ const loadCollectPlaylists = async () => {
 const loadCreatePlaylists = async () => {
   try {
     createPlaylistLoading.value = true
-    const res: CreatePlaylistResp = await getCreatePlaylists(createPagination)
+    const res: CreatePlaylistResp = await getCreatePlaylists({
+      ...createPagination,
+      userId: userId || musicianInfo.value.id,
+    })
     if (res.success) {
       const pageData = res.data || { records: [], total: 0 }
       const rawRecords = pageData.records || []
@@ -531,50 +628,51 @@ const loadCreatePlaylists = async () => {
 }
 
 // 加载收藏专辑
-const loadCollectAlbums = async () => {
-  try {
-    albumLoading.value = true
-    const res: CollectAlbumResp = await getMyCollectAlbums({
-      pageNum: albumPagination.pageNum,
-      pageSize: albumPagination.pageSize,
-    })
+// const loadCollectAlbums = async () => {
+//   try {
+//     albumLoading.value = true
+//     const res: CollectAlbumResp = await getMyCollectAlbums({
+//       pageNum: albumPagination.pageNum,
+//       pageSize: albumPagination.pageSize,
+//       userId: userId || musicianInfo.value.id,
+//     })
 
-    if (res.success && res.data) {
-      const rawAlbums = (res.data.records || []).filter((album) => {
-        return album && album.id !== undefined && album.id !== null
-      })
+//     if (res.success && res.data) {
+//       const rawAlbums = (res.data.records || []).filter((album) => {
+//         return album && album.id !== undefined && album.id !== null
+//       })
 
-      totalAlbums.value = res.data.total || 0
+//       totalAlbums.value = res.data.total || 0
 
-      if (rawAlbums.length > 0) {
-        albums.value = rawAlbums.map((album: AlbumVO) => ({
-          id: album.id,
-          name: album.albumName || '未知专辑',
-          artist: album.musicianName || '未知歌手',
-          cover: album.coverUrl || 'https://picsum.photos/300/300?random=41',
-          songCount: album.musicCount || 0,
-          playCount: `${album.collectCount || 0}次收藏`,
-          collectTime: '2025-05-20',
-        }))
-      } else {
-        albums.value = []
-      }
+//       if (rawAlbums.length > 0) {
+//         albums.value = rawAlbums.map((album: AlbumVO) => ({
+//           id: album.id,
+//           name: album.albumName || '未知专辑',
+//           artist: album.musicianName || '未知歌手',
+//           cover: album.coverUrl || 'https://picsum.photos/300/300?random=41',
+//           songCount: album.musicCount || 0,
+//           playCount: `${album.collectCount || 0}次收藏`,
+//           collectTime: '2025-05-20',
+//         }))
+//       } else {
+//         albums.value = []
+//       }
 
-      filteredAlbums.value = [...albums.value]
-    } else {
-      ElMessage.warning(res.errorMsg || '暂无收藏的专辑')
-      albums.value = []
-      filteredAlbums.value = []
-    }
-  } catch (error) {
-    console.error('加载收藏专辑失败:', error)
-    ElMessage.error('加载收藏专辑失败，请稍后重试')
-    albums.value = []
-    filteredAlbums.value = []
-  } finally {
-    albumLoading.value = false
-  }
-}
+//       filteredAlbums.value = [...albums.value]
+//     } else {
+//       ElMessage.warning(res.errorMsg || '暂无收藏的专辑')
+//       albums.value = []
+//       filteredAlbums.value = []
+//     }
+//   } catch (error) {
+//     console.error('加载收藏专辑失败:', error)
+//     ElMessage.error('加载收藏专辑失败，请稍后重试')
+//     albums.value = []
+//     filteredAlbums.value = []
+//   } finally {
+//     albumLoading.value = false
+//   }
+// }
 
 // 加载每周听歌时长
 const loadWeeklyListenCount = async () => {
@@ -870,21 +968,81 @@ onMounted(async () => {
   setTimeout(() => {
     switchTab('works')
     window.addEventListener('resize', () => {
-      switchTab(activeTab.value as 'works' | 'dynamic' | 'collection')
+      switchTab(activeTab.value)
     })
   }, 100)
-
+  await loadUserInfo()
   await Promise.all([
-    loadUserInfo(),
+    loadMyAlbums(),
     loadLikedSongs(),
     loadCollectPlaylists(),
     loadCreatePlaylists(),
     loadWeeklyListenCount(),
     loadWeeklyTagRatio(),
-    loadCollectAlbums(),
+    loadMyMusic(),
   ])
 })
+// 加载我的专辑
+const loadMyAlbums = async () => {
+  try {
+    albumLoading.value = true
+    const res = await getMyAlbums({
+      pageNum: albumPagination.pageNum,
+      pageSize: albumPagination.pageSize,
+      userId: Number(userId || musicianInfo.value.id),
+    })
+    console.log('loadMyAlbums 响应:', res)
 
+    if (res.success && res.data) {
+      console.log('loadMyAlbums data:', res.data)
+      console.log('loadMyAlbums records:', res.data.records)
+      console.log('loadMyAlbums total:', res.data.total)
+
+      // 处理后端返回的特殊数据结构
+      let records = res.data.records || []
+      if (Array.isArray(records) && records.length === 1 && Array.isArray(records[0])) {
+        records = records[0]
+      }
+
+      const rawAlbums = records.filter((album: any) => {
+        return album && album.id !== undefined && album.id !== null
+      })
+
+      totalAlbums.value = res.data.total || 0
+      console.log('loadMyAlbums rawAlbums长度:', rawAlbums.length)
+
+      if (rawAlbums.length > 0) {
+        myAlbums.value = rawAlbums.map((album: any) => ({
+          id: album.id,
+          name: album.albumName || '未知专辑',
+          artist: album.musicianName || '未知歌手',
+          cover: album.coverUrl || 'https://picsum.photos/300/300?random=41',
+          songCount: album.musicCount || 0,
+          playCount: `${album.collectCount || 0}次收藏`,
+          collectTime: '2025-05-20',
+        }))
+      } else {
+        myAlbums.value = []
+        console.log('loadMyAlbums: 暂无专辑数据')
+      }
+
+      filteredmyAlbums.value = [...myAlbums.value]
+      console.log('loadMyAlbums albums.value:', myAlbums.value)
+    } else {
+      console.log('loadMyAlbums: 请求失败或数据为空')
+      myAlbums.value = []
+      filteredmyAlbums.value = []
+    }
+  } catch (error) {
+    console.error('加载我的专辑失败:', error)
+    ElMessage.error('加载我的专辑失败，请稍后重试')
+    myAlbums.value = []
+    filteredmyAlbums.value = []
+  } finally {
+    albumLoading.value = false
+    console.log('loadMyAlbums 最终 albums:', myAlbums.value)
+  }
+}
 // ========== 11. 筛选专辑（和个人中心一致） ==========
 const filteredAlbumsComputed = computed(() => {
   if (!searchKeyword.value) return albums.value
@@ -894,6 +1052,29 @@ const filteredAlbumsComputed = computed(() => {
       album.name.toLowerCase().includes(keyword) || album.artist.toLowerCase().includes(keyword),
   )
 })
+const route = useRoute()
+
+const userId = route.query.userId as string | undefined
+import { getOtherUserInfo } from '@/api/personalCenter'
+
+const isFollowing = ref(false)
+
+const loadUserInfo = async () => {
+  try {
+    let res
+    if (userId) {
+      res = await getOtherUserInfo({ userId: Number(userId) })
+      isFollowing.value = res.data?.isFollowing || false
+    } else {
+      res = await getUserInfo()
+    }
+    musicianInfo.value = res.data
+  } catch (err) {}
+}
+
+const handleFollowChange = (newIsFollowing: boolean) => {
+  isFollowing.value = newIsFollowing
+}
 </script>
 
 <style lang="scss" scoped>

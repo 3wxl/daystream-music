@@ -1,49 +1,65 @@
 <template>
-  <div class="mb-6">
-    <h3 class="text-white font-medium mb-3 flex items-center gap-2">
-      <i class="iconfont icon-spark text-pink-300">&#xe6e8;</i>
-      推荐创作主题
-    </h3>
-    <div class="space-y-2">
-      <div
-        v-for="theme in themes"
-        :key="theme.id"
-        @click="$emit('select-theme', theme)"
-        class="p-3 rounded-lg bg-white/5 hover:bg-pink-400/10 border border-white/10 hover:border-pink-400/30 transition-all cursor-pointer group"
-      >
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-pink-400/20 flex items-center justify-center">
-            <i class="iconfont text-pink-300 text-sm">{{ getIconChar(theme.iconCode) }}</i>
-          </div>
-          <div class="flex-1 min-w-0">
-            <h4 class="text-white font-medium text-xs truncate">{{ theme.title }}</h4>
-            <p class="text-gray-400 text-xs truncate">{{ theme.description }}</p>
-          </div>
-        </div>
-      </div>
+  <div class="space-y-2">
+    <div v-if="chatSessions.length === 0" class="text-center py-8 text-gray-500 text-sm">
+      暂无历史对话
     </div>
+
+    <div
+      v-for="conversation in chatSessions"
+      :key="conversation.id"
+      class="p-4 rounded-lg bg-white/5 hover:bg-pink-400/10 border border-white/10 hover:border-pink-400/30 transition-all duration-300 cursor-pointer group relative overflow-hidden"
+    >
+      <div class="absolute top-0 right-0 w-24 h-24 bg-pink-500/5 rounded-bl-full -z-10"></div>
+
+      <div class="flex items-start justify-between">
+        <h4 class="text-white font-medium text-sm truncate max-w-[80%]">
+          {{ conversation.title }}
+        </h4>
+
+        <!-- 👇 删除按钮：确保 stop 生效 -->
+        <button
+          @click.stop="$emit('delete-conversation', conversation.id)"
+          class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-400 transition-all duration-300 transform hover:scale-110 p-1 rounded-full hover:bg-red-400/10 z-10"
+        >
+          <i class="iconfont text-xs">&#xe607;</i>
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-gray-400 text-xs">
+          {{ conversation.createTime.replace('T', ' ') }}
+        </span>
+      </div>
+
+      <!-- 👇 选择会话：把点击写在这里，不要用绝对定位遮罩！ -->
+      <div
+        class="absolute inset-0 cursor-pointer"
+        @click="$emit('select-conversation', conversation)"
+      ></div>
+    </div>
+
+    <div v-if="loading" class="text-center py-4 text-gray-400 text-sm">加载中...</div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { Theme } from '@/types/lyricAssistant'
+interface chatSessions {
+  id: string
+  title: string
+  createTime: string
+  updateTime: string
+}
 
 interface Props {
-  themes: Theme[]
+  chatSessions: chatSessions[]
+  loading?: boolean
 }
 
 interface Emits {
-  (e: 'select-theme', theme: Theme): void
+  'select-conversation': [conversation: chatSessions]
+  'delete-conversation': [conversationId: string]
 }
 
 defineProps<Props>()
 defineEmits<Emits>()
-
-const getIconChar = (iconCode: string): string => {
-  const match = iconCode.match(/&#x([0-9a-f]+);/i)
-  if (match) {
-    return String.fromCodePoint(parseInt(match[1], 16))
-  }
-  return iconCode
-}
 </script>

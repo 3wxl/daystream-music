@@ -134,7 +134,7 @@
 
       <!-- 统计数据 -->
       <div class="grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-6 mt-6 md:mt-10">
-        <router-link to="/user/follow-list">
+        <router-link :to="`/user/follow-list?userId=${userId || props.userInfo.id}`">
           <div
             class="stat-item text-center p-2 hover:scale-105 transition-all duration-300 hover:text-[#FFD1DC] cursor-pointer"
           >
@@ -144,7 +144,7 @@
             <div class="text-gray-300 text-xs md:text-sm mt-1">关注</div>
           </div>
         </router-link>
-        <router-link to="/user/follower-list">
+        <router-link :to="`/user/follower-list?userId=${userId || props.userInfo.id}`">
           <div
             class="stat-item text-center p-2 hover:scale-105 transition-all duration-300 hover:text-[#FFD1DC] cursor-pointer"
           >
@@ -437,15 +437,18 @@
 
 <script setup lang="ts">
 // 1. 导入必要依赖
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
+const route = useRoute()
 import { ElForm, ElMessage } from 'element-plus'
 import type { UserInfoVO, EditForm } from '@/types/personalCenter/index'
 import { useUserInfoRules } from '@/utils/rules/updateInfo'
-
+import { followUser, cancelFollow } from '@/api/follow/index'
+const userId = route.query.userId as string | undefined
 // 2. 定义Props
 const props = defineProps<{
   userInfo: UserInfoVO
   isOthersPage: boolean
+  isFollowing?: boolean
 }>()
 
 // 3. 定义Emits
@@ -453,10 +456,11 @@ const emit = defineEmits<{
   'update-user-info': [editForm: EditForm]
   'upload-avatar': [file: File]
   'upload-bg': [file: File]
+  'follow-change': [isFollowing: boolean]
 }>()
 
 // 4. 响应式数据
-const isFollowing = ref(false)
+const isFollowing = ref(props.isFollowing || false)
 const showEditDialog = ref(false)
 const avatarInput = ref<HTMLInputElement | null>(null)
 const bgInput = ref<HTMLInputElement | null>(null)
@@ -595,9 +599,50 @@ const handleFileUpload = (type: 'avatar' | 'bg', e: Event) => {
 }
 
 // 12. 关注/取消关注
-const handleFollow = () => {
-  isFollowing.value = !isFollowing.value
+const handleFollow = async () => {
+  try {
+    const userId = props.userInfo.id
+    if (!userId) {
+      ElMessage.error('用户ID不存在')
+      return
+    }
+
+    if (isFollowing.value) {
+      // 取消关注
+      const res = await cancelFollow(Number(userId))
+      console.log(res)
+      if (res.data.success) {
+        isFollowing.value = false
+        ElMessage.success('已取消关注')
+        emit('follow-change', false)
+      } else {
+        ElMessage.error(res.errorMsg || '取消关注失败')
+      }
+    } else {
+      // 关注
+      const res = await followUser(Number(userId))
+      console.log(res)
+      if (res.data.success) {
+        isFollowing.value = true
+        ElMessage.success('关注成功')
+        emit('follow-change', true)
+      } else {
+        ElMessage.error(res.errorMsg || '关注失败')
+      }
+    }
+  } catch (error) {
+    console.error('关注操作失败:', error)
+    ElMessage.error('操作失败，请稍后重试')
+  }
 }
+
+// 监听 props.isFollowing 变化
+watch(
+  () => props.isFollowing,
+  (newVal) => {
+    isFollowing.value = newVal ?? false
+  },
+)
 
 // 13. 生命周期
 onMounted(() => {

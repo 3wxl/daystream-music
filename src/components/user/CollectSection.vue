@@ -88,7 +88,7 @@
         class="text-white text-sm font-medium line-clamp-1 group-hover:text-pink-400 transition-colors cursor-pointer"
         @click="handlePlay(playlist)"
       >
-        {{ playlist.name }}
+        {{ playlist.name || playlist.playlistName }}
       </div>
       <div class="text-gray-500 text-xs mt-1">{{ playlist.playCount }}首歌曲</div>
     </div>
@@ -125,8 +125,10 @@ import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+import { useRoute } from 'vue-router'
+const route = useRoute()
 const playlistStore = usePlaylistStore()
-
+const userId = route.query.userId as string | undefined
 // 定义props
 interface Props {
   playlists: PlaylistVO[]
@@ -372,7 +374,10 @@ const fetchPlaylists = async (isLoadMore = false) => {
   }
 
   try {
-    const res = await getCreatePlaylists(pageParams.value)
+    const res = await getCreatePlaylists({
+      ...pageParams.value,
+      userId: Number(userId || 0),
+    })
     console.log(res)
     if (res.success && res.data) {
       // 替换第384行附近的逻辑如下：

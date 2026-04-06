@@ -66,10 +66,11 @@
             class="w-6 h-6 rounded-full glass-effect flex items-center justify-center transition-all duration-300 hover:bg-white/30 hover:scale-110 flex-shrink-0 ml-2"
             @click.stop="handlePlaySong(song)"
           >
-            <i class="iconfont text-xs">&#xe623;</i>
+            <i class="iconfont text-xs" v-if="isSongPlaying(song.id)">&#xe87a;</i>
+            <i class="iconfont text-xs" v-else>&#xe623;</i>
           </button>
         </div>
-        
+
         <!-- 无歌曲时显示暂无歌曲 -->
         <div
           v-if="chart.topSongs && chart.topSongs.length === 0"
@@ -89,6 +90,13 @@
           <i
             class="iconfont text-white text-sm transition-transform duration-200"
             :class="{ 'scale-110': isHovered }"
+            v-if="isChartPlaying"
+            >&#xe87a;</i
+          >
+          <i
+            class="iconfont text-white text-sm transition-transform duration-200"
+            :class="{ 'scale-110': isHovered }"
+            v-else
             >&#xe623;</i
           >
         </button>
@@ -104,7 +112,8 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue'
+import { usePlayerStore } from '@/stores/player'
+const playerStore = usePlayerStore()
 
 // 接收父组件参数
 const props = defineProps({
@@ -124,6 +133,17 @@ const emit = defineEmits(['hover-enter', 'hover-leave', 'play-chart', 'play-song
 // 响应式数据
 const isHovered = ref(false)
 
+// 计算属性：判断当前歌曲是否正在播放
+const isSongPlaying = (songId) => {
+  return playerStore.currentSong?.id === songId && playerStore.isPlaying
+}
+
+// 计算属性：判断当前榜单的第一首歌是否正在播放
+const isChartPlaying = computed(() => {
+  const firstSong = props.chart.topSongs?.[0]
+  return firstSong && playerStore.currentSong?.id === firstSong.id && playerStore.isPlaying
+})
+
 // 处理悬停
 const handleHoverEnter = () => {
   isHovered.value = true
@@ -137,11 +157,26 @@ const handleHoverLeave = () => {
 
 // 播放榜单/歌曲
 const handlePlayChart = () => {
-  emit('play-chart', props.chart)
+  const firstSong = props.chart.topSongs?.[0]
+  if (firstSong && playerStore.currentSong?.id === firstSong.id && playerStore.isPlaying) {
+    // 如果当前歌曲正在播放，暂停它
+    playerStore.togglePlay()
+    console.log('暂停当前歌曲bangdan ')
+  } else {
+    // 否则播放榜单
+    emit('play-chart', props.chart)
+  }
 }
 
 const handlePlaySong = (song) => {
-  emit('play-song', song)
+  if (playerStore.currentSong?.id === song.id && playerStore.isPlaying) {
+    // 如果当前歌曲正在播放，暂停它
+    playerStore.togglePlay()
+    console.log('暂停当前歌曲')
+  } else {
+    // 否则播放歌曲
+    emit('play-song', song, props.chart)
+  }
 }
 
 // 获取图表图片

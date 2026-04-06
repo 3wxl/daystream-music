@@ -43,9 +43,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { usePlayerStore } from '@/stores/player'
+const playerStore = usePlayerStore()
 import { getRankHome } from '@/api/rank'
 import type { RankHomeVO, MusicianVO } from '@/types/rank'
+import { id } from 'element-plus/es/locale'
 
 // 响应式数据
 const bannerImage = ref(
@@ -111,15 +113,18 @@ const fetchRankData = async () => {
 
         // 处理歌曲列表：兜底空数组
         const topSongs = (rankVO.musicList || []).map((song, index) => ({
+          id: song.id,
           title: song.musicName || '未知歌曲',
           artist: song.musicianName || '未知歌手',
           rank: index + 1,
+          audioList: song.audioList || [],
         }))
 
         const chart = {
+          id: rankVO.id,
           title: rankVO.name || '未知榜单',
           subtitle: rankVO.description || '暂无描述',
-          updateTime: formatUpdateTime(rankVO.updatedTime || new Date().toISOString()), // 修正字段名
+          updateTime: formatUpdateTime(rankVO.updateTime || new Date().toISOString()), // 修正字段名
           backgroundImage:
             topSongs.length > 0
               ? rankVO.musicList[0].coverUrl
@@ -201,12 +206,22 @@ const getRandomGradient = () => {
 }
 
 // 播放函数
-const playChart = (chart) => {
-  console.log('播放榜单:', chart.title)
+const playChart = async (chart) => {
+  console.log('播放歌曲:', chart.topSongs[0], chart.topSongs)
+  try {
+    await playerStore.playSong(chart.topSongs[0], chart.topSongs)
+  } catch (err) {
+    console.error('播放歌曲失败:', err)
+  }
 }
 
-const playSong = (song) => {
-  console.log('播放歌曲:', song.title, '-', song.artist)
+const playSong = async (chart, song) => {
+  console.log('播放歌曲:', song, chart.topSongs)
+  try {
+    await playerStore.playSong(song, chart.topSongs)
+  } catch (err) {
+    console.error('播放歌曲失败:', err)
+  }
 }
 
 // 初始化

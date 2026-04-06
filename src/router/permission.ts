@@ -8,7 +8,7 @@ const whiteList = ['UserAuth']
 
 router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
-  
+
   // 拦截 QQ 回调的 code (自己去换取 Token)
   if (to.query.code && to.query.state) {
     try {
@@ -16,7 +16,7 @@ router.beforeEach(async (to, from, next) => {
       const res = await getQQLoginCallback(to.query.code as string, to.query.state as string)
       // 根据接口定义，获取到的字符串/对象作为 token
       const accessToken = typeof res.data === 'string' ? res.data : (res.data as any)?.token
-      
+
       if (accessToken) {
         setToken(accessToken)
         userStore.token = accessToken
@@ -61,14 +61,20 @@ router.beforeEach(async (to, from, next) => {
       next({ path: '/' })
     } else {
       if (Object.keys(userStore.userInfo).length > 0) {
-        if((to.name as string).startsWith('admin')&&userStore.userInfo.userRole.indexOf('管理员')===-1){
-            next('/UserAuth')
-          }
+        if (
+          (to.name as string).startsWith('admin') &&
+          userStore.userInfo.userRole.indexOf('管理员') === -1
+        ) {
+          next('/UserAuth')
+        }
         next()
       } else {
         try {
           await userStore.getUsersInfo()
-          if((to.name as string).startsWith('admin')&&userStore.userInfo.userRole.indexOf('管理员')===-1){
+          if (
+            (to.name as string).startsWith('admin') &&
+            userStore.userInfo.userRole.indexOf('管理员') === -1
+          ) {
             next('/UserAuth')
           }
           next({ ...to, replace: true })

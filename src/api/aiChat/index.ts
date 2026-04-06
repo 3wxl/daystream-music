@@ -15,6 +15,7 @@ export const fetchStream = async (
   onMessage: (data: string) => void,
   onError?: (error: Error) => void,
   onComplete?: () => void,
+  signal?: AbortSignal,
 ): Promise<void> => {
   try {
     const token = localStorage.getItem('auth_token') || ''
@@ -27,6 +28,7 @@ export const fetchStream = async (
         Accept: 'text/event-stream', // 或者 'text/plain'
       },
       body: JSON.stringify(params),
+      signal,
     })
 
     if (!response.ok) {
@@ -77,6 +79,11 @@ export const fetchStream = async (
 
     onComplete?.()
   } catch (error) {
+    // 忽略中止错误，因为这是用户主动操作
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.log('✅ 流式请求已被用户中止')
+      return
+    }
     console.error('流式请求失败:', error)
     onError?.(error as Error)
   }
@@ -168,6 +175,19 @@ export const getMessages = async (params: {
   }
 }
 
+export const getSessionList = async (params: {
+  sessionType?: string
+  pageNum: number
+  pageSize: number
+}): Promise<any[]> => {
+  try {
+    const response = await request<any[]>('/ai/sessions', 'get', params)
+    return response.data || []
+  } catch (error) {
+    console.error('获取用户会话列表失败:', error)
+    throw error
+  }
+}
 /**
  * 删除会话
  */

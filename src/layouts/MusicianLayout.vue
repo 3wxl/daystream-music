@@ -68,14 +68,13 @@
                 >1</span
               >
             </button>
-            <div
-              class="w-10 h-10 rounded-full overflow-hidden border-2 border-white/60 hover:border-white transition-all duration-300"
-            >
-              <img
+            <div class="w-30 h-10 overflow-hidden hover:border-white transition-all duration-300">
+              <!-- <img
                 src="https://picsum.photos/id/64/200/200"
                 alt="用户头像"
                 class="w-full h-full object-cover"
-              />
+              /> -->
+              <router-link to="/user/musician-center" class="text-white"> 个人中心</router-link>
             </div>
           </div>
         </div>
@@ -91,12 +90,9 @@
       </div>
     </footer>
   </div>
-  <AiChatWindow />
 </template>
 
 <script setup>
-import AiChatWindow from '@/components/musicianCenter/AI/AiChatWindow.vue'
-
 const navOpacity = ref(0)
 const scrollThreshold = 2000
 const handleScroll = () => {

@@ -46,8 +46,6 @@ export default defineConfig({
       resolvers: [ElementPlusResolver()],
       // 生成组件类型声明文件（可选，建议开启）
       dts: 'src/components.d.ts',
-      // 排除AiChatWindow组件，避免与手动导入冲突
-      exclude: [/AiChatWindow\.vue$/],
     }),
   ],
   resolve: {

@@ -179,7 +179,11 @@ export const getWeeklyTagRatio = () => {
     returnFullResponse: false,
   })
 }
-export const getMyCollectAlbums = (params: { pageNum: number; pageSize?: number }) => {
+export const getMyCollectAlbums = (params: {
+  pageNum: number
+  pageSize?: number
+  userId?: string | number
+}) => {
   return request(
     '/user/home/getMyCollectAlbums', // url
     'POST', // method
@@ -189,6 +193,46 @@ export const getMyCollectAlbums = (params: { pageNum: number; pageSize?: number 
       noToken: false,
     },
   )
+}
+
+export const getLikeMusic = (params: {
+  userId: string | number
+  lastId?: string | null
+  size?: number
+}) => {
+  return request(
+    '/userbase/getLikeMusic',
+    'POST',
+    { ...params },
+    {
+      showLoading: true,
+      noToken: false,
+    },
+  )
+}
+
+export const getPlayList = (params: {
+  pageNum: number
+  pageSize?: number
+  userId?: string | number
+}) => {
+  return request(
+    '/userbase/getPlayList',
+    'POST',
+    { ...params },
+    {
+      showLoading: true,
+      noToken: false,
+    },
+  )
+}
+
+export const getOtherUserInfo = (params: { userId: number }) => {
+  return request('/userbase/getOtherUserInfo', 'GET', undefined, {
+    showLoading: true,
+    noToken: false,
+    params: params,
+  })
 }
 export const collectAlbum = (targetId: string | number, targetType: 1 | 2 = 2) => {
   return request<{
