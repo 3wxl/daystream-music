@@ -12,7 +12,7 @@
       label="类型"
       :options="[
         {value: 0, label: '正常'},
-        {value: 2, label: '封禁'}
+        {value: 1, label: '封禁'}
       ]"
       v-model="musicianType"
       class="ml-5"

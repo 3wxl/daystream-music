@@ -23,6 +23,7 @@
               <IconFontSymbol name="quanbutongguo"/>
               <span class="text-sm">认证音乐人</span>
             </div>
+            <p class="mt-2 text-[12px] text-pink-400">认证日期：{{ musicianData.createdTime }}</p>
           </div>
         </div>
         <div class="mt-6 pt-6 border-t border-gray-200 flex items-center justify-around">
