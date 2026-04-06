@@ -1,41 +1,15 @@
 <template>
   <div class="h-full flex flex-col overflow-hidden">
-    <div class="shrink-0 overflow-x-auto overflow-y-hidden tag-bar-container">
-      <TagBar :tags="artistFilterTags" />
-    </div>
-
     <div class="flex-1 min-h-0 overflow-y-auto">
-      <router-view />
+      <ArtistList />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import TagBar from '@/components/TagBar.vue';
 
-// 修改后的歌手标签数据
-const artistFilterTags = [
-  // 路径修改为 /artist/artist
-  { name: '歌手/推荐', path: '/artist/artist' },
+import ArtistList from '@/views/artist/artist.vue';
 
-  // 以下标签的 path 保持 /album/mylist，并增加 query 参数用于筛选
-  { name: '周杰伦', path: '/album/mylist', query: { cat: 'jay-chou' } },
-  { name: '陈奕迅', path: '/album/mylist', query: { cat: 'eason-chan' } },
-  { name: 'Taylor Swift', path: '/album/mylist', query: { cat: 'taylor-swift' } },
-  { name: 'Ariana Grande', path: '/album/mylist', query: { cat: 'ariana-grande' } },
-  { name: '林俊杰', path: '/album/mylist', query: { cat: 'jj-lin' } },
-  { name: '邓紫棋', path: '/album/mylist', query: { cat: 'gloria-tang' } },
-  { name: 'Ed Sheeran', path: '/album/mylist', query: { cat: 'ed-sheeran' } },
-  { name: 'BTS', path: '/album/mylist', query: { cat: 'bts' } },
-  { name: 'Blackpink', path: '/album/mylist', query: { cat: 'blackpink' } },
-  { name: '五月天', path: '/album/mylist', query: { cat: 'mayday' } },
-  { name: 'Adele', path: '/album/mylist', query: { cat: 'adele' } },
-  { name: '窦唯', path: '/album/mylist', query: { cat: 'dou-wei' } },
-  { name: '坂本龙一', path: '/album/mylist', query: { cat: 'sakamoto' } },
-  { name: 'Billie Eilish', path: '/album/mylist', query: { cat: 'billie-eilish' } },
-  { name: '王菲', path: '/album/mylist', query: { cat: 'faye-wong' } },
-  { name: '李荣浩', path: '/album/mylist', query: { cat: 'li-ronghao' } },
-];
 </script>
 
 <style lang="scss" scoped>

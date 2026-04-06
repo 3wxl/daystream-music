@@ -14,6 +14,11 @@ export default defineConfig({
     // 2. 配置自动路由插件（放在 vue() 之前）
     Pages({
       dirs: 'src/views',
+      exclude: [
+        '**/ws/chat**',
+        '**/components/**',
+        '**/*.iframe.html'
+      ],
       // 可选：配置路由生成规则（如文件名是否转小写等）
       extendRoute(route) {
         // 示例：给所有路由添加 meta.title

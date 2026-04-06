@@ -11,7 +11,7 @@
       <div class="flex flex-wrap gap-3">
         <el-button
           type="primary"
-          @click="$emit('openAddDialog')"
+          @click="openAddDialog"
           class="bg-blue-500 hover:bg-blue-600 text-white transition-all"
         >
           <IconFontSymbol name="tianjia" class="text-[white] mr-1" size="16px"></IconFontSymbol>
@@ -41,5 +41,16 @@
 <script setup>
 import { defineProps, defineEmits, ref } from 'vue';
 
-const emit = defineEmits(['openAddDialog', 'refreshData', 'preview']);
+const emit = defineEmits(['openAddDialog', 'refreshData', 'preview','isEditModeFun']);
+const props = defineProps({
+  resetForm: {
+    type: Function,
+    required: true
+  }
+})
+function openAddDialog(){
+  emit('openAddDialog');
+  emit('isEditModeFun', false);
+  props.resetForm()
+}
 </script>

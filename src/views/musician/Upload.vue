@@ -183,85 +183,185 @@
       align-center
     >
       <div class="p-4">
-        <div class="flex gap-4 mb-6 justify-center">
-          <button
-            @click="uploadType = 'audio'"
-            class="px-6 py-2 rounded-full font-medium transition-all text-sm"
-            :class="
-              uploadType === 'audio'
-                ? 'bg-pink-600 text-white'
-                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-            "
-          >
-            发布音乐
-          </button>
-          <button
-            @click="uploadType = 'mv'"
-            class="px-6 py-2 rounded-full font-medium transition-all text-sm"
-            :class="
-              uploadType === 'mv'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-            "
-          >
-            发布 MV
-          </button>
-        </div>
-
-        <div v-if="uploadType === 'audio'" class="animate-fade-in">
-          <div
-            class="border-2 border-dashed border-gray-700 rounded-xl p-8 text-center hover:border-pink-500/50 hover:bg-pink-500/5 transition-all cursor-pointer mb-6"
-            @click="triggerFileSelect"
-          >
-            <div v-if="!hasFile">
-              <i class="fa fa-cloud-upload text-4xl text-gray-500 mb-2"></i>
-              <p class="text-sm font-medium text-gray-300">点击上传音频</p>
-              <p class="text-xs text-gray-500 mt-1">支持 MP3, WAV (Max 50MB)</p>
-            </div>
-            <div v-else>
-              <i class="fa fa-check-circle text-4xl text-green-500 mb-2"></i>
-              <p class="text-white">已选择: demo_track.mp3</p>
-              <button @click.stop="hasFile = false" class="text-xs text-red-400 mt-2 underline">
-                移除
-              </button>
+        <div class="animate-fade-in">
+          <div class="grid grid-cols-2 gap-4 mb-6">
+            <div
+              v-for="(label, key) in qualityLabels"
+              :key="key"
+              class="border-2 border-dashed border-gray-700 rounded-xl p-4 text-center hover:border-pink-500/50 hover:bg-pink-500/5 transition-all cursor-pointer relative"
+              @click="triggerQualitySelect(key)"
+            >
+              <input
+                type="file"
+                :ref="(el) => (qualityRefs[key] = el)"
+                class="hidden"
+                accept=".mp3,.wav,.flac"
+                @change="(e) => onQualityFileChange(key, e)"
+              />
+              <div v-if="!audioFiles[key]">
+                <i class="fa fa-cloud-upload text-2xl text-gray-500 mb-1"></i>
+                <p class="text-xs font-medium text-gray-300">{{ label }}</p>
+                <p class="text-[10px] text-gray-500">点击上传</p>
+              </div>
+              <div v-else>
+                <i class="fa fa-check-circle text-2xl text-green-500 mb-1"></i>
+                <p class="text-[10px] text-white truncate px-2" :title="audioFiles[key].name">
+                  {{ audioFiles[key].name }}
+                </p>
+                <button
+                  @click.stop="audioFiles[key] = null"
+                  class="text-[10px] text-red-400 mt-1 underline"
+                >
+                  移除
+                </button>
+              </div>
             </div>
           </div>
 
-          <el-form label-position="top" size="large">
-            <el-form-item label="标题">
-              <el-input placeholder="给你的作品起个名字" class="dark-input" />
+          <el-form
+            ref="musicFormRef"
+            :rules="musicUploadRule"
+            :model="audioForm"
+            label-position="top"
+            size="large"
+          >
+            <el-form-item label="歌曲名" prop="musicName">
+              <el-input
+                v-model="audioForm.musicName"
+                placeholder="给你的作品起个名字"
+                class="dark-input"
+              />
             </el-form-item>
+
             <div class="grid grid-cols-2 gap-4">
-              <el-form-item label="封面">
-                <el-input placeholder="封面图片链接" class="dark-input" />
+              <el-form-item label="歌曲封面">
+                <div class="flex items-center gap-4">
+                  <div
+                    class="w-20 h-20 rounded border-2 border-dashed border-gray-700 flex items-center justify-center cursor-pointer hover:border-pink-500/50"
+                    @click="triggerCoverSelect"
+                  >
+                    <img
+                      v-if="coverPreview"
+                      :src="coverPreview"
+                      class="w-full h-full object-cover"
+                    />
+                    <i v-else class="fa fa-plus text-gray-500"></i>
+                  </div>
+                  <input
+                    type="file"
+                    ref="coverInput"
+                    class="hidden"
+                    accept="image/*"
+                    @change="onCoverFileChange"
+                  />
+                  <div class="text-xs text-gray-500">建议尺寸 500x500</div>
+                </div>
               </el-form-item>
-              <el-form-item label="流派">
-                <el-select placeholder="选择风格" class="w-full">
-                  <el-option label="流行" value="pop" />
-                  <el-option label="说唱" value="rap" />
+
+              <el-form-item label="是否 VIP 专属">
+                <el-radio-group v-model="audioForm.isVip">
+                  <el-radio :label="0">否</el-radio>
+                  <el-radio :label="1">是</el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <el-form-item v-if="audioForm.isVip === 1" label="单价（音浪）" prop="price">
+                <el-input
+                  v-model="audioForm.price"
+                  placeholder="输入所需音浪币"
+                  class="dark-input"
+                />
+              </el-form-item>
+
+              <el-form-item label="节奏 (BPM)" prop="bpm">
+                <el-input-number
+                  v-model="audioForm.bpm"
+                  :min="1"
+                  :max="300"
+                  class="w-full dark-input"
+                />
+              </el-form-item>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <el-form-item label="版权类型" prop="licenseType">
+                <el-select
+                  v-model="audioForm.licenseType"
+                  placeholder="选择版权类型"
+                  class="w-full"
+                >
+                  <el-option label="CC-BY (署名即可免费使用)" value="CC-BY" />
+                  <el-option label="CC-BY-NC (署名 + 非商用)" value="CC-BY-NC" />
+                  <el-option label="CC-BY-SA (相同方式共享)" value="CC-BY-SA" />
+                  <el-option label="CC-BY-ND (禁止演绎)" value="CC-BY-ND" />
+                </el-select>
+              </el-form-item>
+
+              <el-form-item label="所属专辑 (可选)" prop="albumId">
+                <el-select
+                  v-model="audioForm.albumId"
+                  placeholder="选择所属专辑"
+                  class="w-full"
+                  clearable
+                  :loading="loadingAlbums"
+                >
+                  <el-option
+                    v-for="album in myAlbums"
+                    :key="album.idStr || album.id"
+                    :label="album.albumName || album.name"
+                    :value="album.idStr || album.id"
+                  />
                 </el-select>
               </el-form-item>
             </div>
-          </el-form>
-        </div>
 
-        <div v-else class="animate-fade-in">
-          <div
-            class="border-2 border-dashed border-gray-700 rounded-xl p-8 text-center hover:border-blue-500/50 hover:bg-blue-500/5 transition-all cursor-pointer mb-6"
-            @click="triggerMvSelect"
-          >
-            <div v-if="!hasMvFile">
-              <i class="fa fa-video-camera text-4xl text-gray-500 mb-2"></i>
-              <p class="text-sm font-medium text-gray-300">点击上传MV</p>
-            </div>
-            <div v-else>
-              <i class="fa fa-check-circle text-4xl text-green-500 mb-2"></i>
-              <p class="text-white">已选择: my_mv.mp4</p>
-            </div>
-          </div>
-          <el-form label-position="top" size="large">
-            <el-form-item label="MV标题">
-              <el-input class="dark-input" />
+            <el-form-item label="歌词文件 (LRC)">
+              <div class="flex items-center gap-4">
+                <div
+                  class="flex-1 py-3 px-4 rounded-lg bg-white/5 border border-dashed border-gray-700 hover:border-pink-500/50 transition-all cursor-pointer flex items-center justify-between"
+                  @click="triggerLyricSelect"
+                >
+                  <span class="text-sm" :class="lyricFile ? 'text-white' : 'text-gray-500'">
+                    {{ lyricFile ? lyricFile.name : '点击上传 .lrc 格式歌词' }}
+                  </span>
+                  <i v-if="lyricFile" class="fa fa-check-circle text-green-500"></i>
+                  <i v-else class="fa fa-upload text-gray-500"></i>
+                </div>
+                <input
+                  type="file"
+                  ref="lyricInput"
+                  class="hidden"
+                  accept=".lrc"
+                  @change="onLyricFileChange"
+                />
+                <button
+                  v-if="lyricFile"
+                  @click.stop="lyricFile = null"
+                  class="ml-2 px-2 py-1 text-[10px] bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 transition-colors"
+                >
+                  清除
+                </button>
+              </div>
+            </el-form-item>
+
+            <el-form-item label="音乐标签 (最多选择3个)" prop="tags">
+              <div class="flex flex-wrap gap-2">
+                <div
+                  v-for="tag in availableTags"
+                  :key="tag.id"
+                  @click="toggleTag(tag)"
+                  class="px-3 py-1.5 rounded-full border text-xs cursor-pointer transition-all"
+                  :class="
+                    audioForm.tags.includes(tag.id)
+                      ? 'bg-pink-600 border-pink-600 text-white'
+                      : 'bg-white/5 border-gray-700 text-gray-400 hover:border-pink-500/50'
+                  "
+                >
+                  {{ tag.tagName }}
+                </div>
+              </div>
             </el-form-item>
           </el-form>
         </div>
@@ -274,7 +374,7 @@
             class="bg-linear-to-r! from-purple-600! to-pink-600! border-none!"
             @click="handleUpload"
           >
-            {{ uploadType === 'audio' ? '确认发布' : '开始上传' }}
+            确认发布
           </el-button>
         </div>
       </template>
@@ -283,26 +383,220 @@
 </template>
 
 <script lang="ts" setup>
+import { getMyAlbums, uploadMusic } from '@/api/music'
+import { getAllTags } from '@/api/playlist'
+import { useUploadtRules } from '@/utils/rules/upload'
+import type { FormInstance } from 'element-plus'
 import { ElMessage } from 'element-plus'
-import { ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
+import { useRoute } from 'vue-router'
 
+const { musicUploadRule } = useUploadtRules()
+const musicFormRef = ref<FormInstance>()
+const route = useRoute()
 const showUploadDialog = ref(false)
-const uploadType = ref<'audio' | 'mv'>('audio')
-const hasFile = ref(false)
-const hasMvFile = ref(false)
 
-const triggerFileSelect = () => {
-  hasFile.value = true
-}
-const triggerMvSelect = () => {
-  hasMvFile.value = true
+// 音频上传表单
+const audioForm = reactive({
+  musicName: '',
+  isVip: 0,
+  price: '',
+  bpm: 120,
+  licenseType: 'CC-BY',
+  albumId: '',
+  tags: [] as any[],
+})
+
+const qualityLabels: Record<string, string> = {
+  standard: '标清音质',
+  highDefinition: '高清音质',
+  lossless: '无损',
+  spatialAudio: '空间音频',
 }
 
-const handleUpload = () => {
-  ElMessage.success('模拟：上传成功，进入审核流程')
-  showUploadDialog.value = false
-  hasFile.value = false
-  hasMvFile.value = false
+const audioFiles = reactive<Record<string, File | null>>({
+  standard: null,
+  highDefinition: null,
+  lossless: null,
+  spatialAudio: null,
+})
+
+const qualityRefs = reactive<Record<string, any>>({})
+
+const coverInput = ref<HTMLInputElement | null>(null)
+const lyricInput = ref<HTMLInputElement | null>(null)
+const coverFile = ref<File | null>(null)
+const lyricFile = ref<File | null>(null)
+const coverPreview = ref('')
+
+onMounted(() => {
+  if (route.query.type === 'audio') {
+    showUploadDialog.value = true
+  }
+  fetchTags()
+  fetchAlbums()
+})
+
+const fetchTags = async () => {
+  try {
+    const res = await getAllTags()
+    if (res.success && res.data) {
+      // 提取扁平化的标签列表
+      availableTags.value = Object.values(res.data).flat()
+    }
+  } catch (error) {
+    console.error('获取标签失败:', error)
+  }
+}
+
+const fetchAlbums = async () => {
+  loadingAlbums.value = true
+  try {
+    const res = await getMyAlbums(1,40)
+    if (res.success && res.data) {
+      myAlbums.value = res.data.records
+    }
+  } catch (error) {
+    console.error('获取专辑失败:', error)
+  } finally {
+    loadingAlbums.value = false
+  }
+}
+
+const availableTags = ref<any[]>([])
+const myAlbums = ref<any[]>([])
+const loadingAlbums = ref(false)
+
+const toggleTag = (tag: any) => {
+  const index = audioForm.tags.indexOf(tag.id)
+  if (index > -1) {
+    audioForm.tags.splice(index, 1)
+  } else {
+    if (audioForm.tags.length >= 3) {
+      return ElMessage.warning('最多只能选择 3 个标签')
+    }
+    audioForm.tags.push(tag.id)
+  }
+}
+
+const triggerQualitySelect = (key: string) => {
+  qualityRefs[key]?.click()
+}
+
+const onQualityFileChange = (key: string, e: Event) => {
+  const files = (e.target as HTMLInputElement).files
+  if (files && files[0]) {
+    audioFiles[key] = files[0]
+  }
+}
+
+// 移除旧的单文件处理逻辑
+
+const triggerCoverSelect = () => {
+  coverInput.value?.click()
+}
+
+const onCoverFileChange = (e: Event) => {
+  const files = (e.target as HTMLInputElement).files
+  if (files && files[0]) {
+    coverFile.value = files[0]
+    coverPreview.value = URL.createObjectURL(files[0])
+  }
+}
+
+const triggerLyricSelect = () => {
+  lyricInput.value?.click()
+}
+
+const onLyricFileChange = (e: Event) => {
+  const files = (e.target as HTMLInputElement).files
+  if (files && files[0]) {
+    lyricFile.value = files[0]
+  }
+}
+
+const handleUpload = async () => {
+  // 检查是否至少选择了一个音质
+  const selectedQualities = Object.keys(audioFiles).filter(key => audioFiles[key] !== null)
+  if (selectedQualities.length === 0) {
+    return ElMessage.warning('请至少选择一种音质的音频文件')
+  }
+
+  if (!coverFile.value) {
+    ElMessage.warning('请选择歌曲封面')
+    return
+  }
+  if (!lyricFile.value) {
+    ElMessage.warning('请上传 LRC 歌词文件')
+    return
+  }
+
+  // 开始元数据校验
+  if (!musicFormRef.value) return
+  const valid = await musicFormRef.value.validate().catch(() => false)
+  if (!valid) {
+    return ElMessage.warning('请补全表单必填信息')
+  }
+
+  try {
+    const formData = new FormData()
+
+    // 构造元数据 musicDTO
+    const musicMetadata = {
+      musicName: audioForm.musicName,
+      albumId: audioForm.albumId || null, // 不强制转 Number，避免大数精度丢失
+      bpm: Number(audioForm.bpm),
+      licenseType: audioForm.licenseType,
+      isVip: Number(audioForm.isVip),
+      price: Number(audioForm.price || 0),
+      tags: audioForm.tags,
+    }
+
+    // 调试输出
+    console.log('musicDTO:', JSON.stringify(musicMetadata))
+
+    // 文档中指定musicDTO为json格式
+    const musicJsonBlob = new Blob([JSON.stringify(musicMetadata)],
+    {type:'application/json'}
+  )
+    formData.append('musicDTO', musicJsonBlob)
+
+    // 3. 追加所有选中的音质文件
+    selectedQualities.forEach((key) => {
+      if (audioFiles[key]) {
+        formData.append(key, audioFiles[key] as File)
+      }
+    })
+
+    // 4. 歌词部分
+    if (lyricFile.value) {
+      formData.append('lyric', lyricFile.value)
+    }
+ box
+
+    const res = await uploadMusic(formData)
+    if (res.success) {
+      ElMessage.success('上传成功，进入审核流程')
+      showUploadDialog.value = false
+      // 重置所有文件和表单
+      Object.keys(audioFiles).forEach(key => audioFiles[key] = null)
+      coverFile.value = null
+      coverPreview.value = ''
+      lyricFile.value = null
+      Object.assign(audioForm, {
+        musicName: '',
+        isVip: 0,
+        price: '',
+        bpm: 120,
+        licenseType: 'CC-BY',
+        albumId: '',
+        tags: [],
+      })
+    }
+  } catch (error) {
+    console.error('Upload failed:', error)
+    ElMessage.error('上传音频文件音质不符')
+  }
 }
 </script>
 
@@ -324,8 +618,8 @@ const handleUpload = () => {
   position: relative;
   z-index: 2;
   padding: 2rem;
-  background: #130a21; 
-  border-radius: 15px; 
+  background: #130a21;
+  border-radius: 15px;
   height: 100%;
   border: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
@@ -509,7 +803,6 @@ const handleUpload = () => {
   animation: shine-pulse 2s infinite;
 }
 </style>
-
 
 <route lang="yaml">
 meta:

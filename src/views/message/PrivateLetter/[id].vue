@@ -14,11 +14,12 @@
       <p class="text-[12px] text-pink-400 font-[600] max-w-[300px] line-clamp-1 mt-1">在线</p>
     </div>
     <div class="ml-auto mr-5">
-      <IconFontSymbol name="sandian" class="hover:text-pink-500 text-white cursor-pointer duration-300" size="20px"/>
+      <IconFontSymbol name="sandian" class="hover:text-pink-500 text-white cursor-pointer duration-300" size="20px" @click="isShowManage= !isShowManage"/>
     </div>
   </header>
   <section class="w-full relative" style="height: calc(100% - 84px)">
     <ChatContent :id="id"/>
+    <PrivateManageBar v-model="isShowManage"/>
   </section>
 </template>
 
@@ -26,7 +27,7 @@
   import { useRoute } from 'vue-router'
   const route = useRoute()
   let id = ref(route.params.id)
-
+  let isShowManage = ref(false)       // 控制右侧管理栏的显示
   watch(
     () => route.params.id,
     (newId) => {

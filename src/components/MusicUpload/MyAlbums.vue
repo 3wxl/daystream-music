@@ -52,7 +52,7 @@
     :model="albumForm"
     :rules="albumUploadRule"
     label-position="top">
-      <el-form-item label="专辑名称">
+      <el-form-item label="专辑名称" prop="albumName">
         <el-input placeholder="请输入专辑名称" class="dark-input" v-model="albumForm.albumName"/>
       </el-form-item>
       <el-form-item label="歌单封面" prop="coverFile">
@@ -68,7 +68,7 @@
           <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
         </el-upload>
       </el-form-item>
-      <el-form-item label="简介">
+      <el-form-item label="简介" prop="introduction">
         <el-input type="textarea" :rows="3" placeholder="介绍一下这张专辑..." class="dark-input" v-model="albumForm.introduction" />
       </el-form-item>
       <el-form-item label="专辑状态" prop="status">
@@ -150,7 +150,7 @@ const handleDelete = (album: any) => {
 
 // 获取专辑列表
 const getAlbums = async () => {
-  const res = await getMyAlbum(1,40)
+  const res: any = await getMyAlbum('1','40')
   albums.value = res.data.records.flat()
   console.log(albums.value)
   loading.value = false

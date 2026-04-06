@@ -12,7 +12,7 @@
     label: string;
     options: {
       label: string;
-      value: string;
+      value: any;
     }[];
   }>();
   let typeVal = defineModel<string>({ required: true });

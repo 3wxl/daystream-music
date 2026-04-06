@@ -1,7 +1,7 @@
 import { useUserStore } from '@/stores/user'
 import { getToken, setToken } from '@/utils/request'
 import router from './index'
-import { getQQLoginCallback } from '@/api/auth'
+import { getQQLoginCallback, getTokenByTempCode } from '@/api/auth'
 import { ElMessage } from 'element-plus'
 
 const whiteList = ['UserAuth']
@@ -38,19 +38,29 @@ router.beforeEach(async (to, from, next) => {
     return
   }
 
-  // 2. 兼容之前的后端直接发 Token 拦截逻辑
-  if (to.query.token) {
-    const accessToken = to.query.token as string
-    setToken(accessToken)
-    userStore.token = accessToken
-    console.log('第三方登录成功')
-    await userStore.getUsersInfo().catch((err) => {
-      console.error('获取用户信息失败', err)
-    })
+  // 2. 兼容后端发tempCode 拦截逻辑
+  if (to.query.tempCode) {
+    const tempCode = to.query.tempCode as string
+    try {
+      const res = await getTokenByTempCode(tempCode)
+      const accessToken = res.data?.token
 
-    // 重定向到主页
+      if (accessToken) {
+        setToken(accessToken)
+        userStore.token = accessToken
+        console.log('第三方登录成功(通过tempCode换取)')
+        await userStore.getUsersInfo().catch((err) => {
+          console.error('获取用户信息失败', err)
+        })
+      }
+    } catch (err: any) {
+      console.error('通过tempCode获取Token失败', err)
+      ElMessage.error(err.message || '登录验证失败')
+    }
+
+    // 重定向到主页，清除地址栏的 tempCode
     const newQuery = { ...to.query }
-    delete newQuery.token
+    delete newQuery.tempCode
     next({ path: '/', query: newQuery, replace: true })
     return
   }
@@ -71,10 +81,15 @@ router.beforeEach(async (to, from, next) => {
       } else {
         try {
           await userStore.getUsersInfo()
+<<<<<<< HEAD
           if (
             (to.name as string).startsWith('admin') &&
             userStore.userInfo.userRole.indexOf('管理员') === -1
           ) {
+=======
+          const toName = (to.name || '') as string
+          if((toName as string).startsWith('admin')&&userStore.userInfo.userRole.indexOf('管理员')===-1){
+>>>>>>> 49ed0dc8114a58c3911b3645d2a53c860dcd8d9d
             next('/UserAuth')
           }
           next({ ...to, replace: true })

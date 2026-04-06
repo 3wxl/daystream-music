@@ -55,11 +55,12 @@ export default defineConfig({
     },
     server: {
         port: 5173,
+        hmr:true,
         proxy: {
             '/api': {
-                target: 'http://39.96.214.163:8080',
-                changeOrigin: true,
-                rewrite: (path) => path.replace(/^\/api/, ''),
+              target: 'http://39.96.214.163:8080',
+              changeOrigin: true,
+              rewrite: (path) => path.replace(/^\/api/, ''),
             },
         },
     },

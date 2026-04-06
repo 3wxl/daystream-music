@@ -60,6 +60,12 @@
 </template>
 
 <script setup lang="ts">
+  const props = defineProps({
+    musicianData: {
+      type: Object,
+      default: () => ({})
+    }
+  })
   let showDetail = defineModel<boolean>({ default: false })
 </script>
 

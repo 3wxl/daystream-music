@@ -3,8 +3,9 @@
     <!-- 头部操作区 -->
     <BannerHeader
       @openAddDialog="openAddDialog"
-      @refreshData="refreshData"
       @preview="isPreview = true"
+      @isEditModeFun="isEditModeFun"
+      :resetForm="resetForm"
     />
 
     <!-- 展示规则提示 -->
@@ -20,15 +21,18 @@
 
     <!-- 轮播图表格列表 -->
     <BannerListTable
-      :filteredBanners="filteredBanners"
       :formatDate="formatDate"
-      :isCurrentlyDisplayed="isCurrentlyDisplayed"
-      :getClickTypeText="getClickTypeText"
-      :getClickTypeTagType="getClickTypeTagType"
-      @edit="openEditDialog"
-      @delete="handleDelete"
+      :BannerList="BannerList"
       :searchKeyword="searchKeyword"
-      @searchChange="(key)=>{searchKeyword = key}"
+      :total="total"
+      @prePage="skipPage"
+      @nextPage="skipPage"
+      @clickPage="skipPage"
+      @searchChange="searchChange"
+      :page="page"
+      @refreshList="refreshList"
+      @isEditModeFun="isEditModeFun"
+      @openUpdate="openUpdate"
     />
 
     <!-- 预览组件 -->
@@ -38,20 +42,16 @@
     <BannerFormDialog
       v-model="isDialogOpen"
       :isEditMode="isEditMode"
-      :form="form"
-      :formRules="formRules"
       :mockMusics="mockMusics"
       :mockPlaylists="mockPlaylists"
-      @submit="submitForm"
       @close="closeDialog"
       @openActionDrawer="isActionDrawerOpen = true"
-      @formChange="formChange"
       v-if="isDialogOpen"
+      @refreshList="refreshList"
     />
 
     <BannerActionDrawer
       v-model="isActionDrawerOpen"
-      :form="form"
       :mockMusics="mockPlaylists"
       :mockPlaylists="mockPlaylists"
       @confirm="confirmActionSetting"
@@ -66,22 +66,24 @@
   </div>
 </template>
 
-<script setup >
+<script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { ElMessage } from 'element-plus';
 
 // 导入子组件
-import BannerHeader from '@/components/admin/OperationManage/BannerManage/BannerHeader.vue';
-import BannerRuleTip from '@/components/admin/OperationManage/BannerManage/BannerRuleTip.vue';
-import BannerListTable from '@/components/admin/OperationManage/BannerManage/BannerListTable.vue';
-import BannerDisplayList from '@/components/admin/OperationManage/BannerManage/BannerDisplayList.vue';
-import BannerFormDialog from '@/components/admin/OperationManage/BannerManage/BannerFormDialog.vue';
-import BannerActionDrawer from '@/components/admin/OperationManage/BannerManage/BannerActionDrawer.vue';
-import BannerDeleteDialog from '@/components/admin/OperationManage/BannerManage/BannerDeleteDialog.vue';
-import BannerPreview from '@/components/admin/OperationManage/BannerPreview.vue';
+import BannerHeader from '@/components/Admin/OperationManage/BannerManage/BannerHeader.vue';
+import BannerRuleTip from '@/components/Admin/OperationManage/BannerManage/BannerRuleTip.vue';
+import BannerListTable from '@/components/Admin/OperationManage/BannerManage/BannerListTable.vue';
+import BannerDisplayList from '@/components/Admin/OperationManage/BannerManage/BannerDisplayList.vue';
+import BannerFormDialog from '@/components/Admin/OperationManage/BannerManage/BannerFormDialog.vue';
+import BannerActionDrawer from '@/components/Admin/OperationManage/BannerManage/BannerActionDrawer.vue';
+import BannerDeleteDialog from '@/components/Admin/OperationManage/BannerManage/BannerDeleteDialog.vue';
+import BannerPreview from '@/components/Admin/OperationManage/BannerPreview.vue';
+import {useBannerStore} from '@/stores/admin/banner'
+import {GetBannerListAPI,SearchBannerListAPI} from '@/api/Admin/operation/banner';
+import { pa } from 'element-plus/es/locale';
 
-import {GetBannerListAPI} from '@/api/Admin/operation/banner';
-
+let { form } = useBannerStore();
 // 模拟数据
 const mockMusics = ref([
   { id: 1, name: '晴天', singer: '周杰伦', album: '叶惠美', duration: '4:29', url: 'music/1.mp3' },
@@ -116,26 +118,24 @@ const deleteId = ref(null);               // 当前正在删除的轮播图ID
 const banners = ref([]);                  // 当前展示的轮播图数据
 const BannerList = reactive([])           // 轮播图列表数据
 const filteredBanners = reactive([]);     // 根据搜索过滤后的轮播图列表
+const total = ref(0);                      // 轮播图总数
+const page = ref(1);                       // 当前页码
+
 
 const clickType = {
   0:'无点击行为',
   1:'跳转到歌单',
-  2:'跳转到歌手',
-  3:'跳转到专辑',
-  4:'跳转到MV',
+  2:'跳转到歌曲',
+  3:'跳转到秒杀活动',
+  4:'链接跳转',
 }
 const clickTypeText = {
   0:'无',
   1:'歌单',
-  2:'歌手',
-  3:'专辑',
-  4:'MV',
+  2:'歌曲',
+  3:'活动',
+  4:'链接',
 }
-
-let form = reactive({
-
-})
-
 
 // 工具方法
 const formatDate = (date) => {
@@ -148,18 +148,41 @@ const formatDate = (date) => {
   const seconds = String(d.getSeconds()).padStart(2, '0');
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
+function resetForm(){       // 重置表单数据
+  form.title = null;
+  form.imageUrl = null;
+  form.linkUrl = null;
+  form.sortOrder = null;
+  form.status = null;
+  form.actionType = null;
+  form.targetId = null;
+  form.targetName = null;
+}
 
 // 方法
 async function getDisplayBanners(){           // 获取当前展示的四个轮播图
   let disBanRes = await GetBannerListAPI(1,4);
   banners.value = disBanRes.data.records;
-  console.log(banners.value);
 }
-async function getBannerList(pageNum,pageSize){         // 获取轮播图列表
-  let banRes = await GetBannerListAPI(pageNum,pageSize);
+async function getBannerList(pageNum,pageSize,keyword){         // 获取轮播图列表
+  let banRes = await SearchBannerListAPI(pageNum,pageSize,keyword);
   BannerList.splice(0,BannerList.length,...banRes.data.records);
+  total.value = banRes.data.total;
+  page.value = pageNum;
 }
 
+function skipPage(page:number){
+  getBannerList(page,8,searchKeyword.value)
+}
+function refreshList(){
+  getBannerList(page.value,8,searchKeyword.value)
+  getDisplayBanners()
+}
+
+function searchChange(keyword:string){
+  searchKeyword.value = keyword;
+  getBannerList(1,8,searchKeyword.value)
+}
 // 事件处理
 function openAddDialog(){         // 打开添加轮播图对话框
   isDialogOpen.value = true;
@@ -167,17 +190,20 @@ function openAddDialog(){         // 打开添加轮播图对话框
 }
 
 function closeDialog(){           // 关闭对话框
-  console.log('关闭对话框');
+  resetForm()
   isDialogOpen.value = false;
 }
-
-function formChange(newform){
-  form = newform;
+function isEditModeFun(val:boolean){       // 设置编辑模式
+  isEditMode.value = val;
 }
+function openUpdate(){           // 打开修改抽屉
+  isDialogOpen.value = true;
+}
+
 // 初始化
 onMounted(()=>{
   getDisplayBanners();
-  getBannerList(1,10)
+  getBannerList(1,8,'')
 })
 
 </script>

@@ -134,8 +134,9 @@
 <script lang="ts" setup>
 import { getSearchHotList, getSearchSuggestion } from '@/api/home/search/index'
 import { useUserStore } from '@/stores/user'
-import { ref } from 'vue'
+import { ref  } from 'vue'
 import { useRouter } from 'vue-router'
+const $wsChat:any = inject('$wsChat');        // 引入wsChat
 const router = useRouter()
 const isCheckedIn = ref(window.localStorage.getItem('checkIn_status.isCheckedIn'))
 const currentWaves = ref(window.localStorage.getItem('checkIn_status.currentWaves'))
@@ -159,7 +160,7 @@ watch(input,(newVal) => {
   console.log('输入关键字',newVal)
   if(!newVal){
     suggestList.value = []
-    return 
+    return
   }
   getSearchSuggestion(newVal).then((res) => {
     console.log('热搜联想词', res.data.suggestList)
@@ -172,6 +173,7 @@ watch(input,(newVal) => {
 })
 
 onMounted(() => {
+  // $wsChat.init()
   getSearchHotList().then((res) => {
     searchHotList.value = res.data.map((t) => {
       return {

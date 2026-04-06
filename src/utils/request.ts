@@ -133,7 +133,6 @@ service.interceptors.response.use(
 
     const headers = response.headers
     // 测试是否携带了新的token请求头
-    console.log('响应头', headers)
     const newToken = headers['authorization'] || headers['Authorization']
     const isRefreshed = headers['token-refreshed'] || headers['Token-Refreshed']
     if (newToken && isRefreshed) {
@@ -253,7 +252,7 @@ async function request<T = unknown>(
   }
 
   // 判断请求类型：GET/DELETE 默认用 params，其他用 data
-  const isGetOrDelete = ['get', 'delete'].includes(method.toLowerCase())
+  const isGetOrDelete = ['get'].includes(method.toLowerCase())
   const isParams = config?.isParams // 新置：是否强制作为 query 参数
 
   if (submitData) {

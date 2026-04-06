@@ -12,6 +12,7 @@ import App from './App.vue'
 import router from './router'
 import './router/permission'
 import { useFlashSaleReminderStore } from './stores/flashSaleReminder'
+import wsChat from './utils/wsChat'
 
 
 const pinia = createPinia()
@@ -19,7 +20,10 @@ pinia.use(piniaPluginPersistedstate)
 
 const app = createApp(App)
 
+app.provide('$wsChat', wsChat);
 app.config.globalProperties.$echarts = echarts
+
+// wsChat.init();     // 项目启动时初始化wsChat
 
 app.component('QuillEditor', QuillEditor)
 app.use(pinia)

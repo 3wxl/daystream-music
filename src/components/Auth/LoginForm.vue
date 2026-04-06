@@ -99,6 +99,7 @@ const handleLogin = async (formEl: FormInstance | undefined) => {
 
 // 图形验证码
 onMounted(() => {
+  console.log(2)
   changeCaptcha()
 })
 

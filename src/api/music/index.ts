@@ -1,5 +1,6 @@
+import type { MusicDetailVO, MusicPlayVO } from '@/types/personalCenter'
+import type { MusicUploadRequest } from '@/types/personalCenter/musician'
 import request from '@/utils/request'
-import type { MusicPlayVO, MusicDetailVO } from '@/types/personalCenter'
 
 /**
  * 获取音乐播放链接
@@ -22,6 +23,7 @@ export const getMusicPlayUrl = (params: { musicId: number | string; quality: num
     },
   )
 }
+
 export const getMusicDetail = (musicId: string) => {
   return request<{
     success: boolean
@@ -37,4 +39,23 @@ export const getMusicDetail = (musicId: string) => {
       returnFullResponse: false,
     },
   )
+}
+
+// 上传音乐
+export function uploadMusic(data: FormData) {
+  return request('/music/upload', 'post', data, { showLoading: true,timeout:350000 })
+}
+
+
+// 分页查询我的音乐作品
+export function getMyMusicList(pageNum: number, pageSize: number) {
+  return request<any>('/musician/home/getMyMusic', 'post', {
+    pageNum,
+    pageSize,
+  })
+}
+
+// 获取我的专辑列表
+export function getMyAlbums(pageNum:number,pageSize:number) {
+  return request<any[]>('/music/albums', 'get',{pageNum,pageSize})
 }

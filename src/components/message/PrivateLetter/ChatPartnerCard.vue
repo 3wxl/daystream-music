@@ -1,3 +1,4 @@
+<!-- 左侧聊天列表项的一个一个小卡片模板 -->
 <template>
   <transition name="slide-up-appear" appear>
     <div class="pb-1 group relative shadow-custom mx-[10px] rounded-[12px] duration-300 cursor-pointer mb-3 hover:bg-pink-500/10" :class="isActived?'bg-pink-500/10':''" @click="updateActive">
