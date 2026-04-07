@@ -122,9 +122,8 @@
 
           <el-tooltip content="添加到歌单" placement="top">
             <button
-              class="flex items-center justify-center w-5 h-5 transition-colors"
-              :class="song.isLiked ? 'text-amber-400' : 'text-gray-400 hover:text-amber-400'"
-              @click.stop="handleLike(String(song.id))"
+              class="flex items-center justify-center w-5 h-5 transition-colors text-gray-400 hover:text-amber-400"
+              @click.stop="openPlaylistDialog(song.id)"
             >
               <i class="iconfont text-sm">&#xe6cb;</i>
             </button>
@@ -133,17 +132,18 @@
           <el-tooltip content="评论" placement="top">
             <button
               class="flex items-center justify-center w-5 h-5 text-gray-400 hover:text-white transition-colors"
+              @click.stop="openCommentDialog(song.id)"
             >
               <i class="iconfont text-sm">&#xe62c;</i>
             </button>
           </el-tooltip>
-          <el-tooltip content="分享" placement="top">
+          <!-- <el-tooltip content="分享" placement="top">
             <button
               class="flex items-center justify-center w-5 h-5 text-gray-400 hover:text-white transition-colors"
             >
               <i class="iconfont text-sm">&#xe64f;</i>
             </button>
-          </el-tooltip>
+          </el-tooltip> -->
         </div>
         <!-- 专辑名：后端返回的是albumName，且可能为null -->
         <div class="w-[200px] text-gray-500 text-xs text-center">
@@ -154,7 +154,7 @@
       <div class="flex items-center gap-3 shrink-0 w-[100px] justify-end">
         <i
           class="iconfont cursor-pointer transition-all text-lg"
-          :class="song.isLiked ? 'text-[#FF4D4F]' : 'text-gray-500'"
+          :class="song.isLiked || song.like ? 'text-[#FF4D4F]' : 'text-gray-500'"
           @click.stop="handleLike(String(song.id))"
           v-loading="loadingIds.includes(String(song.id))"
           element-loading-text=""
@@ -163,12 +163,43 @@
           &#xe8c3;
         </i>
         <!-- 时长：后端直接返回格式化后的字符串，无需转换 -->
-        <div class="text-gray-500 text-xs">
+        <!-- <div class="text-gray-500 text-xs">
           {{ song.duration }}
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
+
+  <!-- 歌单选择对话框 -->
+  <el-dialog v-model="showPlaylistDialog" title="添加到歌单" width="400px" class="dark-dialog">
+    <div v-loading="playlistLoading" element-loading-text="加载歌单中...">
+      <el-select v-model="selectedPlaylistId" placeholder="请选择歌单" class="w-full">
+        <el-option
+          v-for="playlist in playlists"
+          :key="playlist.id"
+          :label="playlist.name"
+          :value="playlist.id"
+        />
+      </el-select>
+    </div>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="showPlaylistDialog = false">取消</el-button>
+        <el-button type="primary" @click="confirmAddToPlaylist">确认</el-button>
+      </span>
+    </template>
+  </el-dialog>
+
+  <!-- 评论对话框 -->
+  <el-dialog
+    v-model="showCommentDialog"
+    title="歌曲评论"
+    width="600px"
+    class="dark-dialog"
+    style="background-color: #0a0a14; color: white"
+  >
+    <CommentSection v-if="selectedSongId" :target-id="String(selectedSongId)" :target-type="1" />
+  </el-dialog>
 </template>
 <script setup lang="ts">
 // 原有导入
@@ -176,18 +207,34 @@ import type { MusicVO, LikeRecordResponse } from '@/types/personalCenter'
 import { likeRecord } from '@/api/personalCenter'
 // 新增：导入播放状态
 import { usePlayerStore } from '@/stores/player'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElDialog, ElSelect, ElOption } from 'element-plus'
 // 导入下载音乐API
 import { downloadMusic } from '@/api/music/download'
+// 导入歌单相关API
+import { addSongToPlaylist, getMyPlaylistByTime } from '@/api/personalCenter'
+// 导入评论组件
+import CommentSection from './CommentSection.vue'
 
 const playerStore = usePlayerStore() // 初始化播放状态
 
 // 原有Props和逻辑不变
 interface Props {
   likedSongs: MusicVO[]
+  userId?: number
 }
 const props = defineProps<Props>()
 const loadingIds = ref<string[]>([])
+
+// 歌单选择相关状态
+const showPlaylistDialog = ref(false)
+const selectedPlaylistId = ref<number | null>(null)
+const playlists = ref<any[]>([])
+const playlistLoading = ref(false)
+const currentSongId = ref<number | null>(null)
+
+// 评论对话框相关状态
+const showCommentDialog = ref(false)
+const selectedSongId = ref<number | null>(null)
 
 const likedSongsList = computed(() => {
   return Array.isArray(props.likedSongs) ? props.likedSongs : []
@@ -221,6 +268,71 @@ watch(
 onMounted(async () => {
   await nextTick()
 })
+
+// 获取歌单列表
+const fetchPlaylists = async () => {
+  if (!props.userId) {
+    ElMessage.warning('用户ID不存在')
+    return
+  }
+
+  playlistLoading.value = true
+  try {
+    const res = await getMyPlaylistByTime({
+      userId: props.userId,
+      pageNum: 1,
+      pageSize: 50,
+    })
+    console.log(res)
+    if (res.success && res.data) {
+      playlists.value = res.data.records[0] || []
+    }
+  } catch (error) {
+    console.error('获取歌单列表失败:', error)
+    ElMessage.error('获取歌单列表失败')
+  } finally {
+    playlistLoading.value = false
+  }
+}
+
+// 打开歌单选择对话框
+const openPlaylistDialog = (songId: number) => {
+  currentSongId.value = songId
+  selectedPlaylistId.value = null
+  fetchPlaylists()
+  showPlaylistDialog.value = true
+}
+
+// 确认添加歌曲到歌单
+const confirmAddToPlaylist = async () => {
+  if (!currentSongId.value || !selectedPlaylistId.value) {
+    ElMessage.warning('请选择歌单')
+    return
+  }
+
+  try {
+    const res = await addSongToPlaylist({
+      playlistId: selectedPlaylistId.value,
+      songId: currentSongId.value,
+    })
+    console.log(res)
+    if (res.success) {
+      ElMessage.success('添加成功')
+      showPlaylistDialog.value = false
+    } else {
+      ElMessage.error(res.errorMsg || '添加失败')
+    }
+  } catch (error) {
+    console.error('添加歌曲到歌单失败:', error)
+    ElMessage.error('添加失败，请重试')
+  }
+}
+
+// 打开评论对话框
+const openCommentDialog = (songId: number) => {
+  selectedSongId.value = songId
+  showCommentDialog.value = true
+}
 
 const handleLike = async (songId: string) => {
   if (loadingIds.value.includes(songId)) return
@@ -426,5 +538,50 @@ img[alt='歌曲封面']:error {
 ::v-deep .el-dropdown-menu__item.is-disabled {
   color: #888888 !important; // 禁用字体色（灰色）
   background-color: transparent !important; // 禁用背景色（透明）
+}
+
+// 深色主题对话框样式
+::v-deep .dark-dialog .el-dialog__header {
+  background-color: #1f1f1f !important;
+  border-bottom: 1px solid #333 !important;
+}
+
+::v-deep .dark-dialog .el-dialog__title {
+  color: #f5f5f5 !important;
+}
+
+::v-deep .dark-dialog .el-dialog__body {
+  background-color: #1a1a1a !important;
+  color: #f5f5f5 !important;
+}
+
+::v-deep .dark-dialog .el-dialog__footer {
+  background-color: #1f1f1f !important;
+  border-top: 1px solid #333 !important;
+}
+
+// 深色主题选择器样式
+::v-deep .dark-dialog .el-select {
+  background-color: #2c2c2c !important;
+  border-color: #444 !important;
+}
+
+::v-deep .dark-dialog .el-select .el-input__inner {
+  color: #f5f5f5 !important;
+  background-color: #2c2c2c !important;
+  border-color: #444 !important;
+}
+
+::v-deep .dark-dialog .el-select-dropdown {
+  background-color: #2c2c2c !important;
+  border-color: #444 !important;
+}
+
+::v-deep .dark-dialog .el-select-dropdown__item {
+  color: #f5f5f5 !important;
+}
+
+::v-deep .dark-dialog .el-select-dropdown__item:hover {
+  background-color: rgba(128, 128, 128, 0.2) !important;
 }
 </style>

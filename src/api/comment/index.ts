@@ -37,8 +37,11 @@ export const replyComment = (params: ReplyCommentParams): Promise<Data<ReplyComm
 }
 
 // 删除评论
-export const deleteComment = (params: DeleteCommentParams): Promise<Data<null>> => {
-  return request('/comment/deleteComment', 'DELETE', { ...params }, { showLoading: true })
+export const deleteComment = (commentId: number): Promise<Data<null>> => {
+  return request('/comment/deleteComment', 'DELETE', undefined, {
+    showLoading: true,
+    params: { commentId }, // 作为查询参数
+  })
 }
 
 // 举报评论
