@@ -30,8 +30,9 @@ export const getMusicianAlbum = (musicianId: string,pageNum: string,pageSize: st
 }
 
 // 查询我的专辑
-export const getMyAlbum = (pageNum:string, pageSize:string) => {
+export const getMyAlbum = (userId: string | number, pageNum: string, pageSize: string) => {
   return request('/api/album/query-my-album', 'get', {
+    userId,
     pageNum,
     pageSize,
   })

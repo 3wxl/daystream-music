@@ -76,7 +76,7 @@
               <img
                 :src="'http://39.96.214.163:9000/file/70567a01-09d0-443b-9d8a-bab6e5623967.png'"
                 class="cursor-pointer w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                @click="router.push('/User/PersonalCenter')"
+                @click="handleSingerClick"
               />
             </div>
             <p class="text-[#e5e7eb] text-[18px] font-[600] mt-2">{{ dynamic.authorName }}</p>
@@ -121,6 +121,11 @@
   import {Like,FollowOther,UnFollowOther} from '@/api/community/DynamicOperate';      // 点赞 关注和取消关注
   import { ElMessage } from 'element-plus'
   import {debounce,throttle} from '@/utils/debounceThrottle';     // 节流防抖
+  import { useGoToUserPage } from '@/composables/useUserPage';
+  const { goToUserPage } = useGoToUserPage();
+  const handleSingerClick = () => {
+    goToUserPage(dynamic.value.authorId);
+  };
 
   // 数据
   let commentWords = ref(0);    // 你的输入评论字数

@@ -1,28 +1,23 @@
 <template>
   <div class="flex justify-between">
-    <span class="text-[18px] font-700 ml-2">{{musicianType===0?'音乐人审核':musicianType===1?'已通过音乐人':'已驳回音乐人'}}</span>
+    <span class="text-[18px] font-700 ml-2">音乐人管理</span>
     <div class="flex mr-8">
-      <el-tooltip content="通过所选的音乐人申请" v-if="musicianType===0||musicianType===2">
-        <IconFontSymbol name="quanbutongguo" class="text-[#666] font-700 relative top-[3px] cursor-pointer duration-[0.3s] hover:text-[#529FFD] mr-4"></IconFontSymbol>
-      </el-tooltip>
-      <el-tooltip content="驳回所选音乐人申请" v-if="musicianType===0||musicianType===1">
-        <IconFontSymbol name="quanbubohui" class="text-[#666] font-700 relative top-[3px] cursor-pointer hover:text-red-700 mr-4"></IconFontSymbol>
-      </el-tooltip>
-      <el-tooltip content="删除所选音乐人记录">
-        <IconFontSymbol name="shanchu" class="text-[#666] font-700 relative top-[3px] cursor-pointer hover:text-red-700 mr-4"></IconFontSymbol>
+      <el-tooltip content="删除所选音乐人">
+        <IconFontSymbol @click="isShowDeleteMusician=true" name="shanchu" class="text-[#666] font-700 relative top-[3px] cursor-pointer hover:text-red-700 mr-4"></IconFontSymbol>
       </el-tooltip>
       <el-tooltip content="刷新">
-        <IconFontSymbol name="refresh" class="text-[#666] font-700 relative top-[3px] cursor-pointer hover:text-[#529FFD] mr-2"></IconFontSymbol>
+        <IconFontSymbol @click="emit('refresh')" name="refresh" class="text-[#666] font-700 relative top-[3px] cursor-pointer hover:text-[#529FFD] mr-2"></IconFontSymbol>
       </el-tooltip>
     </div>
   </div>
+
   <div class="user-table w-full mt-4">
-    <el-table v-if="musicianType===0" :data="musicianList_0" stripe >
+    <el-table :data="musicianList" stripe @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" class="ml-3"/>
       <el-table-column label="头像" width="130" align="center">
         <template #default="scope">
           <div class="flex justify-center relative cursor-pointer">
-            <img :src="scope.row.avatar" alt="头像" class="m-1 w-[50px] h-[50px] rounded-[6px] object-cover">
+            <img :src="scope.row.avatar" alt="头像" class="m-1 w-[50px] h-[50px] rounded-md object-cover">
           </div>
         </template>
       </el-table-column>
@@ -31,7 +26,7 @@
           <span>{{ scope.row.nickname }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="简介" width="240" align="center">
+      <el-table-column label="简介" width="320" align="center">
         <template #default="scope">
           <span class="line-clamp-2">{{ scope.row.introduction }}</span>
         </template>
@@ -41,119 +36,34 @@
           <span>{{ scope.row.email }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="申请时间" width="200" align="center">
+      <el-table-column label="状态" width="100" align="center">
         <template #default="scope">
-          <span>{{ scope.row.createdTime }}</span>
+          <span
+            class="cursor-pointer bg-[#c8f2d1] text-[#37D159] rounded-[16px] py-1.5 px-[18px] border-[1px] border-solid border-transparent text-[12px] inline-block font-[700] text-center"
+            v-show="scope.row.status===0"
+            @click="banMusician(scope.row.id)"
+          >启用</span>
+          <span
+            class="cursor-pointer bg-[#ffd4cb] text-[#FF6746] rounded-[16px] py-1.5 px-[18px] border-[1px] border-solid border-transparent text-[12px] inline-block font-[700] text-center"
+            v-show="scope.row.status===2"
+            @click="banMusician(scope.row.id)"
+          >禁用</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center">
         <template #default="scope">
           <span
-            class="mr-3 active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#bfdcff] inline-block bg-[#e0eeff] text-[#529FFD] py-[3px] rounded-[20px] px-[12px] cursor-pointer text-[14px]"
-            @click="showDetailFun(scope.row)"
+            class="active:scale-[0.97] mr-3 duration-150 hover:shadow-xl hover:shadow-[#bfdcff] inline-block bg-[#e0eeff] text-[#529FFD] py-[3px] rounded-[20px] px-[12px] cursor-pointer text-[14px]"
+            @click="showMusicianDetailFun(scope.row.id)"
           >
             <IconFontSymbol name="robot-3-line" size="18px"></IconFontSymbol>
             详情
           </span>
           <span
-            class="mr-3 active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#bfdcff] inline-block bg-[#e0eeff] text-[#529FFD] py-[3px] rounded-[20px] px-[12px] cursor-pointer text-[14px]"
-            @click="showDetail = true"
-          >
-            <IconFontSymbol name="qianshoushenpitongguo-xianxing" size="18px"></IconFontSymbol>
-            通过
-          </span>
-          <span
-            class="active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#ffbfbf] inline-block bg-[#ffe0e0] text-[#fd5252] py-[3px] rounded-[20px] px-[12px] cursor-pointer text-[14px]"
-            @click=""
-          >
-            <IconFontSymbol name="bohui" size="15px"></IconFontSymbol>
-            驳回
-          </span>
-        </template>
-      </el-table-column>
-    </el-table>
-    <el-table v-if="musicianType===1" :data="musicianList_1" stripe >
-      <el-table-column type="selection" width="55" align="center" class="ml-3"/>
-      <el-table-column label="头像" width="130" align="center">
-        <template #default="scope">
-          <div class="flex justify-center relative cursor-pointer">
-            <img :src="scope.row.avatar" alt="头像" class="m-1 w-[50px] h-[50px] rounded-[6px] object-cover">
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column label="艺名" width="200" align="center">
-        <template #default="scope">
-          <span>{{ scope.row.nickname }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="简介" width="240" align="center">
-        <template #default="scope">
-          <span class="line-clamp-2">{{ scope.row.introduction }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="邮箱" width="250" align="center">
-        <template #default="scope">
-          <span>{{ scope.row.email }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="入驻时间" width="200" align="center">
-        <template #default="scope">
-          <span>{{ scope.row.createdTime }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center">
-        <template #default="scope">
-          <span
-            class="mr-3 active:scale-[0.97] duration-150 hover:shadow-xl hover:shadow-[#bfdcff] inline-block bg-[#e0eeff] text-[#529FFD] py-[3px] rounded-[20px] px-[12px] cursor-pointer text-[14px]"
+            class="active:scale-[0.97] ml-3 duration-150 hover:shadow-xl hover:shadow-[#ffc3bf] inline-block bg-[#ffe4e0] text-[#fd5252] py-[3px] rounded-[20px] px-[12px] cursor-pointer text-[14px]"
             @click="showMusicianDetailFun(scope.row)"
           >
-            <IconFontSymbol name="robot-3-line" size="18px"></IconFontSymbol>
-            详情
-          </span>
-        </template>
-      </el-table-column>
-    </el-table>
-    <el-table v-if="musicianType===2" :data="musicianList_2" stripe >
-      <el-table-column type="selection" width="55" align="center" class="ml-3"/>
-      <el-table-column label="头像" width="130" align="center">
-        <template #default="scope">
-          <div class="flex justify-center relative cursor-pointer">
-            <img :src="scope.row.avatar" alt="头像" class="m-1 w-[50px] h-[50px] rounded-[6px] object-cover">
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column label="艺名" width="200" align="center">
-        <template #default="scope">
-          <span>{{ scope.row.nickname }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="简介" width="240" align="center">
-        <template #default="scope">
-          <span class="line-clamp-2">{{ scope.row.introduction }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="邮箱" width="250" align="center">
-        <template #default="scope">
-          <span>{{ scope.row.email }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="驳回时间" width="200" align="center">
-        <template #default="scope">
-          <span>{{ scope.row.createdTime }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center">
-        <template #default="scope">
-          <span class="text-[#529FFD] cursor-pointer" @click="showDetailFun(scope.row)">
-            <IconFontSymbol name="robot-3-line" size="17px"></IconFontSymbol>
-            详情
-          </span>
-          <span class="text-[#529FFD] cursor-pointer mx-2">
-            <IconFontSymbol name="qianshoushenpitongguo-xianxing" size="17px"></IconFontSymbol>
-            通过
-          </span>
-          <span class="text-red-700 cursor-pointer">
-            <IconFontSymbol name="bohui" size="15px"></IconFontSymbol>
+            <IconFontSymbol name="shanchu" size="18px"></IconFontSymbol>
             删除
           </span>
         </template>
@@ -171,33 +81,29 @@
       />
     </div>
   </div>
-  <MusicianApplyCard
-    v-model="showDetail"
-    :musicianData="musicianData"
-  >
-  </MusicianApplyCard>
-  <MusicianDetailCard
+  <MusicianListDetailCard
     v-model="showMusicianDetail"
     :musicianData="musicianData"
-  >
-  </MusicianDetailCard>
+  />
+  <AdminConfirm
+    v-model="isShowDeleteMusician"
+    width="470px"
+    iconName="gongzuotai-dongtaishenhe"
+    iconColor="#F72A33"
+    title="操作确认"
+    :content="`是否删除选中的音乐人？操作后无法取消。`"
+    @confirmClick="deleteSelectMusician"
+  ></AdminConfirm>
 </template>
 
 <script setup lang="ts">
+  import {GetMusicianDetailApi,BanMusicianApi} from '@/api/Admin/musicianAudit'
   const props = defineProps({
     musicianType:{
       type: Number,
       default: 0
     },
-    musicianList_0:{
-      type: Array,
-      default: []
-    },
-    musicianList_1:{
-      type: Array,
-      default: []
-    },
-    musicianList_2:{
+    musicianList:{
       type: Array,
       default: []
     },
@@ -206,20 +112,35 @@
       default: 0
     },
   })
-  const emit = defineEmits(['pageSkip'])
+  const emit = defineEmits(['pageSkip', 'refresh'])
   // 数据
 
-  let showDetail = ref(false)
   let showMusicianDetail = ref(false)
-  let musicianData = ref({})
-  // 方法
-  function showDetailFun(obj:any){      // 对于未审核通过的音乐人，点击查看详情
-    musicianData.value = obj
-    showDetail.value = true
+  let musicianData:any = ref({})
+  let nowSelectIds:any = ref([])            // 当前选中的音乐人id列表
+  let isShowDeleteMusician = ref(false)     // 是否显示删除所选音乐人弹框
+
+
+  async function showMusicianDetailFun(id:any){      // 点击查看详情
+    let res = await GetMusicianDetailApi(id)
+    if(res.success){
+      musicianData.value = res.data
+      showMusicianDetail.value = true
+    }
   }
-  function showMusicianDetailFun(obj:any){      // 对于已审核通过的音乐人，点击查看详情
-    musicianData.value = obj
-    showMusicianDetail.value = true
+  function handleSelectionChange(val:any){   // 选择框变化回调
+    nowSelectIds.value = val.map((item:any)=>item.id)
+  }
+  async function deleteSelectMusician(){
+
+  }
+  async function banMusician(id:string){
+    let res = await BanMusicianApi(id)
+    if(res.success){
+      console.log(res)
+      emit('refresh')
+      ElMessage.success('操作成功')
+    }
   }
 </script>
 

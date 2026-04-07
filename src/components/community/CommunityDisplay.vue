@@ -4,10 +4,10 @@
       <div class="flex">
         <div class="w-[60px] h-[60px] rounded-[50%] relative group">
           <el-avatar :src="avatar" :size="60"></el-avatar>
-          <div class="group-hover:opacity-100 opacity-0 cursor-pointer duration-[.2s] w-full h-full rounded-[50%] bg-[rgba(0,0,0,.1)] absolute top-0 left-0"></div>
+          <div @click="handleSingerClick" class="group-hover:opacity-100 opacity-0 cursor-pointer duration-[.2s] w-full h-full rounded-[50%] bg-[rgba(0,0,0,.1)] absolute top-0 left-0"></div>
         </div>
         <div class="flex flex-col ml-4">
-          <span class="font-bold text-[17px] text-white cursor-pointer hover:text-pink-400 mt-1">{{userName}}</span>
+          <span class="font-bold text-[17px] text-white cursor-pointer hover:text-pink-400 mt-1" @click="handleSingerClick">{{userName}}</span>
           <div class="mt-2 text-[12px] text-[#e5e7eb]">
             <span class="mr-2">{{createTime}}</span>
             <!-- <span>{{introduction}}</span> -->
@@ -69,8 +69,11 @@
   import {useRouter} from "vue-router";
   import {FollowOther,UnFollowOther,Like} from '@/api/community/DynamicOperate';    // 关注和取消关注,点赞
   import {debounce,throttle} from '@/utils/debounceThrottle';     // 节流防抖
+  import { useGoToUserPage } from "@/composables/useUserPage";
+
 
   // 数据
+  const {goToUserPage} = useGoToUserPage();
   const router = useRouter();
   let props = defineProps({
     dynamic: {
@@ -97,6 +100,9 @@
   createTime.value = formatDateTime(createTime.value);
 
   // 方法
+  const handleSingerClick = async ()=>{
+    await goToUserPage(userId.value)
+  }
   function extractImgSrcByReg(html:string) {     // 这里是获取一个hmtl片段里面的图片的src组成的数组
     if (!html || typeof html !== 'string') return [];
     const imgSrcReg = /<img[^>]+src\s*=\s*["']([^"']*)["'][^>]*>/gi;
