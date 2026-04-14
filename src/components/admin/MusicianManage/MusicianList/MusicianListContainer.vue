@@ -45,7 +45,7 @@
           >启用</span>
           <span
             class="cursor-pointer bg-[#ffd4cb] text-[#FF6746] rounded-[16px] py-1.5 px-[18px] border-[1px] border-solid border-transparent text-[12px] inline-block font-[700] text-center"
-            v-show="scope.row.status===2"
+            v-show="scope.row.status===1"
             @click="banMusician(scope.row.id)"
           >禁用</span>
         </template>
@@ -61,7 +61,7 @@
           </span>
           <span
             class="active:scale-[0.97] ml-3 duration-150 hover:shadow-xl hover:shadow-[#ffc3bf] inline-block bg-[#ffe4e0] text-[#fd5252] py-[3px] rounded-[20px] px-[12px] cursor-pointer text-[14px]"
-            @click="showMusicianDetailFun(scope.row)"
+            @click="nowDelId=scope.row.id;isShowDeleteMusicianOne=true"
           >
             <IconFontSymbol name="shanchu" size="18px"></IconFontSymbol>
             删除
@@ -84,6 +84,7 @@
   <MusicianListDetailCard
     v-model="showMusicianDetail"
     :musicianData="musicianData"
+    @refresh="emit('refresh')"
   />
   <AdminConfirm
     v-model="isShowDeleteMusician"
@@ -94,10 +95,19 @@
     :content="`是否删除选中的音乐人？操作后无法取消。`"
     @confirmClick="deleteSelectMusician"
   ></AdminConfirm>
+  <AdminConfirm
+    v-model="isShowDeleteMusicianOne"
+    width="470px"
+    iconName="gongzuotai-dongtaishenhe"
+    iconColor="#F72A33"
+    title="操作确认"
+    :content="`是否删除该音乐人？操作后无法取消。`"
+    @confirmClick="deleteMusician"
+  ></AdminConfirm>
 </template>
 
 <script setup lang="ts">
-  import {GetMusicianDetailApi,BanMusicianApi} from '@/api/Admin/musicianAudit'
+  import {GetMusicianDetailApi,BanMusicianApi,DeleteMusicianApi,DeleteMusicianBatchApi} from '@/api/Admin/musicianAudit'
   const props = defineProps({
     musicianType:{
       type: Number,
@@ -119,11 +129,13 @@
   let musicianData:any = ref({})
   let nowSelectIds:any = ref([])            // 当前选中的音乐人id列表
   let isShowDeleteMusician = ref(false)     // 是否显示删除所选音乐人弹框
-
+  let isShowDeleteMusicianOne = ref(false)  // 是否显示删除单个音乐人弹框
+  let nowDelId = ref('')                    // 当前删除的id
 
   async function showMusicianDetailFun(id:any){      // 点击查看详情
     let res = await GetMusicianDetailApi(id)
     if(res.success){
+      console.log(res)
       musicianData.value = res.data
       showMusicianDetail.value = true
     }
@@ -132,7 +144,20 @@
     nowSelectIds.value = val.map((item:any)=>item.id)
   }
   async function deleteSelectMusician(){
-
+    let res = await DeleteMusicianBatchApi(nowSelectIds.value)
+    if(res.success){
+      emit('refresh')
+      ElMessage.success('删除成功')
+      isShowDeleteMusician.value = false
+    }
+  }
+  async function deleteMusician(){
+    let res = await DeleteMusicianApi(nowDelId.value)
+    if(res.success){
+      emit('refresh')
+      ElMessage.success('删除成功')
+      isShowDeleteMusicianOne.value = false
+    }
   }
   async function banMusician(id:string){
     let res = await BanMusicianApi(id)

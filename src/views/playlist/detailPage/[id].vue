@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getPlayListDetail } from '@/api/playlist'
+import { getPlayListDetail, querySongsByPlaylist } from '@/api/playlist'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { onMounted, ref, watch } from 'vue'
@@ -63,26 +63,40 @@ const loadData = async (id: string, isLoadMore = false) => {
   }
 
   try {
-    const res: any = await getPlayListDetail(id)
-    console.log('Playlist Detail Response:', res)
-    
-    if (res.success && res.data) {
-      const data = res.data
-      playlistDetail.value = data
-   
-      const songData = data.musicDetailVOList || {}
-      const records = songData.records || []
-      
+    // 1. 获取歌单基础元数据 (仅在首次加载时)
+    if (!isLoadMore) {
+      const detailRes: any = await getPlayListDetail(id)
+      if (detailRes.success && detailRes.data) {
+        playlistDetail.value = detailRes.data
+      }
+    }
+
+    // 2. 获取歌单内歌曲的分页数据
+    const songRes: any = await querySongsByPlaylist(id, pageNum.value, pageSize.value)
+    console.log('Playlist Songs Response:', songRes)
+
+    if (songRes.success && songRes.data) {
+      const records = (songRes.data.records || []).map((s: any) => ({
+        ...s,
+        id: String(s.id),
+        // 后端返回的是对象数组形式的音质列表时，将其映射为播放器需要的字符串数组
+        audioList: Array.isArray(s.audioList) 
+          ? s.audioList.map((item: any) => 
+              typeof item === 'object' ? (item.qualityType === 0 ? '标准' : item.qualityType === 1 ? '高清' : '无损') : item
+            )
+          : []
+      }))
+
       if (isLoadMore) {
         musicList.value = [...musicList.value, ...records]
       } else {
         musicList.value = records
       }
-      
+
       // 判断是否还有更多内容
-      hasMore.value = pageNum.value < (songData.pages || 0)
+      hasMore.value = pageNum.value < (songRes.data.pages || 0)
     } else {
-      ElMessage.error(res.errorMsg || '获取歌单详情失败')
+      ElMessage.error(songRes.errorMsg || '获取歌曲列表失败')
     }
   } catch (err) {
     console.log('获取歌单详情失败', err)

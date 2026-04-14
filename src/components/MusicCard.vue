@@ -6,7 +6,7 @@
 
     <div class="card-content">
       <slot></slot>
-      <div v-if="showPlayButton" class="play-button"></div>
+      <div v-if="showPlayButton" class="play-button" @click.stop.prevent="handlePlayClick"></div>
     </div>
   </router-link>
 </template>
@@ -27,6 +27,12 @@ withDefaults(defineProps<Props>(), {
   variant: 'default',
   title: '',
 })
+
+const emit = defineEmits(['play'])
+
+const handlePlayClick = () => {
+  emit('play')
+}
 </script>
 
 <style lang="scss" scoped>

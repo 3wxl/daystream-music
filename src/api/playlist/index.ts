@@ -47,7 +47,21 @@ export function deleteMusicsFromPlaylist(data: any) {
   return request('/playlist/batch-remove-song-from-playlist', 'post', data, { isParams: true })
 }
 
+// 分页查询指定歌单的歌曲
+export function querySongsByPlaylist(playlistId: string, pageNum: number, pageSize: number) {
+  return request('/playlist/query-songs-by-playlist', 'get', {
+    playlistId,
+    pageNum,
+    pageSize,
+  })
+}
+
 // 将歌曲从指定歌单删除
 export function deleteMusicFromPlaylist(data: any) {
   return request('/playlist/batch-remove-song-from-playlist', 'post', data, { isParams: true })
+}
+
+// 将单曲添加到歌单
+export function addSongToPlaylist(data: { playlistId: string | number; songId: string | number }) {
+  return request('/playlist/add-song-to-playlist', 'post', data, { isParams: true })
 }
