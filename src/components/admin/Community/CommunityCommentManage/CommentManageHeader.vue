@@ -13,10 +13,10 @@
         class="mr-16"
         v-model="typeVal"
         :options="[
-          { value: '1', label: '歌曲' },
-          { value: '2', label: '歌单' },
-          { value: '3', label: '专辑' },
-          { value: '4', label: '动态' },
+          { value: 1, label: '歌曲' },
+          { value: 2, label: '歌单' },
+          { value: 3, label: '专辑' },
+          { value: 4, label: '动态' },
         ]"
         label="类型"
       ></AdminSelect>
@@ -36,7 +36,7 @@ import AdminSelect from '@/components/Admin/AdminSelect.vue'
 let emit = defineEmits(['search'])
 
 let commentSearch = ref('')
-let typeVal = ref('1')
+let typeVal = ref(1)
 
 function handleSearch(){
   emit('search',{

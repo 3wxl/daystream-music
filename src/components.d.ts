@@ -159,6 +159,7 @@ declare module 'vue' {
     MusicProCard: typeof import('./components/MusicianCenter/MusicProCard.vue')['default']
     MusicProContainer: typeof import('./components/MusicianCenter/MusicProContainer.vue')['default']
     MusicStatistics: typeof import('./components/User/MusicStatistics.vue')['default']
+    MusicTable: typeof import('./components/Admin/WorksManage/WorksReview/MusicReview/MusicTable.vue')['default']
     MvCard: typeof import('./components/MvCard.vue')['default']
     MyAlbum: typeof import('./components/User/MyAlbum.vue')['default']
     MyAlbums: typeof import('./components/MusicUpload/MyAlbums.vue')['default']
@@ -192,6 +193,8 @@ declare module 'vue' {
     SonCommentCard: typeof import('./components/Community/SonCommentCard.vue')['default']
     SongInfoPanel: typeof import('./components/MusicPlayer/SongInfoPanel.vue')['default']
     SongsNumDataCard: typeof import('./components/Admin/DataStatistics/SongsNumDataCard.vue')['default']
+    SongsReviewContainer: typeof import('./components/Admin/WorksManage/WorksReview/SongsReviewContainer.vue')['default']
+    SongsReviewHeader: typeof import('./components/Admin/WorksManage/WorksReview/SongsReviewHeader.vue')['default']
     SongsTypeAssign: typeof import('./components/Admin/DataStatistics/SongsTypeAssign.vue')['default']
     TagBar: typeof import('./components/TagBar.vue')['default']
     TagBars: typeof import('./components/TagBars.vue')['default']
@@ -216,8 +219,11 @@ declare module 'vue' {
     VipPrivileges: typeof import('./components/Vip/VipPrivileges.vue')['default']
     VipProgress: typeof import('./components/CheckIn/VipProgress.vue')['default']
     WelcomeMessage: typeof import('./components/MusicianCenter/AI/chat/WelcomeMessage.vue')['default']
+    WorksReviewContainer: typeof import('./components/Admin/WorksManage/WorksReview/WorksReviewContainer.vue')['default']
+    WorksReviewHeader: typeof import('./components/Admin/WorksManage/WorksReview/WorksReviewHeader.vue')['default']
   }
   export interface GlobalDirectives {
+    vInfiniteScroll: typeof import('element-plus/es')['ElInfiniteScroll']
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']
   }
 }

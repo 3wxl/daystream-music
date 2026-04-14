@@ -84,6 +84,7 @@
   <MusicianListDetailCard
     v-model="showMusicianDetail"
     :musicianData="musicianData"
+    @refresh="emit('refresh')"
   />
   <AdminConfirm
     v-model="isShowDeleteMusician"

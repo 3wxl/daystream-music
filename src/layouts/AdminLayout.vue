@@ -41,7 +41,7 @@
               <IconFontSymbol name="bofangqi_shouyegequliebiao_" size="18px"></IconFontSymbol>
               <span>作品列表</span>
             </el-menu-item>
-            <el-menu-item index="3-2" @click="router.push('/admin/worksManage/songsReview')">
+            <el-menu-item index="3-2" @click="router.push('/admin/worksManage/WorksReview')">
               <IconFontSymbol name="file-music" class="mr-1"></IconFontSymbol>
               <span>作品审核</span>
             </el-menu-item>
@@ -159,6 +159,7 @@
         <slot />
       </el-main>
     </el-container>
+    <PlayerControls class="fied bottom-0 w-full! z-40 shrink-0 player-height" :isAdmin="true"/>
   </el-container>
   <!-- <div class="absolute z-10 bottom-0 left-[250px]">
     <img src="../../public/animals.webp" alt="" class="w-[400px]">

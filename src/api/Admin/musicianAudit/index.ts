@@ -70,3 +70,12 @@ export function DeleteMusicianBatchApi(ids:[string]){
     { ids:ids }
   )
 }
+
+// 修改音乐人信息
+export function UpdateMusicianApi(data:any){
+  return request(
+    `/adminMusician/updateMusician`,
+    'post',
+    data
+  )
+}
