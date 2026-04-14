@@ -17,8 +17,9 @@ export function getlistByTags(currentTag: string[], pageNum: string, pageSize: s
 }
 
 // 获取用户歌单
-export function getUserPlaylist(pageNum: string, pageSize: string) {
+export function getUserPlaylist(userId: string, pageNum: string, pageSize: string) {
   return request('/playlist/query-my-playlist-by-collect', 'get', {
+    userId,
     pageNum,
     pageSize,
   })
@@ -38,7 +39,7 @@ export function deletePlaylist(playListId: string) {
 
 // 批量将歌曲添加到歌单
 export function addMusicToPlaylist(data: any) {
-  return request('/playlist/batch-add-song-to-playlist', 'post', data,{isParams:true})
+  return request('/playlist/batch-add-song-to-playlist', 'post', data, { isParams: true })
 }
 
 // 批量将歌曲从歌单中删除

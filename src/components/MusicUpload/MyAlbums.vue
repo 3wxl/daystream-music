@@ -100,6 +100,7 @@ const showCreateAlbumDialog = ref(false)
 const showManageAlbumDialog = ref(false)
 const currentAlbumName = ref('')
 const createAlbumForm = ref<FormInstance>()
+const userStore = useUserStore()
 
 
 const {albumUploadRule} = useUploadtRules()
@@ -150,7 +151,7 @@ const handleDelete = (album: any) => {
 
 // 获取专辑列表
 const getAlbums = async () => {
-  const res: any = await getMyAlbum('1','40')
+  const res: any = await getMyAlbum(userStore.userInfo.id, '1', '40')
   albums.value = res.data.records.flat()
   console.log(albums.value)
   loading.value = false

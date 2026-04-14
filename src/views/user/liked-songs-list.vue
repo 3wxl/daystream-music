@@ -120,7 +120,7 @@
 
             <!-- 3. 有数据状态：渲染歌曲列表组件 -->
             <div v-else>
-              <LikedSongs :likedSongs="likedSongs" />
+              <LikedSongs :likedSongs="likedSongs" :userId="userInfo.id" />
             </div>
 
             <!-- 加载更多提示 -->

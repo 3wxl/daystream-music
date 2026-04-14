@@ -306,3 +306,21 @@ export function getPlaylistCollections(
     },
   )
 }
+
+// 添加歌曲到歌单
+export const addSongToPlaylist = (params: { playlistId: number; songId: number }) => {
+  return request('/playlist/add-song-to-playlist', 'POST', undefined, {
+    params: params,
+  })
+}
+
+// 分页查询我的歌单(按创建时间降序)
+export const getMyPlaylistByTime = (params: {
+  userId: number
+  pageNum: number
+  pageSize: number
+}) => {
+  return request('/playlist/query-my-playlist-by-time', 'GET', undefined, {
+    params: params,
+  })
+}
