@@ -60,3 +60,8 @@ export function getMyMusicList(musicianId: string | number, pageNum: number, pag
 export function getMyAlbums(pageNum:number,pageSize:number) {
   return request<any[]>('/music/albums', 'get',{pageNum,pageSize})
 }
+
+// 删除我的音乐作品
+export function deleteMusic(musicId: string | number) {
+  return request(`/music/${musicId}`, 'delete')
+}

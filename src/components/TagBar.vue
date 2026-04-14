@@ -24,6 +24,7 @@ defineProps({
   display: inline-block;
   padding: 8px 16px;
   margin-right: 10px;
+  margin-top: 8px;
   border-radius: 20px;
   background-color: rgba(255, 255, 255, 0.1); /* 半透明白色背景 */
   color: #e5e7eb; /* 浅灰色文字 */

@@ -59,20 +59,12 @@
       :show-close="!isUploading"
     >
       <el-form ref="createMvFormRef" :model="mvForm" :rules="mvUploadRule" label-position="top">
-        <el-form-item
-          label="MV标题"
-          prop="title"
-        >
+        <el-form-item label="MV标题" prop="title">
           <el-input placeholder="请输入MV标题" class="dark-input" v-model="mvForm.title" />
         </el-form-item>
 
         <el-form-item label="关联我的音乐 (必填)" prop="musicId">
-          <el-select 
-            v-model="mvForm.musicId" 
-            placeholder="请选择此 MV 关联的歌曲" 
-            class="w-full"
-            :loading="loadingSongs"
-          >
+          <el-select v-model="mvForm.musicId" @change="handleSongSelect">
             <el-option
               v-for="song in mySongs"
               :key="song.id"
@@ -246,24 +238,26 @@
 </template>
 
 <script lang="ts" setup>
+import { useUserStore } from '@/stores/user'
 import { useUploadtRules } from '@/utils/rules/upload'
 import type { FormInstance } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { useUserStore } from '@/stores/user'
 // @ts-ignore
 // @ts-ignore
 // @ts-ignore
 import { getMyMusicList } from '@/api/music'
 import {
   createMv as createMvApi,
-  deleteMv, // Use the new API
-  getHotMv,
+  deleteMv,
+  getImageUrl,
+  getMyMvList,
   mergeChunks as mergeChunksApi,
   uploadChunk,
   validateChunk,
 } from '@/api/mv'
 import SparkMD5 from 'spark-md5'
+import { updateImage } from '@/api/community/ImageOperate'
 
 const { mvUploadRule } = useUploadtRules()
 
@@ -421,6 +415,17 @@ const fetchMySongs = async () => {
   }
 }
 
+// 处理歌曲选择变化
+const handleSongSelect = (val: any) => {
+  const selected = mySongs.value.find((s) => s.id === val)
+  console.log('--- 选中关联歌曲信息 ---', {
+    musicId: val,
+    musicName: selected?.musicName,
+    musicianName: selected?.musicianName,
+    albumName: selected?.albumName,
+  })
+}
+
 // 交互方法
 const selectFile = () => {
   fileInput.value?.click()
@@ -572,7 +577,7 @@ const uploadSingleChunk = async (
 
     // 创建FormData
     const formData = new FormData()
-    formData.append('file', chunkData, (chunkIndex+1).toString()) // 改为使用索引作为文件名，防止后端覆盖
+    formData.append('file', chunkData, (chunkIndex + 1).toString()) // 改为使用索引作为文件名，防止后端覆盖
     // formData.append('file', chunkData, file.name) // 分片文件 (注意key变为file)
     formData.append('md5Value', fileMd5.value)
     formData.append('chunk', chunkIndex.toString())
@@ -585,7 +590,7 @@ const uploadSingleChunk = async (
     formData.append('operation', 'upload')
 
     addStatusLog(`开始上传分片 ${chunkIndex + 1}/${totalChunks.value}...`, 'info')
-    
+
     // 调试---------------打印 FormData 内容
     console.log(`--- 分片 ${chunkIndex + 1} 上传数据检查 ---`)
     formData.forEach((value, key) => {
@@ -660,14 +665,14 @@ const mergeChunks = async (): Promise<string> => {
   }
 }
 
-// 6. 创建MV记录 
+// 6. 创建MV记录
 const createMvRecord = async (filePath: string) => {
   try {
     addStatusLog('正在创建MV记录...', 'info')
 
     const payload = {
       mvName: mvForm.title,
-      musicId: Number(mvForm.musicId) || 0, // 使用选中的真实的音乐ID
+      musicId: mvForm.musicId, // 保持为字符串，防止大整数精度丢失（强制类型转换会丢失精度）
       duration: videoDuration.value || 0,
       coverUrl: mvForm.coverUrl || '', // 如果封面已通过其他途径上传，这里是URL
       releaseTime: new Date().toISOString(), // 对应后端 releaseTime: "string"
@@ -683,9 +688,11 @@ const createMvRecord = async (filePath: string) => {
       ],
     }
 
-    // 注意：如果后端封面也需要这次一起上传，则这里需要改造成 FormData
-    // 但鉴于你提供的是纯 JSON 结构体，这里先按 JSON 发送
-    console.log('--- 创建MV接口参数预览 ---', JSON.stringify(payload, null, 2))
+    // 打印最终发往后端的创建参数
+    console.log('--- [重要] MV创建提交参数对照 ---')
+    console.log('请求路径: POST /mv/create')
+    console.log('参数内容:', JSON.stringify(payload, null, 2))
+
     const res = await createMvApi(payload)
 
     addStatusLog('MV记录创建成功', 'success')
@@ -719,8 +726,27 @@ const startUpload = async () => {
       addStatusLog(`文件: ${file.name}`, 'info')
       addStatusLog(`大小: ${formatFileSize(file.size)}`, 'info')
 
-      // 步骤1: 计算文件MD5
-      addStatusLog('步骤1: 计算文件MD5...', 'info')
+      // 步骤1：如果选择了封面文件，先将其上传至服务器换取 URL
+      if (coverFile.value) {
+        addStatusLog('步骤1：正在上传封面图...', 'info')
+        const imgFd = new FormData()
+        imgFd.append('multipartFile', coverFile.value)
+        try {
+          const imgRes = await getImageUrl(imgFd)
+          if (imgRes.success && imgRes.data) {
+            console.log(imgRes.data)
+            mvForm.coverUrl = imgRes.data
+            addStatusLog('封面图上传完成', 'success')
+          } else {
+            throw new Error('封面图服务返回错误')
+          }
+        } catch (e) {
+          throw new Error('封面上传失败，请重试')
+        }
+      }
+
+      // 步骤2: 计算文件MD5
+      addStatusLog('步骤2: 计算文件MD5...', 'info')
       fileMd5.value = await calculateFileMD5(file)
       if (!fileMd5.value) {
         throw new Error('计算文件MD5失败')
@@ -822,14 +848,10 @@ const handleDelete = async (id: string) => {
 
 const getMvList = async () => {
   try {
-    const res = await getHotMv('1', '40')
-    mvs.value = ((res.data as any).records as any[]) || []
-
-    if (mvs.value.length === 0) {
-      // 没有任何MV时，保留一个示例方便展示 (可选)
-      /* mvs.value = [
-        { id: '1', title: '示例MV', description: '上传你的第一个MV吧！', cover: '' }
-      ] */
+    const res = await getMyMvList(1, 40)
+    if (res.success && res.data?.records) {
+      // 使用 flat() 适配可能存在的嵌套结构并渲染
+      mvs.value = res.data.records.flat()
     }
   } catch (error) {
     console.error('获取MV列表失败:', error)

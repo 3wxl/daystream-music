@@ -14,6 +14,7 @@
       <div v-for="album in albums" :key="album.id" class="group relative">
         <div
           class="aspect-square rounded-xl overflow-hidden bg-gray-800 mb-3 relative cursor-pointer"
+          @click="handleManageSongs(album)"
         >
           <img
             :src="album.coverUrl"
@@ -43,74 +44,158 @@
 
   <el-dialog
     v-model="showCreateAlbumDialog"
-    title="创建新专辑"
+    :title="albumForm.id ? '编辑专辑' : '创建新专辑'"
     width="500px"
-    custom-class="dark-dialog"
+    class="dark-dialog"
   >
     <el-form 
-    ref="createAlbumForm"
-    :model="albumForm"
-    :rules="albumUploadRule"
-    label-position="top">
+      ref="createAlbumForm"
+      :model="albumForm"
+      :rules="albumUploadRule"
+      label-position="top">
       <el-form-item label="专辑名称" prop="albumName">
         <el-input placeholder="请输入专辑名称" class="dark-input" v-model="albumForm.albumName"/>
       </el-form-item>
-      <el-form-item label="歌单封面" prop="coverFile">
+      <el-form-item label="专辑封面" prop="coverFile">
         <el-upload
           class="avatar-uploader"
-          action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
+          action="#"
+          :auto-upload="false"
           :show-file-list="false"
           :on-change="handleAvatarChange"
           :before-upload="beforeAvatarUpload"
-          v-model="albumForm.coverFile"
         >
           <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-          <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+          <el-icon v-else class="avatar-uploader-icon"><i class="fa fa-plus"></i></el-icon>
         </el-upload>
       </el-form-item>
       <el-form-item label="简介" prop="introduction">
         <el-input type="textarea" :rows="3" placeholder="介绍一下这张专辑..." class="dark-input" v-model="albumForm.introduction" />
       </el-form-item>
+      <el-form-item label="发布日期" prop="releaseDate">
+        <el-date-picker
+          v-model="albumForm.releaseDate"
+          type="date"
+          placeholder="选择发布日期"
+          class="dark-input w-full"
+          value-format="YYYY-MM-DD"
+        />
+      </el-form-item>
       <el-form-item label="专辑状态" prop="status">
         <el-radio-group v-model="albumForm.status">
-          <el-radio value="1" size="large">上架</el-radio>
-          <el-radio value="0" size="large">下架</el-radio>
+          <el-radio :value="1" size="large">上架</el-radio>
+          <el-radio :value="0" size="large">下架</el-radio>
         </el-radio-group>
       </el-form-item>
     </el-form>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="showCreateAlbumDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleCreateAlbum">创建</el-button>
+        <el-button type="primary" :loading="loading" @click="handleSaveAlbum">
+          {{ albumForm.id ? '保存修改' : '立即创建' }}
+        </el-button>
       </span>
+    </template>
+  </el-dialog>
+
+  <!-- 歌曲关联管理弹窗 -->
+  <el-dialog
+    v-model="showManageSongsDialog"
+    :title="`管理专辑曲目 - ${currentAlbum.albumName}`"
+    width="650px"
+    class="dark-dialog"
+  >
+    <div class="mb-4">
+      <p class="text-sm text-gray-400 mb-3">勾选歌曲并点击“确认绑定”将其关联到此专辑</p>
+      <div class="max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+        <div v-if="userSongs.length > 0" class="space-y-2">
+          <div
+            v-for="song in userSongs"
+            :key="song.id"
+            class="flex items-center justify-between p-3 bg-white/5 rounded-lg group"
+          >
+            <div class="flex items-center gap-3">
+              <el-checkbox v-model="selectedSongIds" :label="song.id">
+                <div class="flex items-center gap-3 ml-2">
+                  <img :src="song.coverUrl" class="w-10 h-10 rounded object-cover" />
+                  <div>
+                    <p class="text-sm font-medium text-white">{{ song.musicName }}</p>
+                    <p class="text-xs text-gray-500">{{ song.albumName || '未关联专辑' }}</p>
+                  </div>
+                </div>
+              </el-checkbox>
+            </div>
+            <!-- 移除按钮样式预留 -->
+            <button 
+              class="text-xs text-red-400 opacity-0 group-hover:opacity-100 transition-opacity hover:underline"
+              title="暂不支持移除功能"
+            >
+              移除预览
+            </button>
+          </div>
+        </div>
+        <el-empty v-else description="暂无可选歌曲" :image-size="60"></el-empty>
+      </div>
+    </div>
+    <template #footer>
+      <div class="flex justify-between items-center w-full">
+        <span class="text-xs text-gray-500">已选择 {{ selectedSongIds.length }} 首歌曲</span>
+        <div class="flex gap-3">
+          <el-button @click="showManageSongsDialog = false">关闭</el-button>
+          <el-button 
+            type="primary" 
+            :loading="binding" 
+            :disabled="selectedSongIds.length === 0"
+            @click="handleBindSongs"
+          >
+            确认绑定
+          </el-button>
+        </div>
+      </div>
     </template>
   </el-dialog>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useUploadtRules } from '@/utils/rules/upload'
 import { useUserStore } from '@/stores/user'
-import type { CheckboxValueType, FormInstance, UploadProps } from 'element-plus'
-import { createAlbum ,getMyAlbum} from '@/api/album'
+import type { FormInstance, UploadProps } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { createAlbum, getMyAlbum, updateAlbum, bindSongsToAlbum, deleteAlbum } from '@/api/album'
+import { getMyMusicList } from '@/api/music'
 
+const userStore = useUserStore()
 const imageUrl = ref('')
 const loading = ref(false)
+const binding = ref(false)
 const showCreateAlbumDialog = ref(false)
-const showManageAlbumDialog = ref(false)
-const currentAlbumName = ref('')
+const showManageSongsDialog = ref(false)
+const userSongs = ref<any[]>([])
+const selectedSongIds = ref<number[]>([])
 const createAlbumForm = ref<FormInstance>()
-const userStore = useUserStore()
+const currentAlbum = ref<any>({})
 
-
-const {albumUploadRule} = useUploadtRules()
-const albumForm = reactive({
-  albumName:'',
-  introduction:'',
-  coverFile:'',
-  status:'1',
-  musicianId:useUserStore().userInfo.id
+const { albumUploadRule } = useUploadtRules()
+const albumForm = reactive<any>({
+  id: undefined,
+  albumName: '',
+  introduction: '',
+  coverFile: '',
+  status: 1,
+  releaseDate: '',
+  musicianId: userStore.userInfo.id
 })
+
+const resetForm = () => {
+  albumForm.id = undefined
+  albumForm.albumName = ''
+  albumForm.introduction = ''
+  albumForm.coverFile = ''
+  albumForm.status = 1
+  albumForm.releaseDate = ''
+  imageUrl.value = ''
+}
 
 const handleAvatarChange: UploadProps['onChange'] = (uploadFile) => {
   imageUrl.value = URL.createObjectURL(uploadFile.raw!)
@@ -119,7 +204,7 @@ const handleAvatarChange: UploadProps['onChange'] = (uploadFile) => {
 
 const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
   if (rawFile.type !== 'image/jpeg' && rawFile.type !== 'image/png') {
-    ElMessage.error('专辑封面必须为JPG或PNG格式')
+    ElMessage.error('专辑封面必须为JPG or PNG格式')
     return false
   } else if (rawFile.size / 1024 / 1024 > 2) {
     ElMessage.error('专辑封面大小不能超过2MB')
@@ -128,57 +213,106 @@ const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
   return true
 }
 
-const songs = ref([
-  { id: '1', title: 'Song A' },
-  { id: '2', title: 'Song B' },
-  { id: '3', title: 'Song C' },
-])
-
-const albums = ref([])
-
-const manageAlbum = (album: any) => {
-  currentAlbumName.value = album.title
-  showManageAlbumDialog.value = true
-}
+const albums = ref<any[]>([])
 
 const handleSetting = (album: any) => {
-  console.log('Settings clicked', album)
+  resetForm()
+  albumForm.id = album.id
+  albumForm.albumName = album.albumName
+  albumForm.introduction = album.introduction
+  albumForm.status = album.status
+  albumForm.releaseDate = album.releaseDate
+  imageUrl.value = album.coverUrl
+  showCreateAlbumDialog.value = true
 }
 
 const handleDelete = (album: any) => {
-  console.log('Delete clicked', album)
+  ElMessageBox.confirm(`确定要删除专辑《${album.albumName}》吗？此操作不可逆。`, '警告', {
+    confirmButtonText: '确定删除',
+    cancelButtonText: '取消',
+    type: 'error',
+  }).then(async () => {
+    try {
+      const res = await deleteAlbum(album.id)
+      if (res.success) {
+        ElMessage.success('专辑删除成功')
+        getAlbums()
+      }
+    } catch (e) {}
+  })
 }
 
-// 获取专辑列表
+const handleManageSongs = async (album: any) => {
+  currentAlbum.value = album
+  selectedSongIds.value = []
+  showManageSongsDialog.value = true
+  
+  try {
+    const res = await getMyMusicList(userStore.userInfo.id, 1, 100)
+    if (res.success && res.data?.records) {
+      userSongs.value = res.data.records.flat()
+    }
+  } catch (e) {}
+}
+
+const handleBindSongs = async () => {
+  if (selectedSongIds.value.length === 0) return
+  binding.value = true
+  try {
+    const res = await bindSongsToAlbum(currentAlbum.value.id, selectedSongIds.value)
+    if (res.success) {
+      ElMessage.success('歌曲关联成功')
+      showManageSongsDialog.value = false
+      getAlbums()
+    }
+  } catch (e) {
+  } finally {
+    binding.value = false
+  }
+}
+
 const getAlbums = async () => {
-  const res: any = await getMyAlbum(userStore.userInfo.id, '1', '40')
-  albums.value = res.data.records.flat()
-  console.log(albums.value)
-  loading.value = false
+  loading.value = true
+  try {
+    const res: any = await getMyAlbum(userStore.userInfo.id, '1', '40')
+    if (res.success && res.data?.records) {
+      albums.value = res.data.records.flat()
+    }
+  } catch (error) {
+    console.error('获取专辑失败:', error)
+  } finally {
+    loading.value = false
+  }
 }
 
-const handleCreateAlbum = async () => {
-  if(!createAlbumForm.value) return
-  await createAlbumForm.value.validate( async (valid) => {
-    if(valid){
+const handleSaveAlbum = async () => {
+  if (!createAlbumForm.value) return
+  await createAlbumForm.value.validate(async (valid) => {
+    if (valid) {
       loading.value = true
       try {
         const fd = new FormData()
+        if (albumForm.id) fd.append('id', String(albumForm.id))
         fd.append('albumName', albumForm.albumName)
-        fd.append('introduction', albumForm.introduction)
-        if(albumForm.coverFile){
+        fd.append('introduction', albumForm.introduction || '')
+        if (albumForm.coverFile) {
           fd.append('coverFile', albumForm.coverFile)
         }
-        fd.append('status', albumForm.status)
-        fd.append('musicianId', albumForm.musicianId)
+        fd.append('status', String(albumForm.status))
+        fd.append('musicianId', String(albumForm.musicianId))
+        if (albumForm.releaseDate) fd.append('releaseDate', albumForm.releaseDate)
 
-        await createAlbum(fd)
-        ElMessage.success('创建专辑成功')
-        showCreateAlbumDialog.value = false
-        // 更新专辑列表
-        getAlbums()
+        const action = albumForm.id ? updateAlbum : createAlbum
+        const res = await action(fd)
+        if (res.success) {
+          ElMessage.success(albumForm.id ? '更新专辑成功' : '创建专辑成功')
+          showCreateAlbumDialog.value = false
+          getAlbums()
+        }
       } catch (error) {
-         console.log(error, '创建歌单失败')
+        console.log(error, '操作专辑失败')
+      } finally {
+        loading.value = false
       }
     } else {
       ElMessage.error('请填写完整信息')

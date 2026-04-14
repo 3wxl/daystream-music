@@ -45,7 +45,7 @@ export function validateChunk(fileMd5: string, chunk: string, chunkMd5: string) 
 
 // 分片上传接口
 export function uploadChunk(data: FormData) {
-  return request('/mv/uploadMv', 'post', data,{timeout:18000})//同样设置为180秒
+  return request('/mv/uploadMv', 'post', data, { timeout: 18000 }) //同样设置为180秒
 }
 
 // 合并分片文件接口
@@ -54,30 +54,33 @@ export function mergeChunks(data: FormData) {
 }
 
 // 获取我的MV列表
-export function getMyMvList() {
-  return request('/mv/my/list', 'get')
+export function getMyMvList(pageNum: string | number, pageSize: string | number) {
+  return request('/mv/myMvs/createTime', 'get', {
+    pageNum,
+    pageSize,
+  })
 }
 
 // MV多画质DTO
 export interface MvQualityDTO {
-  qualityType?: number; // 1-标清480P，2-高清720P，3-超清1080P，4-4K
-  mvUrl?: string; // 播放地址
-  fileSize?: number; // 文件大小
-  isVipLimit?: number; // 是否仅VIP可播放（0-否，1-是）
-  [property: string]: any;
+  qualityType?: number // 1-标清480P，2-高清720P，3-超清1080P，4-4K
+  mvUrl?: string // 播放地址
+  fileSize?: number // 文件大小
+  isVipLimit?: number // 是否仅VIP可播放（0-否，1-是）
+  [property: string]: any
 }
 
 // MV创建/更新请求参数
 export interface MusicMvDTO {
-  mvName?: string;
-  musicId?: number;
-  duration?: number;
-  coverUrl?: string;
-  releaseTime?: string;
-  isVip?: number; // 0-否，1-是
-  status?: number; // 0-待审核级，1-上架，2-下架
-  qualityList?: MvQualityDTO[];
-  [property: string]: any;
+  mvName?: string
+  musicId?: string | number
+  duration?: number
+  coverUrl?: string
+  releaseTime?: string
+  isVip?: number // 0-否，1-是
+  status?: number // 0-待审核级，1-上架，2-下架
+  qualityList?: MvQualityDTO[]
+  [property: string]: any
 }
 
 // 删除MV
@@ -88,4 +91,11 @@ export function deleteMv(mvId: string) {
 // 创建MV
 export function createMv(data: MusicMvDTO) {
   return request('/mv/create', 'post', data)
+}
+
+
+
+// 获取图片url
+export function getImageUrl(multipartFile:FormData) {
+  return request('/file/uploadFile', 'POST', multipartFile)
 }

@@ -264,7 +264,9 @@ export interface CreatePlaylistParams {
 }
 
 export interface CollectPlaylistReq extends PageParams {}
-export interface CreatePlaylistReq extends PageParams {}
+export interface CreatePlaylistReq extends PageParams {
+  userId?: IDType
+}
 
 // 通用分页参数
 export interface PageParams {
