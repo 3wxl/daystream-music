@@ -42,3 +42,18 @@ export const getMyAlbum = (userId: string | number, pageNum: string, pageSize: s
 export const getAlbumDetail = (albumId: string) => {
   return request('/api/album/get-album-detail', 'get', { albumId })
 }
+
+// 修改专辑元数据
+export const updateAlbum = (data: FormData) => {
+  return request('/api/album/update-album', 'post', data)
+}
+
+// 关联歌曲到专辑
+export const bindSongsToAlbum = (albumId: number | string, musicIds: number[]) => {
+  return request(`/${albumId}/songs/bind`, 'post', musicIds)
+}
+
+// 删除专辑
+export const deleteAlbum = (albumId: number | string) => {
+  return request('/api/album/delete-album', 'get', { albumId })
+}

@@ -38,6 +38,7 @@
         class="w-8 h-8 flex items-center justify-center rounded-full bg-pink-600 text-white
                hover:bg-pink-500 transition-colors duration-200"
         aria-label="Play"
+        @click.stop="handleClick(item)"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
