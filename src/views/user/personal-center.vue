@@ -38,7 +38,11 @@
         <div v-else-if="likedSongs.length === 0" class="py-12 text-center">
           <el-empty description="暂无喜欢的歌曲" class="text-gray-500" />
         </div>
-        <LikedSongs v-if="!loading && likedSongs.length > 0" :likedSongs="likedSongs" />
+        <LikedSongs
+          v-if="!loading && likedSongs.length > 0"
+          :likedSongs="likedSongs"
+          :userId="Number(userId) || Number(userInfo.id)"
+        />
       </div>
 
       <!-- 其他原有代码（收藏歌单/创建歌单/收藏专辑） -->
@@ -510,7 +514,7 @@ const loadLikedSongs = async () => {
     console.log('API原始返回:', res.data)
 
     if (res.success) {
-      const rawRecords = res.data?.dateList || []
+      const rawRecords = res.data.dateList || []
       likedSongs.value = Array.isArray(rawRecords[0])
         ? (rawRecords[0] as MusicVO[])
         : (rawRecords as MusicVO[])
@@ -634,7 +638,7 @@ const handleUpdateUserInfo = async (editForm: EditForm) => {
     const params: UpdateUserInfoParams = {
       username: editForm.name,
       introduction: editForm.signature,
-      gender: editForm.gender,
+      gender: editForm.gender as any,
       phone: editForm.phone,
     }
 

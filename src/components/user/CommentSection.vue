@@ -186,7 +186,8 @@ import {
   deleteComment,
   reportComment,
 } from '@/api/comment'
-import { getUserInfo } from '@/api/personalCenter/index'
+import { getUserInfo, likeRecord } from '@/api/personalCenter/index'
+import { ElMessage } from 'element-plus'
 
 // 接收父组件传递的参数
 const props = defineProps<{
@@ -287,6 +288,7 @@ const loadParentComments = async (lastId: string | null = null) => {
       size: 10,
     }
     const res = await getParentCommentList(params)
+    console.log('加载父评论列表:', res)
     if (res.success && res.data?.dateList) {
       const newComments = res.data.dateList.map((item) => ({
         id: item.id,
@@ -333,6 +335,7 @@ const loadReplyComments = async (comment: CommentItem) => {
       size: 10,
     }
     const res = await getReplyCommentList(params)
+    console.log('加载回复评论列表:', res)
     if (res.success && res.data?.dateList) {
       const newReplies = res.data.dateList.map((item) => ({
         id: item.id,
@@ -376,6 +379,7 @@ const submitComment = async () => {
       content: newComment.value.trim(),
     }
     const res = await releaseComment(params)
+    console.log('发布评论:', res)
     if (res.success) {
       ElMessage.success('评论发布成功！')
       newComment.value = ''
@@ -413,6 +417,7 @@ const submitReply = async (comment: CommentItem) => {
       content: comment.replyContent.trim(),
     }
     const res = await replyComment(params)
+    console.log('回复评论:', res)
     if (res.success) {
       ElMessage.success('回复成功！')
       comment.showReplyInput = false
@@ -438,13 +443,29 @@ const toggleShowReplies = async (comment: CommentItem) => {
 }
 
 // 点赞/取消点赞
-const toggleLike = (item: CommentItem | ReplyItem) => {
-  if (item.isLike) {
-    item.likeCount--
-  } else {
-    item.likeCount++
+const toggleLike = async (item: CommentItem | ReplyItem) => {
+  try {
+    const res = await likeRecord({
+      targetId: String(item.id),
+      targetType: 2, // 评论点赞类型为2
+    })
+    console.log('点赞/取消点赞:', res)
+    if (res.success) {
+      // 使用类型断言或进行字段名转换
+      const data = res.data as any
+
+      // 更新本地状态
+      item.isLike = data.islike ? 1 : 0
+      if (data.likecount !== undefined) {
+        item.likeCount = data.likecount
+      }
+    } else {
+      ElMessage.error(res.errorMsg || '操作失败，请重试')
+    }
+  } catch (error) {
+    console.error('点赞/取消点赞失败:', error)
+    ElMessage.error('网络异常，操作失败')
   }
-  item.isLike = !item.isLike
 }
 
 // 处理父评论更多操作（删除/举报）
@@ -456,11 +477,9 @@ const handleCommentCommand = async (command: string, comment: CommentItem) => {
         cancelButtonText: '取消',
         type: 'warning',
       })
-      const params: DeleteCommentParams = {
-        commentId: Number(comment.id),
-      }
-      const res = await deleteComment(params)
-      console.log(res)
+
+      const res = await deleteComment(Number(comment.id))
+      console.log('删除评论:', res)
       if (res.success) {
         ElMessage.success('删除成功！')
         comments.value = comments.value.filter((item) => item.id !== comment.id)
@@ -486,12 +505,13 @@ const handleReplyCommand = async (command: string, comment: CommentItem, reply: 
       await ElMessageBox.confirm('确定要删除这条回复吗？', '提示', {
         type: 'warning',
       })
-
+      console.log(reply.id)
       const params: DeleteCommentParams = {
         commentId: reply.id as string | number,
       }
+      console.log('删除参数：', params)
       const res = await deleteComment(params)
-
+      console.log('删除回复:', res)
       if (res.success) {
         ElMessage.success('删除成功！')
         comment.replies = comment.replies.filter((item) => item.id !== reply.id)

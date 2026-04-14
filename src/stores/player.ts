@@ -158,7 +158,7 @@ export const usePlayerStore = defineStore(
     // 播放歌曲
     const playSong = async (song: MusicVO, playListData?: MusicVO[]) => {
       audioLoadingError.value = false
-
+      console.log('播放歌曲:', song)
       try {
         // 更新播放列表
         if (playListData && Array.isArray(playListData) && playListData.length > 0) {

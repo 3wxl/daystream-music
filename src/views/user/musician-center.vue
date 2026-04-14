@@ -75,7 +75,10 @@
               :infinite-scroll-immediate="false"
               class="mb-8 max-h-[300px] overflow-y-auto"
             >
-              <LikedSongs :likedSongs="mySongs" />
+              <LikedSongs
+                :likedSongs="mySongs"
+                :userId="Number(userId) || Number(musicianInfo.id)"
+              />
               <div v-if="musicLoading" class="py-4 text-center text-gray-500">
                 <el-icon class="is-loading"></el-icon>
                 加载中...
@@ -148,7 +151,11 @@
               <div v-else-if="likedSongs.length === 0" class="py-12 text-center">
                 <el-empty description="暂无喜欢的歌曲" class="text-gray-500" />
               </div>
-              <LikedSongs v-if="!loading && likedSongs.length > 0" :likedSongs="likedSongs" />
+              <LikedSongs
+                v-if="!loading && likedSongs.length > 0"
+                :likedSongs="likedSongs"
+                :userId="Number(userId) || Number(musicianInfo.id)"
+              />
             </div>
 
             <!-- 统计+歌单模块（和个人中心统一） -->
@@ -855,7 +862,7 @@ const handleUploadBg = async (file: File) => {
 // 专辑相关事件
 const goToAlbumDetail = (id: number | string) => {
   console.log(`跳转到专辑详情: ${id}`)
-  router.push({ path: `/album/${id}` })
+  router.push({ path: `/user/liked-songs-list`, query: { albumId: id } })
 }
 
 const playAlbum = (id: number | string) => {
