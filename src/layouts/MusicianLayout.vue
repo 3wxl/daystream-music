@@ -20,61 +20,46 @@
           <div class="space-x-10 mr-auto">
             <router-link
               to="/musician/musician-settle-in"
-              class="text-white text-base hover:text-gray-200 transition-colors duration-300"
+              class="text-white text-base hover:text-pink-300 transition-colors duration-300"
             >
               首页
             </router-link>
             <router-link
-              to="/music"
-              class="text-white text-base hover:text-gray-200 transition-colors duration-300"
-            >
-              音乐展示
-            </router-link>
-            <router-link
-              to="/about"
-              class="text-white text-base hover:text-gray-200 transition-colors duration-300"
-            >
-              关于我们
-            </router-link>
-            <router-link
               to="/musician/ai-chat"
-              class="text-white text-base hover:text-gray-200 transition-colors duration-300 relative"
+              class="text-white text-base hover:text-pink-300 transition-colors duration-300 relative"
             >
               创作实验室
               <span
-                class="absolute -top-3 -right-4 bg-red-500 text-white text-xs rounded-full px-2 py-1"
+                class="absolute -top-3 -right-4 bg-pink-500 text-white text-xs rounded-full px-2 py-1"
                 >New</span
               >
             </router-link>
             <router-link
               to="/musician/Works"
-              class="text-white text-base hover:text-gray-200 transition-colors duration-300"
+              class="text-white text-base hover:text-pink-300 transition-colors duration-300"
             >
               作品管理
             </router-link>
             <router-link
               to="/musician/Upload"
-              class="text-white text-base hover:text-gray-200 transition-colors duration-300"
+              class="text-white text-base hover:text-pink-300 transition-colors duration-300"
             >
               发布作品
             </router-link>
           </div>
 
           <div class="flex items-center gap-5">
-            <button class="text-white hover:text-gray-200 transition-colors duration-300 relative">
+            <button class="text-white hover:text-pink-300 transition-colors duration-300 relative">
               <i class="fa fa-bell text-xl"></i>
               <span
-                class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+                class="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
                 >1</span
               >
             </button>
             <div class="w-30 h-10 overflow-hidden hover:border-white transition-all duration-300">
-              <!-- <img
-                src="https://picsum.photos/id/64/200/200"
-                alt="用户头像"
-                class="w-full h-full object-cover"
-              /> -->
-              <router-link to="/user/musician-center" class="text-white"> 个人中心</router-link>
+              <router-link to="/user/musician-center" class="text-white hover:text-pink-300">
+                个人中心</router-link
+              >
             </div>
           </div>
         </div>
@@ -84,6 +69,42 @@
     <main class="">
       <router-view />
     </main>
+
+    <!-- 暗黑 + 粉色 · 拖拽悬浮按钮 - 黑粉配色升级版 -->
+    <div
+      ref="draggableRef"
+      class="fixed z-50 cursor-move select-none"
+      :style="{ left: currentX + 'px', top: currentY + 'px' }"
+      @mousedown="startDrag"
+    >
+      <div class="group relative">
+        <!-- 主按钮：黑粉渐变 + 炫光效果 -->
+        <div
+          class="w-14 h-14 bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] border-2 border-pink-500/60 rounded-full flex items-center justify-center text-pink-400 text-xl shadow-2xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 group-hover:shadow-[0_0_20px_rgba(236,72,153,0.6)] group-hover:border-pink-400"
+        >
+          <i class="fa fa-home"></i>
+        </div>
+
+        <!-- 右侧展开菜单：暗黑玻璃质感 + 粉红点缀 -->
+        <div
+          class="absolute left-full top-1/2 -translate-y-1/2 ml-3 opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 pointer-events-none group-hover:pointer-events-auto flex flex-row gap-2 bg-black/80 backdrop-blur-xl border border-pink-500/30 p-2 rounded-2xl shadow-2xl transition-all duration-300"
+        >
+          <button
+            @click.stop="goBack"
+            class="px-4 py-2 bg-black/60 hover:bg-pink-600/40 text-gray-200 hover:text-white rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 border border-pink-500/20 hover:border-pink-400/60 backdrop-blur-sm"
+          >
+            ← 返回上一页
+          </button>
+          <button
+            @click.stop="goToHome"
+            class="px-4 py-2 bg-black/60 hover:bg-pink-600/40 text-gray-200 hover:text-white rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 border border-pink-500/20 hover:border-pink-400/60 backdrop-blur-sm"
+          >
+            🎵 听音乐
+          </button>
+        </div>
+      </div>
+    </div>
+
     <footer class="bg-gray-900 text-white py-10">
       <div class="container mx-auto px-4 text-center">
         <p class="text-lg font-medium">&copy; 2025 音乐开放平台. All rights reserved.</p>
@@ -92,7 +113,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 const navOpacity = ref(0)
 const scrollThreshold = 2000
 const handleScroll = () => {
@@ -106,12 +131,67 @@ const handleScroll = () => {
   }
 }
 
+// 可拖拽组件相关状态
+const draggableRef = ref<HTMLElement | null>(null)
+const isDragging = ref(false)
+const startX = ref(0)
+const startY = ref(0)
+const currentX = ref(0)
+const currentY = ref(0)
+
+// 初始化位置在右下角
+currentX.value = window.innerWidth - 80
+currentY.value = window.innerHeight - 120
+
+// 开始拖拽
+const startDrag = (e: MouseEvent) => {
+  isDragging.value = true
+  startX.value = e.clientX - currentX.value
+  startY.value = e.clientY - currentY.value
+  document.addEventListener('mousemove', drag)
+  document.addEventListener('mouseup', stopDrag)
+}
+
+// 拖拽中
+const drag = (e: MouseEvent) => {
+  if (!isDragging.value) return
+  currentX.value = e.clientX - startX.value
+  currentY.value = e.clientY - startY.value
+
+  const windowWidth = window.innerWidth
+  const windowHeight = window.innerHeight
+  const elementWidth = 56
+  const elementHeight = 56
+
+  currentX.value = Math.max(0, Math.min(currentX.value, windowWidth - elementWidth))
+  currentY.value = Math.max(0, Math.min(currentY.value, windowHeight - elementHeight))
+}
+
+// 停止拖拽
+const stopDrag = () => {
+  isDragging.value = false
+  document.removeEventListener('mousemove', drag)
+  document.removeEventListener('mouseup', stopDrag)
+}
+
+// 返回上一页
+const goBack = () => {
+  router.back()
+}
+
+// 跳转到首页
+const goToHome = () => {
+  router.push('/')
+}
+
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
+  document.removeEventListener('mousemove', drag)
+  document.removeEventListener('mouseup', stopDrag)
 })
 </script>
 
