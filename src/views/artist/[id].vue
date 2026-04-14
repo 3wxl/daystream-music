@@ -150,14 +150,33 @@ const loadSongs = async (musicianId: number) => {
   loadingSongs.value = true
   try {
     const res: any = await getMusicianMusic(musicianId, 1, 50)
-    // 根据您提供的接口结构，数据是一个二维数组的嵌套 records: [ [ {...} ] ] 或一维数组
     if (res.success && res.data && res.data.records) {
-      if (Array.isArray(res.data.records[0])) {
-         // 有时后端会返回双层嵌套
-         musicList.value = res.data.records[0]
-      } else {
-         musicList.value = res.data.records
+      // 1. 彻底打平多维数组
+      let list = res.data.records.flat(Infinity)
+
+      // 2. 转换数据以适配 LikedSongs 组件（该组件接收audioList 为 ['高清', '无损'] 形式的字符串数组，而非对象数组）
+      const qualityMap: Record<number, string> = {
+        1: '标准',
+        2: '高清',
+        3: '无损',
+        4: '空间音频'
       }
+
+      list = list.map((song: any) => {
+        let formattedAudioList: string[] = []
+        if (Array.isArray(song.audioList)) {
+          formattedAudioList = song.audioList.map((audio: any) => {
+            if (typeof audio === 'string') return audio
+            return qualityMap[audio.qualityType] || '标准'
+          })
+        }
+        return {
+          ...song,
+          audioList: formattedAudioList
+        }
+      })
+
+      musicList.value = list
     }
   } catch (e) {
     console.error('加载歌曲失败', e)
