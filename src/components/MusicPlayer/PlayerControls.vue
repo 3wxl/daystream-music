@@ -1,8 +1,14 @@
 <template>
   <div
-    class="fixed bottom-0 left-0 right-0 border-t border-pink-400/10 bg-gradient-to-t from-[#0f0f15] via-[#0f0f15]/95 to-transparent backdrop-blur-xl p-3 z-40"
+    class="fixed bottom-0 left-0 right-0 duration-400 h-[92px] border-t border-pink-400/10 bg-gradient-to-t from-[#0f0f15] via-[#0f0f15]/95 to-transparent backdrop-blur-xl p-3 z-40"
+    :class="{ 'adminColor': isAdmin ,'closeStatus':isClose}"
   >
-    <div class="container mx-auto px-4">
+    <div class="container mx-auto px-4 relative">
+      <div v-if="isAdmin" class="-top-[22px] w-[100%] flex justify-center absolute">
+        <span @click="isClose=!isClose" class="bg-gray-400/60 cursor-pointer px-3 py-[0px] rounded-[24px] ">
+          <IconFontSymbol class="text-white" name="lujing"></IconFontSymbol>
+        </span>
+      </div>
       <!-- 进度条 -->
       <div class="flex items-center gap-3 mb-3">
         <!-- 直接使用 store 中定义的 formatTime 方法 -->
@@ -183,6 +189,14 @@ import { useRouter } from 'vue-router'
 import { usePlayerStore } from '@/stores/player'
 import { getMusicPlayUrl } from '@/api/music'
 
+const props = defineProps<{
+  isAdmin:{
+    type: Boolean,
+    default: false
+  }
+}>()
+
+const isClose = ref(false);
 const router = useRouter()
 const playerStore = usePlayerStore()
 
@@ -322,3 +336,14 @@ const handleVolumeClick = (e: MouseEvent) => {
   playerStore.setVolume(newVolume)
 }
 </script>
+
+<style scoped lang="scss">
+  .adminColor{
+    background-image:linear-gradient(to top,rgb(119, 80, 116),rgb(99, 80, 119));
+  }
+  .closeStatus{
+    height: 0px;
+    transition: all 0.5s ease;
+    padding: 0;
+  }
+</style>

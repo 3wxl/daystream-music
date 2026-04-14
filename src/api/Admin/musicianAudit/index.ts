@@ -53,3 +53,29 @@ export function BanMusicianApi(id:string){
     'get'
   )
 }
+
+// 删除音乐人
+export function DeleteMusicianApi(id:string){
+  return request(
+    `/adminMusician/deleteMusician?musicianId=${id}`,
+    'get'
+  )
+}
+
+// 批量删除音乐人
+export function DeleteMusicianBatchApi(ids:[string]){
+  return request(
+    `/adminMusician/deleteBatch`,
+    'post',
+    { ids:ids }
+  )
+}
+
+// 修改音乐人信息
+export function UpdateMusicianApi(data:any){
+  return request(
+    `/adminMusician/updateMusician`,
+    'post',
+    data
+  )
+}

@@ -33,6 +33,6 @@ export const addUserRule: Record<string, FormItemRule[]> = {
 export const updateCommentRule: Record<string, FormItemRule[]> = {
   content: [
     { required: true, message: '评论内容不能为空', trigger: 'blur' },
-    { min: 2, max: 100, message: '长度在 1 到 100 个字符', trigger: 'blur' }
+    { min: 1, max: 100, message: '长度在 1 到 100 个字符', trigger: 'blur' }
   ]
 }

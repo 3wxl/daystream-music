@@ -25,7 +25,7 @@
 <script setup lang="ts">
   import {GetMusicianListApi} from "@/api/Admin/musicianAudit"
   // 数据
-  let musicianType = ref(0)   // 当前审核音乐人的类型 ：0-正常 2-封禁
+  let musicianType = ref(0)   // 当前审核音乐人的类型 ：0-正常 1-封禁
   let keyword = ref('')       // 搜索关键词
   let musicianList= ref([])  // 待审核音乐人列表
   let total = ref(0)            // 音乐人总数

@@ -33,8 +33,11 @@
         ·
         <span>{{ formatDateTime(createdTime) }}</span>
       </div>
-      <div class="mt-1 text-[#a7a7a7] text-[14px] cursor-pointer" v-if="childCount>0" @click="isSpradSonComment = !isSpradSonComment;spreadSonComment">
+      <div class="mt-1 text-[#a7a7a7] text-[14px] cursor-pointer" v-if="childCount>0&&!isSpradSonComment" @click="isSpradSonComment = !isSpradSonComment;spreadSonComment">
         共 {{ childCount }} 条回复,点击展开
+      </div>
+      <div class="mt-1 text-[#a7a7a7] text-[14px] cursor-pointer" v-if="childCount>0&&isSpradSonComment" @click="isSpradSonComment = !isSpradSonComment;spreadSonComment">
+        收起
       </div>
       <transition name="el-zoom-in-top">
         <div class="text-white mt-3" v-show="isSpradSonComment">
