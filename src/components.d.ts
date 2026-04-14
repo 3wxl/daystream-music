@@ -165,6 +165,7 @@ declare module 'vue' {
     MusicProCard: typeof import('./components/musicianCenter/MusicProCard.vue')['default']
     MusicProContainer: typeof import('./components/musicianCenter/MusicProContainer.vue')['default']
     MusicStatistics: typeof import('./components/user/MusicStatistics.vue')['default']
+    MusicTable: typeof import('./components/admin/WorksManage/WorksReview/MusicReview/MusicTable.vue')['default']
     MvCard: typeof import('./components/MvCard.vue')['default']
     MyAlbum: typeof import('./components/user/MyAlbum.vue')['default']
     MyAlbums: typeof import('./components/MusicUpload/MyAlbums.vue')['default']
@@ -222,6 +223,8 @@ declare module 'vue' {
     VipPrivileges: typeof import('./components/vip/VipPrivileges.vue')['default']
     VipProgress: typeof import('./components/CheckIn/VipProgress.vue')['default']
     WelcomeMessage: typeof import('./components/musicianCenter/AI/chat/WelcomeMessage.vue')['default']
+    WorksReviewContainer: typeof import('./components/admin/WorksManage/WorksReview/WorksReviewContainer.vue')['default']
+    WorksReviewHeader: typeof import('./components/admin/WorksManage/WorksReview/WorksReviewHeader.vue')['default']
   }
   export interface GlobalDirectives {
     vInfiniteScroll: typeof import('element-plus/es')['ElInfiniteScroll']
